@@ -1,0 +1,645 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body{
+    /* margin: 0; */
+    padding: 0;
+    /* Ensures body doesn't become narrower than 400px */
+    /* min-width: 400px;  */
+
+    margin: auto; /* Centers the content */
+
+    /* font-family: Verdana, Geneva, Tahoma, sans-serif;  */
+    font-family: 'Roboto', sans-serif;
+    overflow-x: auto; /* Adds horizontal scroll if viewport is narrower than min-width */
+
+    /* Example background */
+    /* background: #c99d9d;  */
+    width: 100%;
+    max-width: 1000px;
+
+
+}
+
+.body-content-container {
+    display: flex;  /* Using Flexbox */
+    flex-direction: row;  /* Align children side by side */
+    justify-content: space-between;  /* Distributes space between and around content items */
+    align-items: stretch;  /* Stretch children to fill the container */
+    width: 100%;  /* Full width */
+    max-width: 1000px;  /* Maximum width limit to align with the navbar */
+    margin: 0 auto;  /* Centering the container */
+    padding: 10px;
+    gap: 20px;  /* Space between children */
+    
+}
+
+.items-container,
+.order-summary-container {
+    flex: 1;  /* Each child will take equal space */
+    overflow: auto;  /* Adds scroll to each container if content overflows */
+    padding: 10px;  /* Padding for aesthetics */
+}
+
+
+@media (max-width: 768px) {
+    .body-content-container {
+        flex-direction: column;  /* Stacks children vertically in flexbox */
+        grid-template-columns: 1fr;  /* Single column layout in grid */
+    }
+
+    .items-container,
+    .order-summary-container {
+        /* Ensure each takes full width when stacked */
+        width: 100%;  
+        
+    }
+}
+
+  
+  .items-container {
+    /* border: 1px solid #755454; */
+    display: grid;
+    /* Responsive grid for items */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+     /* Creates three columns */
+    /* grid-template-columns: repeat(4, 1fr); */
+    /* gap: 10px; */
+    /* Allows scrolling within the container */
+    overflow-y: auto; 
+    overflow-x: hidden;
+
+     /* Set a max-height relative to the viewport height */
+     max-height: 50vh; /* Adjust based on your needs, 50vh means 50% of the viewport height */
+
+     background-color: #f8f8f8;
+    
+
+     padding: 5px;
+    border: 1px solid #755454;
+
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(255, 253, 253, 0.1);
+    width: 100%;  /* Adjust based on design preference */
+    margin-top: 20px;  /* Center if width is less than 100% */
+    box-sizing: border-box; /* Important for including padding and border in width calculations */
+
+  }
+
+  .order-summary-container {
+    margin-top: 20px ;
+    /* border: 1px solid #755454; */
+    background-color: #f8f8f8;
+    padding: 10px;
+
+    border: 1px solid #755454;
+
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(98, 2, 2, 0.1);
+    /* Enables scrolling for the summary */
+    overflow-y: auto; 
+     /* Set a max-height relative to the viewport height */
+     max-height: 50vh; /* Adjust based on your needs, 50vh means 50% of the viewport height */
+}
+
+
+/* Styling the scrollbar for Webkit browsers */
+.order-summary-container::-webkit-scrollbar {
+    width: 6px; /* width of the entire scrollbar */
+}
+
+.order-summary-container::-webkit-scrollbar-track {
+    background: #f1f1f1; /* color of the tracking area */
+}
+
+.order-summary-container::-webkit-scrollbar-thumb {
+    background-color: darkgrey; /* color of the scroll thumb */
+    border-radius: 10px; /* roundness of the scroll thumb */
+    border: 2px solid rgb(213, 205, 191); /* creates a border around the scroll thumb */
+}
+
+
+  .menu-item-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* border: 1px solid #ccc; */
+    /* border: 1px solid #755454; */
+    padding:10px;
+    border-radius: 10px;
+    background: #e9e5e5;
+    box-shadow: 0 1px 3px rgba(227, 4, 41, 0.1);
+    height: auto; /* Fixed height for each item */
+    width: auto;
+    /* Hides any overflow */
+    /* overflow: hidden;  */
+    /* Change to visible to test if cropping is an issue due to overflow settings */
+    /* overflow: visible;  */
+
+    margin: 10px; /* Ensure spacing at bottom if needed */
+    user-select: none;
+    
+}
+
+
+@media  (min-width: 1000px){
+    .body-content-container {
+      /* Ensures body doesn't become narrower than 1000px */
+      min-width: 1000px; 
+      /* Ensures body doesn't become wider than 1000px */
+      max-width: 1000px; 
+    }
+  }
+  
+
+/* Handling very narrow devices specifically */
+@media (max-width: 344px) {
+    .items-container {
+        grid-template-columns: 1fr; /* Ensures readability and access */
+    }
+}
+
+/* Additional styling for wider devices but not too wide */
+@media (min-width: 360px) and (max-width: 540px) {
+    .items-container {
+        grid-template-columns: repeat(2, 1fr); /* Better use of space with two columns */
+    }
+}
+
+
+/* Specific media queries for listed dimensions */
+/* For devices with width up to 540px (covers 375, 390, 360, 412, 344, 430 widths) */
+@media (max-width: 540px) {
+    .items-container {
+        /* Single column layout */
+        /* grid-template-columns: 1fr;  */
+        grid-template-columns: repeat(1, 1fr);
+        max-height: 50vh; /* Allows scrolling within half of the viewport */
+    }
+
+    .order-summary-container {
+        max-height: 50vh; /* Consistent with the items container */
+    }
+}
+
+
+/* For slightly larger devices, you might want two columns if space allows */
+@media (min-width: 541px) and (max-width: 768px) {
+    .items-container {
+        grid-template-columns: repeat(2, 1fr); /* Two columns layout */
+    }
+}
+
+
+/* Ensure summary is under the items on smaller screens */
+@media (max-width: 768px) {
+    .body-content-container {
+        flex-direction: column;
+    }
+    .order-summary-container {
+        order: 2;
+        width: 100%; /* Full width */
+        max-height: none; /* Let it take as much height as needed */
+    }
+}
+
+/* Adjust for taller devices like 896, 844, 932, 915, 740, 882 heights */
+/* This assumes a higher breakpoint for landscape or wider views */
+@media (min-height: 768px) and (max-height: 932px) {
+    .body-content-container {
+        flex-direction: column;
+    }
+    .order-summary-container {
+        order: 2; /* Ensure it stays below items container */
+        width: 100%;
+        max-height: 300px; /* Increased height */
+    }
+  
+
+}
+
+
+@media (min-width: 1024px){
+    .items-container {
+        /* Adjust grid column setup if necessary */
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+
+
+
+
+.section-one{
+    position: relative;
+}
+
+.logo-container{
+    position: relative;
+    display: block; /* Since the image takes full length */
+}
+
+.header-logo{
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+
+    display: block;
+    /* border-radius: 10px; */
+    border-bottom-left-radius: 10px; /* Rounds the bottom left corner */
+    border-bottom-right-radius: 10px; /* Rounds the bottom right corner */
+   
+}
+.header-text p{
+   color: rgb(233, 226, 82);
+   /* font-weight: bold; */
+   font-style: italic;
+}
+.header-text {
+  position: absolute;
+  max-width: 250px;
+  top: 50%;
+  left: 30%;
+  transform: translate(-90%, -50%);
+  z-index: 1;
+  color: rgb(233, 226, 82);
+  text-align: center;
+  width: 90%; /* Ensure the text container doesn't overflow the viewport */
+  font-family:Georgia, 'Times New Roman', Times, serif;
+}
+
+
+
+/* Render Menu Section */
+
+.landing-page-content{
+
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Take full width to ensure central alignment of children */
+    padding: 20px; /* Padding for the container */
+    text-align: center;
+    font-style: italic;
+    font-family:Georgia, 'Times New Roman', Times, serif;
+}
+
+.landing-page-content h2, 
+.landing-page-content p{
+    padding: 5px;
+    margin: 10px;
+}
+
+.content-header{
+    margin-left: 20px;
+    text-decoration: underline;
+}
+
+/* Base styles apply for mobile devices first */
+.menu-item-image {
+    border-radius: 6px;
+    width: 80px; /* Smaller on mobile */
+    margin-bottom: 5px;
+}
+
+
+
+
+
+.menu-item-details{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.8rem;
+    width: 100%; /* Ensures details fill the container */
+    padding: 5px; /* Reduced padding */
+    margin: 0; /* Reduce margin to pull elements closer together */
+     /* adapts more fluidly to varying screen sizes and container dimensions  
+                    as compared to setting a fixed width and height*/
+    flex-grow: 1;
+    /* gap: 1px; */
+    
+}
+
+ /* Adjust space between items */
+.menu-item-details > * {
+    margin-top: 1px;
+}
+
+.add-btn{
+    margin-top: 5px; /* Reduce margin to pull button closer to details */
+    width: 80%; /* Match width to container or image for consistency */
+    border-radius: 5px;
+    background: rgb(82, 163, 233);
+    width: 5rem;
+    height: 2rem;
+    color: rgb(241, 241, 241);
+    font-size: .8rem;
+    cursor: pointer;
+    user-select: none;
+    border: none;
+    /* overflow-y: auto;  */
+
+}
+
+.button-quantity-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    user-select: none;
+    padding: .5rem;
+
+    width: 100%;
+    margin-top: 5px;
+}
+.quantity-indicator{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: none;
+    /* background: rgb(33, 142, 237); */
+    color: black;
+    margin-top: .5rem;
+    margin-bottom: .5rem;
+    font-size: 0.7rem;
+
+}
+
+.section-summary{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.receipt-header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin: 20px;
+
+}
+
+.horizontal-divider-dashed{
+    border: .8px solid black;
+}
+
+.receipt-body{
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    font-size: 0.8rem;
+}
+
+.receipt-titles{
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.receipt-item div{
+    border: none;
+}
+.receipt-item .order-item-name{
+    font-size: 0.7rem;
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Show ellipsis (...) for overflow */
+    max-width: 60%; /* Adjust based on your layout */;
+}
+
+.receipt-item .order-item-price{
+    font-size: .7rem;
+    padding: 0;
+}
+.receipt-titles , .receipt-item{
+    display: flex;
+    justify-content: space-between;
+    margin: 5px;
+}
+
+.receipt-titles span ,.receipt-item span {
+    flex: 1; /* grow (or shrink) to fill the available space in the flex container relative to the rest of the flex items */
+    min-width: 60px; /*sets the minimum width that each <span> elements won't be smaller than 60 pixels in width*/
+}
+
+.receipt-titles span:first-child, 
+.receipt-item span:first-child {
+    text-align: left;
+}
+
+.receipt-titles span:nth-child(2), 
+.receipt-item span:nth-child(2){
+    text-align: center;
+}
+.receipt-titles span:last-child, 
+.receipt-item span:last-child {
+    text-align: right;
+}
+
+.horizontal-divider{
+    border: 1px solid gray;
+}
+
+.order-total-price{
+    display: flex;
+    justify-content: space-between;
+    /* align-items: center; */
+    margin: 25px;
+
+}
+
+
+.order-item-quantity{
+    display: flex;
+    justify-content: center;
+    position: relative; /* Ensure positioning context */
+}
+
+.order-item-quantity span {
+    cursor: pointer;
+    font-size: 1rem; /* Smaller font size */
+    color: red; /* Color to indicate removal */
+    font-weight: bold;
+    user-select: none;
+}
+
+.remove-all-item{
+    font-size: 8px;
+    color: #5f646a; /* Bootstrap-like link/button color */
+    cursor: pointer;
+    text-decoration: underline; /* Indicates clickability */
+    padding: 3px 5px; /* Optional: adds some padding around the text */
+    border-radius: 5px; /* Optional: adds rounded corners */
+    transition: background-color 0.2s; /* Smooth background transition */
+}
+
+.remove-all-item:hover, .remove-all-item:focus {
+    color: red;
+    text-decoration: none; /* Removes underline on hover/focus */
+}
+
+.add-single-item,
+.remove-single-item {
+    position: absolute; /* Position the buttons within the container */
+    top: 50%; /* Place the buttons vertically centered */
+    transform: translateY(-50%); /* Adjust for vertical centering */
+
+    cursor: pointer;
+    font-size: 1rem; /* Smaller font size */
+    color: black;
+    /* font-weight: bold; */
+    user-select: none;
+    
+    background-color: rgb(199, 235, 237);
+
+    /* Adding border-radius to make it circular */
+    border-radius: 50%; /* 50% of the element's width/height to create a circle add button*/
+    width: 1rem; /* Adjust the width to control the size of the add-btn */
+    height: 1rem; /* Adjust the height to control the size of the add-btn */
+    display: inline-flex; /* Ensures it behaves like a flex item */
+    justify-content: center; /* Centers the content horizontally */
+    align-items: center; /* Centers the content vertically */
+    border: none;
+    margin: 0; /* Optional: Remove any default margin */
+    padding: 0; /* Optional: Remove any default padding */
+}
+
+.remove-single-item {
+    left: 20%; /* Adjust the left position for the remove button */
+}
+
+.add-single-item {
+    right: 20%; /* Adjust the right position for the add button */
+}
+
+.add-single-item:hover,
+.remove-single-item:hover,
+.add-single-item:focus,
+.remove-single-item:focus {
+    background-color: #e7f5ff; /* Optional: Add background color on hover/focus */
+    border-radius: 50%; /* Optional: Ensure the border-radius stays consistent on hover/focus */
+    text-decoration: none; /* Optional: Removes underline on hover/focus */
+}
+
+.section-complete{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#complete-order-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 6px;
+    margin: 20px;
+    width: 100%;
+    height: 30px;
+    background-color: rgb(66, 159, 221);
+    color: white;
+}
+
+
+/* 
+    THIS IS FOR CUSTOM MADE CHECKOUT FORM
+
+    Payment form box styles 
+    keep payment-form-box more generic and reusable for other 
+    types of content that may not require a flex layout.
+*/
+.payment-form-box { 
+    position: relative;
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1001; /* Above the overlay */
+}
+
+
+/* Additional styling for the form and its elements */
+ .form-details{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;    
+}
+
+.form-details input[type="text"],
+.form-details input[type="tel"],
+.form-details button {
+    margin: 10px 0; /* Spacing between form elements */
+    padding: 10px; /* Padding inside form elements */
+    /* width: 300px; */
+}
+
+
+.form-details button {
+    background-color: rgb(43, 245, 117);
+    color: white;
+    border-radius: 6px;
+    border: none;
+    width: 100%;
+    height: 60px;
+    margin: 20px;
+
+    cursor: pointer;
+}
+
+/* ********************* OVERLAY payment form box   ********************** */
+
+/* Overlay styles */
+body .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* See-through background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+.close-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+    border-radius: 50%;
+    border: none;
+    /* border: .1px solid black; */
+
+    width: 30px;
+    height: auto;
+    background-color: rgb(0, 8, 8);
+    position: absolute;
+    top: 2%;
+    right: 45%;
+    font-size: 25px;
+    /* font-weight: bold; */
+    cursor: pointer;
+    color: #f80000; /* Adjust as needed */
+    color: white;
+}
+
+.close-button:hover {
+    color: white; /* Darker color on hover */
+    background-color: red;
+}
+

@@ -1,0 +1,312 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.navbar-container{
+  /* border-radius: 10px; */
+  /* box-shadow: 0 0 10px rgba(38, 106, 3, 2);  Horizontal offset, vertical offset, blur radius, color */
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  margin: 0 auto;
+  background-color: #333;
+  color: white;
+
+  /* max-width: 1000px; */
+  width: 100%; 
+
+
+  /* 
+  max-width: 1200px;
+  width: 100%;  */
+}
+
+/* ensure that the navbar maintains a consistent width of 1000px across all larger screens so that
+It won't stretch or shrink beyond this width, which helps maintain a stable and predictable layout.
+*/
+@media  (min-width: 1000px){
+  .navbar-container {
+    /* Ensures body doesn't become narrower than 1000px */
+    min-width: 1000px; 
+    /* Ensures body doesn't become wider than 1000px */
+    max-width: 1000px; 
+  }
+}
+
+
+.brand-title{
+  font-size: 1.5rem;
+  margin: .5rem;
+  color: cyan;
+}
+
+/* .h-logo{
+  height: 40px;
+  width: 35px;
+  left: 45px;
+  background-color: greenyellow;
+} */
+
+.navbar-links ul{
+
+  list-style: none; /* Remove default list styling */
+  margin: 0;
+  padding: 0;
+  display: flex; /* This will make the links horizontal */
+}
+
+.navbar-links li:hover{
+  background-color: #555;
+}
+
+.navbar-links li {
+  list-style: none;
+  padding: 0; /* Remove padding from <li> and apply it to <a> instead */
+}
+
+.navbar-links li a , .navbar-links li button {
+  text-decoration: none;
+  color: cyan;
+  padding: 1rem; /* Apply padding here to increase the clickable area */
+  display: block; /* Make <a> fill the <li> */
+  width: 100%; /* Ensure it spans the full width of its parent */
+  height: 100%; /* Ensure it spans the full height of its parent */
+  text-align: left;
+
+}
+
+
+/* Close "X" button */
+.close-btn{
+  display: none;
+  position: absolute;
+  top: 1%;
+  right: 3%;
+  color: cyan;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+/* Navbar Hamburger Menu */
+.toggle-button{
+  position: absolute;
+  top: 1.5rem;
+  right: 1rem;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+}
+
+/* .toggle-button .bar{
+  height: 30px;
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+} */
+
+/* The Hamburger menu three bar lines */
+.toggle-button .bar {
+  display: block;
+  height: 3px; /* Reduce the height to make the lines thinner */
+  width: 100%; /* Adjust the width as needed */
+  background: cyan;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+/* The following css is for overlaying the navbar links on top of 
+  the body document in a transparent layout on smaller dimensions 
+  like mobile devices 
+*/
+
+@media (max-width: 280px), (max-width: 667px){
+  .navbar-links {
+    position: absolute; /* Or absolute, depending on layout */
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width */
+    height: 100%;
+    /* height: 100%; */
+    background: rgba(0, 0, 0, .8); /* Semi-transparent background */
+    z-index: 1000; /* Ensure it's above other content */
+
+    
+  }
+  
+  .navbar-links.active {
+    display: block; /* Show when active */
+  }
+  
+  .close-btn{
+    display: block; /* Make the close button visible */
+  }
+}
+
+@media (max-width: 280px) {
+  .toggle-button {
+    position: absolute;
+    top: 10px;
+    right: 10px; /* Keep the menu towards the right but with some margin */
+    display: flex; /* Make sure it's displayed */
+  }
+
+  .brand-title {
+    font-size: 14px; /* Smaller font size for narrow screens */
+    padding-right: 10px; /* Prevents overlap */
+  }
+
+  .navbar-container {
+    justify-content: space-between; /* Align items to opposite ends */
+    padding: 10px 10px; /* Adjust padding to ensure spacing */
+  }
+}
+
+/* @media (max-width: 500px) */
+@media (max-width: 667px) {
+  .toggle-button{
+    display: flex;
+  }
+  .navbar-links{
+    display: none;
+    width: 100%;
+    /* gap : 20px; */
+  }
+
+  .navbar-container{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-links ul{
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .navbar-links li{
+    text-align: left;
+  }
+  
+  .navbar-links li a{
+    padding: .5rem 1rem;
+  }
+
+  .navbar-links.active {
+    display: flex;
+  }
+  
+}
+
+
+
+
+
+#profile-container {
+  display: flex;
+  align-items: center;  /* Ensures vertical centering within the li */
+}
+
+#profile-container .button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+
+  width: 40px;   /* Ensure the width is equal to the height */
+  height: 40px;  /* Ensure the height is equal to the width */
+    
+  padding: 0;  /* Adjust padding to prevent shape distortion */
+
+  border-radius: 50%;
+  background-color: #4CAF50;  /* Example color */
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  font-size: 12px;  /* Adjust font size as needed */
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+#profile-container .dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* .dropdown-content a:hover {background-color: #f1f1f1}  */
+
+/*  ****************************** */
+
+/* styles.css */
+/* #profile-container {
+  position: relative;
+  margin: 20px;
+}
+
+.button {
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #f1f1f1} */
+
+/*  ****************************** */
+  
+
+
+
+/* .hamburger-menu {
+  cursor: pointer;
+} */
+
+/* .hamburger-menu span {
+  display: block;
+  width: 30px;
+  height: 2.5px;
+  background-color: rgb(242, 236, 117);
+  margin: 5px 0;
+  transition: all 0.3s ease-in-out; 
+}  */
+
+/* .navigation-menu {
+  display: flex;
+  gap: 20px;
+} */
+
+
+/* .navigation-menu a {
+  color: white;
+} */
+
