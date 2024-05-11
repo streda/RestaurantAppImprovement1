@@ -186,34 +186,46 @@ function renderMenu(menuItems) {
   });
 }
 
+function addItem(itemId) {
+  const itemInMenuArray = menuArray.find(item => item.id === Number(itemId));
+  if (itemInMenuArray) {
+      let itemInOrderArray = orderArray.find(order => order.item.id === Number(itemId));
+      if (itemInOrderArray) {
+          itemInOrderArray.quantity += 1;
+      } else {
+          orderArray.push({ item: itemInMenuArray, quantity: 1 });
+      }
+      updateOrderSummary();
+      toggleCompleteOrderButton(orderArray.length > 0);
 
-function addItem(itemId){
-  // Check the clicked id matches the id of an existing item in the original menuArray
-  const itemInMenuArray = menuArray.find(item => 
-    item.id === Number(itemId)
-  )
-  // if the clicked id matches the id of an existing item in the original menuArray
-  if(itemInMenuArray){
-    // Check if there is an item by the same id as in menuArray present in the orderArray so that you can decrement or increment the count
-    let itemInOrderArray = orderArray.find(order => 
-      order.item.id === Number(itemId)
-      // order.item.id === itemInMenuArray.id
-    )
-    // if there exist the same item in the order Array
-    if(itemInOrderArray){
-      itemInOrderArray.quantity += 1;
-    } else{
-      // The item property holds a reference to an item object from menuArray, it means that the item object within each entry of orderArray directly points to an object that originally exists in the menuArray
-      // By pushing to the orderArray, you are storing a reference to an item in menuArray object in orderArray. However, the quantity property only can be modified. The item object shouldn't because it would alter the object that it is referring to, which is the the entry in the menuArray object.
-      orderArray.push({item : itemInMenuArray, quantity: 1});
-    }
+      const token = localStorage.getItem('token');  // Fetch the token from localStorage
+
+      // Call to server to add to cart
+      console.log('Authorization Header:', `Bearer ${token}`);  // Right before your fetch call
+
+      fetch('/add-to-cart', {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`  // Use the token in the Authorization header
+          },
+          body: JSON.stringify({
+              menuItemId: itemInMenuArray.id,
+              quantity: 1  // This assumes every click adds one item; adjust logic as needed for different increments
+          })
+      })
+      .then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to add item to cart: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => console.log('Added to cart successfully', data))
+    .catch(error => console.error('Failed to add item to cart:', error));
   }
-  updateOrderSummary();
-
-  // Show the button only if there are items in the order
-  toggleCompleteOrderButton(orderArray.length > 0);
-  // toggleCompleteOrderButton(true);
 }
+
+
 
 function updateQuantityIndicators() {
    // Reset all indicators to "0 item" or Reset all indicators to "" 
@@ -241,16 +253,46 @@ function removeAllItem(itemId){
 }
 
 
-function removeSingleItem(itemId){
-    const indexToRemove = orderArray.findIndex(order => 
-    order.item.id === Number(itemId)
-  )
+// function removeSingleItem(itemId){
+//     const indexToRemove = orderArray.findIndex(order => 
+//     order.item.id === Number(itemId)
+//   )
 
-  if(indexToRemove !== -1 && orderArray[indexToRemove].quantity > 1){
-    orderArray[indexToRemove].quantity -= 1;
+//   if(indexToRemove !== -1 && orderArray[indexToRemove].quantity > 1){
+//     orderArray[indexToRemove].quantity -= 1;
+//   }
+//   updateOrderSummary()
+// }
+
+function removeSingleItem(itemId) {
+  const item = orderArray.find(order => order.item.id === Number(itemId));
+  if (item && item.quantity > 1) {
+      item.quantity -= 1;
+      fetch('/api/item/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              id: itemId,
+              quantity: item.quantity
+          })
+      }).then(response => {
+          if (!response.ok) throw new Error('Failed to update item');
+          updateOrderSummary();
+      }).catch(error => console.error('Error updating item:', error));
+  } else if (item && item.quantity === 1) {
+      // If the quantity is 1, removing one should remove the item entirely
+      fetch('/api/item/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: itemId })
+      }).then(response => {
+          if (!response.ok) throw new Error('Failed to remove item');
+          orderArray = orderArray.filter(order => order.item.id !== Number(itemId));
+          updateOrderSummary();
+      }).catch(error => console.error('Error removing item:', error));
   }
-  updateOrderSummary()
 }
+
 
 function addSingleItem(itemId){
   addItem(itemId);
