@@ -17,6 +17,11 @@ const orderItemSchema = new Schema({
 
 
 const orderSchema = new Schema({
+    userId: { // Adding a reference to the User model (assuming you have or will create one)
+        type: Schema.Types.ObjectId,
+        ref: 'User', // This should match your user model's name, if different, adjust accordingly
+        required: true
+    },
     items: [orderItemSchema],
     total: {
         type: Number,

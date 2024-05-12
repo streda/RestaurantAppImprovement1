@@ -221,7 +221,16 @@ function addItem(itemId) {
         return response.json();
     })
     .then(data => console.log('Added to cart successfully', data))
-    .catch(error => console.error('Failed to add item to cart:', error));
+.catch(error => {
+    console.error('Failed to add item to cart:', error);
+    if (error.message.includes('Forbidden')) {
+        alert("You do not have permission to perform this action or your session has expired.");
+        // Example: Redirect to login page or show login modal
+        window.location.href = '/login.html';  // Redirect to login page
+        // Or open a login modal if you have one
+        // showModal('loginModal');
+    }
+});
   }
 }
 
