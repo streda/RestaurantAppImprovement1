@@ -17,12 +17,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function toggleDropdown() {
+
+window.toggleDropdown = function() {
     const dropdown = document.getElementById('dropdown');
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-}
+};
 
-function logout() {
+window.logout = function() {
     localStorage.removeItem('token');
     location.reload(); // Reload to update UI
-}
+};
+
+// function toggleDropdown() {
+//     const dropdown = document.getElementById('dropdown');
+//     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+// }
+
+// function logout() {
+//     localStorage.removeItem('token');
+//     location.reload(); // Reload to update UI
+// }

@@ -1,123 +1,65 @@
-<!-- index.html  -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+  <!-- <link rel="manifest" href="/site.webmanifest"> -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./index.css">
   <link rel="stylesheet" href="./nav.css">
-  <link rel="stylesheet" href="./login.css">
-  <link rel="stylesheet" href="./modal.css">
 </head>
-<body>  
-   <nav class="navbar-container">
-      <!-- <div class="hamburger-menu"></div> -->
-      <div class="brand-title">H Restaurant</div>
+<body>
+  
+  <!--! NAVBAR CONTAINER (START)-->
+  <nav class="navbar-container">
+    <div class="brand-title">H Restaurant</div>
+    <a href="#" class="toggle-button">
+      <span class="bar"></span> 
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </a>
 
-      <!-- HAMBURGER TOGGLE ACTION IN SMALLER DEVICES-->
-      <a href="#" class="toggle-button">
-        <span class="bar"></span> 
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </a>     
-      <div class="navbar-links">
-        <span class="close-btn" id="close-btn">&times;</span>  <!-- Close button -->
-        <ul>
-          <!-- <li><a href="index.html" data-type="home">Home</a></li> -->
-          
-          <li id="profile-container"></li> <!-- Updated container for login/profile button -->
-          <li><a href="#" data-type="home" class="navbar-link">Home</a></li>
-          <li><a href="#" data-type="drinks" class="navbar-link">Drinks</a></li>
-          <li><a href="#" data-type="desserts" class="navbar-link">Desserts</a></li>
-          <li><a href="#" data-type="sandwich" class="navbar-link">Sandwiches</a></li>
-         
-      
-          
-          <!-- Container for login/profile button -->
-          <!-- <div id="profile-container"></div>  -->
-          <!-- <li><a href="/login.html">Login</a></li> -->
-          <!-- <li><button id="logout-button">Logout</button></li> -->
-        </ul>
+    <!-- NAVBAR LINKS DIV (START)-->
+    <div class="navbar-links">
+      <span class="close-btn" id="close-btn">&times;</span>
+      <ul>
+        <li id="profile-container"></li>
+        <li><a href="#" data-type="home" class="navbar-link">Home</a></li>
+        <li><a href="#" data-type="drinks" class="navbar-link">Drinks</a></li>
+        <li><a href="#" data-type="desserts" class="navbar-link">Desserts</a></li>
+        <li><a href="#" data-type="sandwich" class="navbar-link">Sandwiches</a></li>
+        <img src="./image/ham-sandwich.png" alt="">
+      </ul>
+    </div>
+    <!-- NAVBAR LINKS DIV (END)-->
+
+  </nav>
+  <!--! NAVBAR CONTAINER (END)-->
+
+  <section class="section-one">
+    <div class="logo-container">
+      <img src="./image/burger.png" alt="Burger Picture" class="header-logo">
+      <div class="header-text">
+        <h1>Fresh Sandwich Deli</h1>
+        <p>Happy gut feelings is what we offer!!!</p>
       </div>
-    </nav>
-
-    <section class="section-one">
-      <div class="logo-container">
-            
-            <!-- <link rel="stylesheet" href="./drinks.html"> -->
-            <img src="./image/burger.png" alt="Burger Picture" class="header-logo">
-            
-            <div class="header-text">
-              <h1>Fresh Sandwich Deli</h1>
-              <p>Happy gut feelings is what we offer!!!</p>
-            </div>
-      </div>
-    </section>
-
-   <div class="body-content-container">
-    <div class="items-container" id="section-menu">
-      <!-- Items will be dynamically injected here -->
     </div>
-    <div class="order-summary-container" id="section-summary">
-      <!-- Order summary will be updated here -->
-    </div>
+  </section>
+
+  <div class="body-content-container">
+    <div class="items-container" id="section-menu"></div>
+    <div class="order-summary-container" id="section-summary"></div>
   </div>
 
-  <!-- Cart Modal -->
-  <div id="cart-modal" class="cart-modal">
-    <div class="cart-items" id="cart-items">
-      <!-- Cart item contents goes here -->
-    </div>
-    <button id="checkout-button">Checkout</button>
-  </div>
+  <div class="section-complete" id="section-complete"></div>
 
-
-  <!-- Dynamically render the page section by section -->
-  <div class="section-menu" id="section-menu">
-  </div>
-
-  <div class="section-summary" id="section-summary">
-
-  </div>
-
-  <div class="section-complete" id="section-complete">
-  </div>
-  <!-- <section class="section-complete" id="section-complete">
-    <button id="payment-form">Complete Order</button>
-  </section> -->
-</div>
-
-  <script src="./index.js" type="module"></script>
-
-  <!-- defer attribute in the script tag for login.js ensures that the script is executed after the document has been parsed, but before firing DOMContentLoaded, which is crucial since login.js hooks into that event. -->
-  <!-- <script src="./login.js" defer></script> -->
-  <script src="./script.js" defer></script> 
-  <script src="./logout.js" defer></script>
-
+  <script type="module" src="./index.js" defer></script>
+  <script type="module" src="./script.js" defer></script>
+  <script type="module" src="./logout.js" defer></script>
   <script src="https://js.stripe.com/v3/"></script>
 </body>
 </html>
-
-
-
-
- <!-- Login form logic that will be dynamically displayed -->
- <!-- <div id="login-section" class="login-container" style="display: none;">
-  <div class="logo-container">
-      <img src="./image/burger.png" alt="Burger Picture" class="header-logo">
-      <div class="header-text">
-          <h1>Fresh Sandwich Deli</h1>
-          <p>Happy gut feelings is what we offer!!!</p>
-      </div>
-  </div>
-  <form id="login-form">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required>
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
-      <button type="submit">Login</button>
-  </form>
-</div> -->

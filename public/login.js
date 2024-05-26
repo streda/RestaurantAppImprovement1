@@ -1,48 +1,142 @@
+import { renderMenu, fetchMenuItems } from './index.js';
+
 document.getElementById('login-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+  event.preventDefault();
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
-    console.log("Sending credentials:", { username, password });
+  console.log("Sending credentials:", { username, password });
+  console.log('Current token:', localStorage.getItem('token'));
 
-    fetch('http://localhost:3000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Login failed: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem('token', data.token);
-            console.log('Logged in successfully, token:', data.token);
-            window.location.href = '/'; // Redirect to home page or dashboard
-        } else {
-            throw new Error(data.message || 'Login failed');
-        }
-    })
-    .catch(error => {
-        console.error('Login error:', error);
-        alert('Login failed: ' + error.message);
-    });
+  fetch('http://localhost:3000/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Login failed: ${response.statusText}`);
+    }
+    // console.log(response.json())
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      localStorage.setItem('token', data.token);
+      console.log('Logged in successfully, token:', data.token);
+      fetchMenuItems(true); 
+    } else {
+      throw new Error(data.message || 'Login failed');
+    }
+  })
+  .catch(error => {
+    console.error('Login error:', error);
+    alert('Login failed: ' + error.message);
+  });
 });
 
 
-function fetchWithAuth(url, options = {}) {
-  const token = localStorage.getItem('token');
-  console.log('Sending request with token:', token); // Ensure token is logged
-  return fetch(url, {
-      ...options,
-      headers: {
-          ...options.headers,
-          Authorization: `Bearer ${token}`,
-      },
-  });
-}
+
+
+
+
+
+
+// function fetchMenuItems() {
+//   const token = localStorage.getItem('token');
+//   if (!token) {
+//     console.error('No token found in localStorage');
+//     return;
+//   }
+
+//   fetch('http://localhost:3000/menu-items', {
+//     headers: {
+//       'Authorization': `Bearer ${token}`
+//     }
+//   })
+//   .then(response => {
+//     if (!response.ok) {
+//       throw new Error(`Failed to load menu items: ${response.statusText}`);
+//     }
+//     return response.json();
+//   })
+//   .then(data => {
+//     renderMenu(data);
+//     window.location.href = '/';
+//   })
+//   .catch(error => console.error('Failed to load menu items:', error));
+// }
+
+
+
+// import {renderMenu} from './index.js'
+// import { menuArray } from './data.js';
+// document.getElementById('login-form').addEventListener('submit', function(event) {
+//   event.preventDefault();
+//   const username = document.getElementById('username').value;
+//   const password = document.getElementById('password').value;
+
+//   console.log("Sending credentials:", { username, password });
+
+//   console.log('Current token:', localStorage.getItem('token'));
+
+//   fetch('http://localhost:3000/api/login', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ username, password })
+//   })
+//   .then(response => {
+//       if (!response.ok) {
+//           throw new Error(`Login failed: ${response.statusText}`);
+//       }
+//       return response.json();
+//   })
+//   .then(data => {
+//       if (data.success) {
+//           localStorage.setItem('token', data.token);
+//           console.log('Logged in successfully, token:', data.token);
+//           // window.location.href = '/'; // Redirect to home page or dashboard
+//           // Fetch menu items right after logging in
+
+//           let menuItemsArray = [];
+
+//           fetch('http://localhost:3000/menu-items', {
+//             headers: {
+//                 'Authorization': `Bearer ${localStorage.getItem('token')}`
+//             }
+//         })
+//         .then(response => response.json())
+//         .then(data => {
+//             menuItemsArray = data;
+//             renderMenu(menuItemsArray);
+//             window.location.href = '/'; // Redirect to home page or dashboard
+//         })
+//         .catch(error => console.error('Failed to load menu items:', error));
+
+//       } else {
+//           throw new Error(data.message || 'Login failed');
+//       }
+//   })
+//   // .catch(error => {
+//   //     console.error('Login error:', error);
+//   //     alert('Login failed: ' + error.message);
+//   // });
+// });
+
+
+
+
+// function fetchWithAuth(url, options = {}) {
+//   const token = localStorage.getItem('token');
+//   console.log('Sending request with token:', token); // Ensure token is logged
+//   return fetch(url, {
+//       ...options,
+//       headers: {
+//           ...options.headers,
+//           Authorization: `Bearer ${token}`,
+//       },
+//   });
+// }
 
 
 

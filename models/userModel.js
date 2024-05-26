@@ -2,9 +2,18 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },  // Consider using bcrypt to hash passwords
-    // Add other fields as needed
+    username: { 
+        type: String, 
+        required: true, 
+        unique: true 
+    },
+
+    // using bcrypt to hash passwords is better
+    password: { 
+        type: String, 
+        required: true 
+    }, 
+
 });
 
 const User = mongoose.model('User', userSchema);
