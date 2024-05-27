@@ -12,7 +12,7 @@ const landingPageContent = `
 </div>
 `;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const menuContainer = document.getElementById("section-menu");
   if (menuContainer) {
     menuContainer.innerHTML = landingPageContent;
@@ -24,10 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sectionMenu = document.getElementById("section-menu");
   if (sectionMenu) {
-    sectionMenu.addEventListener("click", function (event) {
+    sectionMenu.addEventListener("click", async function (event) {
       if (event.target.classList.contains("add-btn")) {
         const itemId = event.target.getAttribute("data-item-id");
-        addItem(itemId);
+        await addItem(itemId);
       }
     });
   }
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const navbarLinks = document.querySelector(".navbar-links");
-  navbarLinks.addEventListener("click", function (event) {
+  navbarLinks.addEventListener("click", async function (event) {
     const linkType = event.target.getAttribute("data-type");
     if (linkType) {
       event.preventDefault();
@@ -51,14 +51,11 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleCompleteOrderButton(false);
         toggleOrderSummaryDisplay(false);
       } else {
-        // renderMenuByType(linkType);
-        fetchCartData()
-        .then(validItems => {
-          renderMenuByType(linkType); // Ensure this function correctly renders the menu items
-          updateOrderSummary(validItems);
-          updateQuantityIndicators(validItems);
-        });
-
+        renderMenuByType(linkType); // Ensure this function correctly renders the menu items
+        const validItems = await fetchCartData();
+        updateOrderSummary(validItems);
+        updateQuantityIndicators(validItems);
+    
         toggleCompleteOrderButton(orderArray.length > 0);
         toggleOrderSummaryDisplay(true);
       }
@@ -67,16 +64,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sectionSummary = document.getElementById("section-summary");
   if (sectionSummary) {
-    sectionSummary.addEventListener("click", function (event) {
+    sectionSummary.addEventListener("click", async function (event) {
       if (event.target.classList.contains("remove-single-item")) {
         const itemId = event.target.getAttribute("data-item-id");
-        removeSingleItem(itemId);
+        await removeSingleItem(itemId);
       } else if (event.target.classList.contains("remove-all-item")) {
         const itemId = event.target.getAttribute("data-item-id");
-        removeAllItem(itemId);
+        await removeAllItem(itemId);
       } else if (event.target.classList.contains("add-single-item")) {
         const itemId = event.target.getAttribute("data-item-id");
-        addSingleItem(itemId);
+        await addSingleItem(itemId);
       }
     });
   }
@@ -116,33 +113,35 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
- export function fetchMenuItems(redirect = false) {
+ export async function fetchMenuItems(redirect = false) {
   const token = localStorage.getItem('token');
   if (!token) {
     console.error('No token found in localStorage');
     return;
   }
 
-  fetch('http://localhost:3000/menu-items', {
+  try {
+    const response = await fetch('http://localhost:3000/menu-items', {
     headers: {
       'Authorization': `Bearer ${token}`
     }
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`Failed to load menu items: ${response.statusText}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-    menuArray = data; // Update the menuArray with the fetched items
-    // renderMenu(data); // Render the menu items
 
-    if(redirect){
-      window.location.href = '/';
-    }
-  })
-  .catch(error => console.error('Failed to load menu items:', error));
+  if (!response.ok) {
+    throw new Error(`Failed to load menu items: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  menuArray = data;
+  renderMenu(data); //! Render the menu items
+
+  if(redirect){
+    window.location.href = '/';
+  }
+  }
+  catch(error){
+    console.error('Failed to load menu items:', error)
+  }
 }
 
 function renderMenuByType(menuType) {
@@ -184,46 +183,49 @@ export function renderMenu(menuItems) {
   });
 }
 
-function fetchCartData() {
+async function fetchCartData() {
   const token = localStorage.getItem('token');
 
-  return fetch('/cart', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-  })
-  .then(response => {
+  if(!token) {
+    console.error("No token found in localStorage")
+    return [];
+  }
+
+  try {
+    const response = await fetch('/cart', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
     if (!response.ok) {
       throw new Error(`Failed to fetch cart data: ${response.statusText}`);
     }
-    return response.json();
-  })
-  .then(data => {
+
+    const data = await response.json();
     console.log('Cart data fetched:', JSON.stringify(data, null, 2));
+
     if (data && data.order && Array.isArray(data.order.items)) {
       // Filter out items with null menuItem 
       const validItems = data.order.items.filter(item => item.menuItem !== null);
       console.log("Valid Cart Items:", validItems);
       orderArray = validItems; // Update the global orderArray
-      // updateOrderSummary(validItems);
       return validItems;
     } else {
       console.error('Invalid cart data:', data);
-      // updateOrderSummary([]); // Pass an empty array to clear the order summary
       return [];
     }
-  })
-  .catch(error => {
+  } 
+  catch(error){
     console.error('Failed to fetch cart data:', error);
     // updateOrderSummary([]); // Pass an empty array to clear the order summary
     return [];
-
-  });
+  }
 }
 
-function addItem(itemId) {
+async function addItem(itemId) {
   console.log("Attempting to add item with ID:", itemId);
 
   // Check if menuArray is defined and has elements
@@ -246,7 +248,8 @@ function addItem(itemId) {
   console.log('Authorization Header:', `Bearer ${token}`);
   console.log('Client Time:', new Date().toString());
 
-  fetch('/add-to-cart', {
+  try {
+    const response = await fetch('/add-to-cart', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -258,29 +261,28 @@ function addItem(itemId) {
       quantity: 1
     })
   })
-  .then(response => {
+  
     if (!response.ok) {
       throw new Error(`Failed to add item to cart: ${response.statusText}`);
     }
-    return response.json();
-  })
-  .then(data => {
+  
+    const data = await response.json();
     console.log('Added to cart successfully', data);
-    return fetchCartData(); // Wait for fetchCartData to complete and return the fetched cart data
-  })
-  .then(validCartItems => {
+    
+    const validCartItems = await fetchCartData();
     console.log('Valid Cart Items:', validCartItems);
+
     orderArray = validCartItems; // Update the global orderArray with the valid items
     updateOrderSummary(validCartItems); // Call updateOrderSummary with the fetched cart items
     updateQuantityIndicators(validCartItems); // Update quantity indicators
-  })
-  .catch(error => {
+  }
+  catch(error){
     console.error('Failed to add item to cart:', error);
     if (error.message.includes('Unauthorized')) {
       alert("You do not have permission to perform this action or your session has expired.");
       window.location.href = '/login.html';
     }
-  });
+  };
 }
 
 
@@ -382,69 +384,84 @@ function updateQuantityIndicators(orderArray) {
   });
 }
 
-
-
-function removeAllItem(itemId) {
+async function removeAllItem(itemId) {
   const token = localStorage.getItem('token');
 
-  fetch(`/api/item/remove`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ id: itemId })
-  })
-  .then(response => {
+  try {
+    const response = await fetch(`/api/item/remove`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ id: itemId })
+    })
+  
     if (!response.ok) {
       throw new Error('Failed to remove item');
     }
-    return fetchCartData();
-  })
-  .then(validCartItems => {
+  
+    const data = await response.json();
+    console.log('Removed item successfully', data);
+  
+    const validCartItems = await fetchCartData();
+  
     updateOrderSummary(validCartItems);
-  })
-  .catch(error => console.error('Error removing item:', error));
+    updateQuantityIndicators(validCartItems); // update quantity indicators
+  }
+  catch(error) {
+    console.error('Error removing item:', error);
+  } 
 }
 
-
-function removeSingleItem(itemId) {
+async function removeSingleItem(itemId) {
   const token = localStorage.getItem('token');
 
-  fetch(`/api/item/update`, {
+ try {
+  const response = await fetch(`/api/item/update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify({ id: itemId, action: 'decrease' })
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to update item');
-    }
-    return fetchCartData()
-  })
-  .then(validCartItems => {
-    updateOrderSummary(validCartItems);
-  })
-  .catch(error => console.error('Error updating item:', error));
+
+  if (!response.ok) {
+    throw new Error('Failed to update item');
+  }
+
+  const data = await response.json();
+  console.log('Removed item successfully', data);
+
+  const validCartItems = await fetchCartData();
+
+  updateOrderSummary(validCartItems);
+  updateQuantityIndicators(validCartItems);
+ }
+ catch(error){  
+    console.error('Error updating item:', error);
+  }
 }
 
-
-
-function addSingleItem(itemId) {
+async function addSingleItem(itemId) {
   const token = localStorage.getItem('token');
 
-  fetch(`/api/item/update`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ id: itemId, action: 'increase' })
-  })
-  .then(response => {
+  try {
+    const response = await fetch(`/api/item/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ id: itemId, action: 'increase' })
+    })
+    
     if (!response.ok) {
-      throw new Error('Failed to update item');
-    }
-    return fetchCartData();
-  })
-  .then(validCartItems => {
-    updateOrderSummary(validCartItems);
-  })
-  .catch(error => console.error('Error updating item:', error));
+        throw new Error('Failed to update item');
+      }
+ 
+      const data = await response.json();
+      console.log('Removed item successfully', data);
+
+      const validCartItems = await fetchCartData();
+      updateOrderSummary(validCartItems);
+      updateQuantityIndicators(validCartItems);
+  }
+  catch(error) {
+    console.error('Error updating item:', error);
+  }
 }
 
 function calculateTotalPrice(orders) {
