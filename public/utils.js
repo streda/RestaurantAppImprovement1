@@ -46,7 +46,7 @@ export async function fetchMenuItems(redirect = false) {
 
     menuArray.length = 0; // Clear the existing array
     menuArray.push(...data); // Update the menuArray with the fetched items
-    renderMenu(data, isLoggedIn); //! Render the menu items
+    // renderMenu(data, isLoggedIn); //! Render the menu items
 
     if (redirect) {
       renderLandingPage(); // Ensure landing page is rendered after login
