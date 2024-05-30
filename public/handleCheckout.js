@@ -1,8 +1,8 @@
-export default async function handleCheckout(itemsArray) {
-  const items = itemsArray.map(({item, quantity})=> ({
-    id: item.id,
-    name: item.name,
-    price: item.price,
+export default async function handleCheckout(orderArray) {
+  const items = orderArray.map(({menuItem, quantity})=> ({
+    id: menuItem._id,
+    name: menuItem.name,
+    price: menuItem.price,
     quantity: quantity,
   }));
 
@@ -16,7 +16,7 @@ export default async function handleCheckout(itemsArray) {
 });
 
 
-  console.log(JSON.stringify({ items: itemsArray })); // This will show the exact structure being sent to the server
+  console.log(JSON.stringify({ items: orderArray })); // This will show the exact structure being sent to the server
 
 
   if(!response.ok){
