@@ -29,12 +29,12 @@ export function hideLoginForm() {
 
 export async function fetchMenuItems(redirect = false) {
   const token = localStorage.getItem("token");
-  console.log("Checking existence of token before fetchMenuItems sends Authorization header: ", token)
+  console.log("Checking existence of token before fetchMenuItems sends Authorization header: ", token);
 
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-      const response = await fetch("http://localhost:3000/menu-items", {
+    const response = await fetch("http://localhost:3000/menu-items", {
       headers,
     });
 
@@ -46,7 +46,6 @@ export async function fetchMenuItems(redirect = false) {
 
     menuArray.length = 0; // Clear the existing array
     menuArray.push(...data); // Update the menuArray with the fetched items
-    // renderMenu(data, isLoggedIn); //! Render the menu items
 
     if (redirect) {
       renderLandingPage(); // Ensure landing page is rendered after login
@@ -122,7 +121,6 @@ export function renderMenu(menuItems, isUserLoggedIn) {
     const menuHtml = document.createElement("div");
     menuHtml.className = "menu-item-container";
 
-    //! Check the quantity of this item in the orderArray
     const orderItem = orderArray.find(
       (order) => order.menuItem._id === item._id
     );
@@ -130,38 +128,34 @@ export function renderMenu(menuItems, isUserLoggedIn) {
     const itemText = quantity > 1 ? "items" : "item";
 
     menuHtml.innerHTML = `
-        <img src="${item.emoji}" class="menu-item-image" alt="${
-      item.name
-    } image">
-        <div class="menu-item-details">
-          <h3>${item.name}</h3>
-          <p>Ingredients: ${item.ingredients.join(", ")}</p>
-          <p>Price: $${item.price}</p>
-        </div>
+      <img src="${item.emoji}" class="menu-item-image" alt="${item.name} image">
+      <div class="menu-item-details">
+        <h3>${item.name}</h3>
+        <p>Ingredients: ${item.ingredients.join(", ")}</p>
+        <p>Price: $${item.price}</p>
+      </div>
   
-        <div class="button-quantity-container">
-          ${
-            isUserLoggedIn
-              ? `<button class="add-btn" data-item-id="${item._id}">Add to Cart</button>`
-              : ""
-          }
-          <div class="quantity-indicator" id="quantity-indicator-${
-            item._id
-          }">${quantity} ${itemText}</div>
-        </div>
-      `;
+      <div class="button-quantity-container">
+        ${
+          isUserLoggedIn
+            ? `<button class="add-btn" data-item-id="${item._id}">Add to Cart</button>`
+            : ""
+        }
+        <div class="quantity-indicator" id="quantity-indicator-${item._id}">${quantity} ${itemText}</div>
+      </div>
+    `;
     menuContainer.appendChild(menuHtml);
   });
 
-    //! Attach event listeners to "Add to Cart" buttons
-    if (isUserLoggedIn) {
-      document.querySelectorAll(".add-btn").forEach((button) => {
-        button.addEventListener("click", async (event) => {
-          const itemId = event.target.getAttribute("data-item-id");
-          await addItem(itemId);
-        });
+  // Attach event listeners to "Add to Cart" buttons
+  if (isUserLoggedIn) {
+    document.querySelectorAll(".add-btn").forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        const itemId = event.target.getAttribute("data-item-id");
+        await addItem(itemId);
       });
-    }
+    });
+  }
 }
 
 export async function addItem(itemId) {

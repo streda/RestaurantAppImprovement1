@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const linkType = event.target.getAttribute("data-type");
       if (linkType) {
         event.preventDefault();
-		
         hideLoginForm(); // Hide the login form when navigating to other pages
         if (linkType === "home") {
           renderLandingPage();
@@ -55,14 +54,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           toggleOrderSummaryDisplay(false);
         } else {
           await fetchMenuItems(); // Ensure menu items are fetched before rendering
-          renderMenuByType(linkType, isLoggedIn()); // Ensure this function correctly renders the menu items
-          if (isLoggedIn()){
-          const validItems = await fetchCartData();
-          updateOrderSummary(validItems);
-          updateQuantityIndicators(validItems);
+          renderMenuByType(linkType, isLoggedIn()); // Render the menu items based on type
+          if (isLoggedIn()) {
+            const validItems = await fetchCartData();
+            updateOrderSummary(validItems);
+            updateQuantityIndicators(validItems);
 
-          toggleCompleteOrderButton(orderArray.length > 0);
-          toggleOrderSummaryDisplay(true);
+            toggleCompleteOrderButton(orderArray.length > 0);
+            toggleOrderSummaryDisplay(true);
           }
         }
       }
