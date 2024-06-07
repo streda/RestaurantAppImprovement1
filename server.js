@@ -2,8 +2,11 @@ import express from "express";
 import open from "open";
 import path from "path";
 
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+// import https from "https";
+// import fs from "fs";
+
+import { fileURLToPath } from "url"; // Imports the 'fileURLToPath' function from the Node.js 'url' module, and is used to convert a file URL to a file path.
+import { dirname } from "path"; // Imports the 'dirname' function from the Node.js 'path' module, and is used to get the directory name of a file path.
 
 import cors from "cors";
 import Stripe from "stripe";
@@ -15,11 +18,15 @@ import "express-async-errors";
 import mongoose from "mongoose";
 import MenuItem from "./models/menuItemModel.js";
 import Order from "./models/order.js";
-import User from "./models/userModel.js"; // Assuming you have created a user model
+import User from "./models/userModel.js";
+
+import registerRouter from "./routes/register.js";
+import loginRouter from "./routes/login.js";
 
 // const ObjectId = mongoose.Types.ObjectId;  // Ensure you import mongoose at the top of the file
 
 import { calculateTotalPrice } from "./services/orderService.js";
+import { error } from "console";
 // import * as orderService from './services/orderService.js';
 
 // Initialize dotenv
@@ -41,8 +48,8 @@ app.use(
 );
 
 // Convert import.meta.url to a file path and get the directory name
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename = fileURLToPath(import.meta.url); // 'import.meta.url' provides the URL of the current module file and then passed to fileURLToPath() to convert it into file path. Now '__filename' will hold the absolute path to the current module file.
+const __dirname = dirname(__filename); // The 'dirname' function is used to extract the directory name from `__filename', which represents the directory containing the current module file. '__dirname' will now hold the absolute path to the directory containing the current module.
 
 // Serve static files like favicon and webmanifest
 app.use(express.static(path.join(__dirname, "public")));
@@ -57,6 +64,34 @@ mongoose
     console.error("MongoDB connection error:", err);
     process.exit(1);
   });
+
+app.use(registerRouter); 
+app.use(loginRouter);
+
+//! Make sure the authenticateToken is defined first before it is used down below.
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.error("Token verification failed:", err);
+      return res
+        .status(403)
+        .json({ message: "Failed to authenticate token", error: err.message });
+    }
+    console.log("Verified User:", decoded);
+
+    //! Note:
+    //? req.myUser is only available in route handlers that use the authenticateToken middleware
+    req.myUser = decoded; // Assuming decoded token that comes from the login token includes { userId: user._id }
+    next();
+  });
+};
+
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
 
@@ -102,70 +137,7 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const user = await User.findOne({ username: username });
-    if (!user || user.password !== password) {
-      // Ensure password comparison; consider hashing in production
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
-    }
-
-    const token = jwt.sign(
-      { userId: user._id.toString() },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-    console.log("Logging out the token in api/login: ", token);
-    res.json({ success: true, token });
-  } catch (error) {
-    console.error("Error during login:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      });
-  }
-});
-
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      console.error("Token verification failed:", err);
-      return res
-        .status(403)
-        .json({ message: "Failed to authenticate token", error: err.message });
-    }
-    console.log("Verified User:", decoded);
-
-    //! Note:
-    //? req.myUser is only available in route handlers that use the authenticateToken middleware
-    req.myUser = decoded; // Assuming decoded token that comes from the login token includes { userId: user._id }
-    next();
-  });
-};
-
-app.use(authenticateToken);
-
-// Ensure that the middleware is used only where needed
-// app.use('/add-to-cart', authenticateToken);
-// app.use('/cart', authenticateToken);
-// app.use('/api/item/update', authenticateToken);
-// app.use('/api/item/remove', authenticateToken);
-// app.use('/update-order', authenticateToken);
-
-
-// const ObjectId = mongoose.Types.ObjectId;  // Ensure you import mongoose at the top of the file
+// app.use(authenticateToken);
 
 app.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;
@@ -192,6 +164,14 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
       });
     }
 
+    if(isNaN(menuItem.price)){
+      console.error("Invalid price for menuItem:", menuItem);
+      return res.status(400).json({error: "Invalid menu item price"});
+    }
+    if(isNaN(quantity) || quantity <= 0){
+      console.error("Invalid quantity:", quantity);
+      return res.status(400).json({error: "Invalid quantity"});
+    }
     /* 
         If the item is already in the order, the server uses the retrieved pending order's index and update quantity.
         If the item is not in the order, it is added to the items array.
@@ -208,7 +188,10 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
     }
 
     //! Update the total price
-    order.total += menuItem.price * quantity;
+    // order.total += menuItem.price * quantity;
+    order.total = order.items.reduce((acc, item) =>{
+      return acc + item.quantity + menuItem.price;
+    }, 0);
 
     //  The updated order is saved back to the database
     await order.save();
@@ -235,8 +218,13 @@ app.get("/cart", authenticateToken, async (req, res) => {
       status: "pending",
     }).populate("items.menuItem");
 
+    console.log('This a the structure of the order:', order);
+
     if (!order) {
-      return res.status(404).json({ message: "Cart not found" });
+      // return res.status(404).json({ message: "Cart not found" });
+
+      // When a new user logs in, i.e no order is in the cart yet, instead of sending 404 error, send an empty cart structure
+      return res.json({order: {items: [], total: 0}});
     }
 
     res.json({ order });
@@ -255,8 +243,6 @@ app.get("/menu-items", async (req, res) => {
     res.status(500).send("Error retrieving items");
   }
 });
-
-
 
 app.post("/api/item/update", authenticateToken, async (req, res) => {
   const { id, action } = req.body;
@@ -356,6 +342,57 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   open(`http://localhost:${PORT}`);
 });
+
+//! For SSL encryption purpose
+
+// const sslOptions = {
+//   key: fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/privkey.pem'),
+//   cert: fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/fullchain.pem')
+// };
+
+// https.createServer(sslOptions, app).listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+//   open(`https://localhost:${PORT}`);
+// });
+
+// app.post("/api/login", async (req, res) => {
+//   const { username, password } = req.body;
+//   try {
+//     const user = await User.findOne({ username: username });
+//     if (!user || user.password !== password) {
+//       // Ensure password comparison; consider hashing in production
+//       return res
+//         .status(401)
+//         .json({ success: false, message: "Invalid credentials" });
+//     }
+
+//     const token = jwt.sign(
+//       { userId: user._id.toString() },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1h" }
+//     );
+//     console.log("Logging out the token in api/login: ", token);
+//     res.json({ success: true, token });
+//   } catch (error) {
+//     console.error("Error during login:", error);
+//     res
+//       .status(500)
+//       .json({
+//         success: false,
+//         message: "Internal server error",
+//         error: error.message,
+//       });
+//   }
+// });
+
+// Ensure that the middleware is used only where needed
+// app.use('/add-to-cart', authenticateToken);
+// app.use('/cart', authenticateToken);
+// app.use('/api/item/update', authenticateToken);
+// app.use('/api/item/remove', authenticateToken);
+// app.use('/update-order', authenticateToken);
+
+// const ObjectId = mongoose.Types.ObjectId;  // Ensure you import mongoose at the top of the file
 
 // Ensure the /add-to-cart endpoint correctly updates the database when items are added.
 // app.post('/add-to-cart', authenticateToken, async (req, res) => {

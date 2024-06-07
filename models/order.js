@@ -4,7 +4,7 @@ const {Schema, model} = mongoose;
 
 // This "itemSchema" defines the structure for each item within an order.
 /* 
- A sample structure of a single order is as follows 
+ A sample structure of a single order (i.e a single Menu Item) is as follows 
     {
         name: "Pizza",
         ingredients: ["pepperoni", "mushroom", "mozzarella"],
@@ -14,6 +14,8 @@ const {Schema, model} = mongoose;
         emoji: "./image/pizza.png"
     },
 */
+
+//! A schema for number of menu items and their quantity
 const itemSchema = new Schema({
     menuItem: { //  A reference to a MenuItem data doc in the database
         type: Schema.Types.ObjectId,
@@ -53,7 +55,7 @@ const orderSchema = new Schema({
 });
 
 
-// This creates an Order model from the orderSchema
+//! This creates an Order model from the orderSchema
 const Order = model("Order", orderSchema);
 
 export default Order;

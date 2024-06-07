@@ -1,4 +1,4 @@
-import handleCheckout from "./handleCheckout.js";
+// import handleCheckout from "./handleCheckout.js";
 import { menuArray, orderArray } from "./index.js";
 
 export function renderLandingPage() {
@@ -65,7 +65,7 @@ export async function fetchCartData() {
   }
 
   try {
-    const response = await fetch("/cart", {
+    const response = await fetch("http://localhost:3000/cart", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -77,7 +77,17 @@ export async function fetchCartData() {
       throw new Error(`Failed to fetch cart data: ${response.statusText}`);
     }
 
+    if (response.status === 404) {
+      console.warn("Your cart is empty.");
+      return []; // Treat 404 as an empty cart
+    }
+
     const data = await response.json();
+    console.log('This a the structure of the order:', data.order);
+
+    // data = The JavaScript object that I want to convert to a JSON string
+    // null = a placeholder for the replacer function. Setting it to null means that no replacer function is used, and all properties of the object will be included in the JSON string.
+    // 2 = is the space parameter. It specifies the number of spaces to use for indentation in the output JSON string. It makes the JSON string more readable by formatting it with line breaks and indentations.
     console.log("Cart data fetched:", JSON.stringify(data, null, 2));
 
     if (data && data.order && Array.isArray(data.order.items)) {
@@ -475,4 +485,44 @@ export function updateOrderSummary(items) {
 
   updateQuantityIndicators(items);
   toggleCompleteOrderButton(items.length > 0);
+}
+
+
+
+export default async function handleCheckout(orderArray) {
+  const items = orderArray.map(({menuItem, quantity})=> ({
+    id: menuItem._id,
+    name: menuItem.name,
+    price: menuItem.price,
+    quantity: quantity,
+  }));
+
+  console.log("Prepared items for checkout:", JSON.stringify({ items }));
+  const response = await fetch('http://localhost:3000/create-checkout-session', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ items }), // Send the items to the backend
+});
+
+
+  console.log(JSON.stringify({ items: orderArray })); // This will show the exact structure being sent to the server
+
+
+  if(!response.ok){
+    throw new Error('Network response was not ok.');
+  }
+
+  let session;
+  try {
+    session = await response.json();
+  } catch (error) {
+    throw new Error('Failed to parse JSON response.');
+  }
+  // session = await response.json();
+  window.location.href = session.url; // Redirect to Stripe Checkout
+
+  console.log("Another check is a check")
+
 }

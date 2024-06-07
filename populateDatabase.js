@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import MenuItem from './models/menuItemModel.js'; // Ensure this path is correct
-import { menuArray } from './newData.js'; // Adjust the path to where your newData.js is located
+import { menuArray } from './public/data.js'; // Adjust the path to where your newData.js is located
 
 dotenv.config();
 

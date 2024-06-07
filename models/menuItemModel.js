@@ -37,6 +37,9 @@ const menuItemSchema = new Schema({
   // quantity: {type: Number, required: true, default: 0}
 });
 
+
+// Creating collection 
+//! mongoose.model(<CollectionName>, <CollectionSchema>)
 const MenuItem = mongoose.model('MenuItem', menuItemSchema);
 
 export default MenuItem;

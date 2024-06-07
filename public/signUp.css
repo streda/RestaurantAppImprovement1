@@ -1,0 +1,70 @@
+.signUp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin: 20px auto;
+    background-color: #c0dfe2;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 100%;
+  }
+  
+  .signUp-container form {
+    width: 100%;
+  }
+
+  .logo-container  {
+    position: relative;
+    max-width: 100%; /* Ensures the container does not exceed the width of its parent */
+    text-align: center;
+  }
+
+  .header-logo{
+    width: 100%; /* Makes the image responsive, filling the width of its container */
+    height: auto; /* Maintains aspect ratio */
+    display: block; /* Removes bottom margin/gap */
+  }
+
+  .header-text {
+    position: absolute;
+    top: 50%; /* Positions the top edge of the element at the middle of the parent */
+    left: 40%; /* Positions the left edge of the element at the middle of the parent */
+    transform: translate(-50%, -50%); /* Centers the element both horizontally and vertically */
+    color: white; /* Adjust text color for better visibility */
+    width: 90%; /* Gives some padding inside the container */
+    padding: 10px; /* Padding around the text */
+    border-radius: 10px; /* Rounded corners for the background */
+}
+
+
+.header-text h1, .header-text p {
+    margin: 5px 0; /* Vertical margin for spacing, remove horizontal margin */
+    font-size: 15px;
+}
+
+
+  .signUp-container label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .signUp-container input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .signUp-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  

@@ -12,8 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
             </div></li>
         `;
     } else {
-        // User is not logged in, show login button
-        profileContainer.innerHTML = '<li><a href="/login.html" class="navbar-links">Login</a></li>';
+        // User is not logged in, determine if login or sign-up page is displayed
+
+        const currentPage = window.location.pathname;
+
+        if(currentPage.endsWith('login.html')){
+            profileContainer.innerHTML = '<li><a href="/signUp.html" class="navbar-links">Sign Up</a></li>';
+        } else if (currentPage.endsWith('signUp.html')){
+            profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`
+        } else{
+            profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`
+        }
     }
 });
 
