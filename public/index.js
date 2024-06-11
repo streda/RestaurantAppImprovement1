@@ -10,6 +10,7 @@ import {
   toggleOrderSummaryDisplay,
   toggleCompleteOrderButton,
   handleCompleteOrderButtonClick,
+  initializeCheckoutButton,
   removeAllItem,
   removeSingleItem,
   addSingleItem,
@@ -20,9 +21,18 @@ export let orderArray = [];
 export let menuArray = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
+
+  const currentPagePath = window.location.pathname;
+  const isAuthenticationPage = currentPagePath === '/login.html' || currentPagePath === '/signUp.html';
+
+  if(isAuthenticationPage){
+    console.log("Event listeners disabled on authentication pages.")
+    return; // exit the function early and prevents any further event listeners or scripts from being added and stops the execution flow.
+  }
+
   const menuContainer = document.getElementById("section-menu");
   const sectionComplete = document.getElementById("section-complete");
-  const checkoutButton = document.getElementById("complete-order-button");
+  // const checkoutButton = document.getElementById("complete-order-button");
   const navbarLinks = document.querySelector(".navbar-links");
   const sectionSummary = document.getElementById("section-summary");
   const toggleButton = document.querySelector(".toggle-button");
@@ -32,15 +42,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (sectionComplete) {
     toggleCompleteOrderButton(false);
+    // Initialize the checkout button when the complete order section is available
+    initializeCheckoutButton(); //! Newly added
   } else {
     console.log("section-complete element is not available on this page.");
   }
 
-  if (checkoutButton) {
-    checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
-  } else {
-    console.error("Checkout button not found");
-  }
+  // if (checkoutButton) {
+  //   checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
+  // } else {
+  //   console.error("Checkout button not found");
+  // }
 
   if (navbarLinks) {
     navbarLinks.addEventListener("click", async function (event) {
@@ -118,6 +130,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       navbarLinks.classList.remove("active");
     }
   });
+
+  //! conditional check for each navigation link individually
+/*   document.querySelectorAll(".navbar-link").forEach(link => {
+  // It iterates through each element with the class .navbar-link
+  link.addEventListener("click", function(event) {
+    const currentPath = window.location.pathname;
+    if (currentPath === '/login.html' || currentPath === '/signUp.html') {
+      event.preventDefault(); // Prevent navigation
+      console.log("Navigation is disabled on authentication pages.");
+    }
+  });
+}); */
+
 
   //! IMPORTANT TO LOAD THE MENU ARRAY WHEN THE PAGE STARTS
   // fetchMenuItems(); // Fetch menu items on page load

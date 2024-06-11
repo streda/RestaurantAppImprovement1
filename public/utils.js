@@ -358,6 +358,17 @@ export function handleCompleteOrderButtonClick() {
   }
 }
 
+
+export function initializeCheckoutButton() {
+  const checkoutButton = document.getElementById("complete-order-button");
+  
+  if (checkoutButton) {
+    checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
+  } else {
+    console.error("Checkout button not found");
+  }
+}
+
 export async function updateOrderWithValidItems(orderId, validItems) {
   const token = localStorage.getItem("token");
   try {
