@@ -1,5 +1,5 @@
 import express from "express";
-// import open from "open"; Commented out because I am using Heroku to open the application now. 
+// import open from "open"; // Commented out because I am using Heroku to open the application now. 
 import path from "path";
 
 // import https from "https";
@@ -55,10 +55,7 @@ const __dirname = dirname(__filename); // The 'dirname' function is used to extr
 app.use(express.static(path.join(__dirname, "public")));
 
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB successfully connected! 🎉"))
   .catch((err) => {
     console.error("MongoDB connection error:", err);
@@ -340,7 +337,7 @@ app.get("/logout", (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  open(`http://localhost:${PORT}`);
+  // open(`http://localhost:${PORT}`);
 });
 
 //! For SSL encryption purpose
