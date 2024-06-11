@@ -1,5 +1,5 @@
 import express from "express";
-import open from "open";
+// import open from "open"; Commented out because I am using Heroku to open the application now. 
 import path from "path";
 
 // import https from "https";
