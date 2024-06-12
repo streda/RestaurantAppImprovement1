@@ -333,6 +333,13 @@ app.get("/logout", (req, res) => {
   res.redirect("/login.html");
 });
 
+app.use((req, res, next) => {
+  if(req.headers['x-forward-proto'] !== 'https'){
+    return res.redirect('https://${req.hostname}${req.url}')
+  }
+  next();
+})
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
