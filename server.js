@@ -31,6 +31,14 @@ import { error } from "console";
 // Initialize dotenv
 dotenv.config();
 const app = express();
+
+app.use((req, res, next) => {
+  if(req.headers['x-forward-proto'] !== 'https'){
+    return res.redirect('https://${req.hostname}${req.url}')
+  }
+  next();
+})
+
 app.use(express.json());
 app.use(express.static("public")); // Serving static files normally without {index: false}
 app.use(cookieParser());
@@ -333,12 +341,7 @@ app.get("/logout", (req, res) => {
   res.redirect("/login.html");
 });
 
-app.use((req, res, next) => {
-  if(req.headers['x-forward-proto'] !== 'https'){
-    return res.redirect('https://${req.hostname}${req.url}')
-  }
-  next();
-})
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
