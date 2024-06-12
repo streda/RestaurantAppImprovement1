@@ -33,11 +33,12 @@ dotenv.config();
 const app = express();
 
 app.use((req, res, next) => {
-  if(req.headers['x-forward-proto'] !== 'https'){
-    return res.redirect('https://${req.hostname}${req.url}')
+  if (req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect(`https://${req.hostname}${req.url}`);
   }
   next();
-})
+});
+
 
 app.use(express.json());
 app.use(express.static("public")); // Serving static files normally without {index: false}
