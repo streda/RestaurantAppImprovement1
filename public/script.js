@@ -5,36 +5,89 @@ document.addEventListener('DOMContentLoaded', function() {
     if (userIsLoggedIn) {
         // User is logged in, show profile button and dropdown with only Logout
         profileContainer.innerHTML = `
-            <li>
-                <button class="navbar-link button" onclick="toggleDropdown()">Profile</button>
+            <li class="dropdown">
+                <button class="navbar-link button" id="profile-btn">Profile</button>
                 <div class="dropdown-content" id="dropdown">
                     <a href="#" onclick="logout()">Logout</a>
                 </div>
             </li>
         `;
+
+        // Add event listeners for dropdown behavior
+        const profileBtn = document.getElementById('profile-btn');
+        const dropdown = document.getElementById('dropdown');
+
+        profileBtn.addEventListener('click', function() {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Hide dropdown when mouse leaves the dropdown or the profile button
+        dropdown.addEventListener('mouseleave', function() {
+            dropdown.style.display = 'none';
+        });
+
+        profileBtn.addEventListener('mouseleave', function(event) {
+            setTimeout(() => {
+                if (!dropdown.matches(':hover')) {
+                    dropdown.style.display = 'none';
+                }
+            }, 200); // Delay to allow moving into the dropdown
+        });
     } else {
         // User is not logged in, determine if login or sign-up page is displayed
         const currentPage = window.location.pathname;
 
-        if(currentPage.endsWith('login.html')){
+        if (currentPage.endsWith('login.html')) {
             profileContainer.innerHTML = '<li><a href="/signUp.html" class="navbar-links">Sign Up</a></li>';
-        } else if (currentPage.endsWith('signUp.html')){
-            profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`
-        } else{
-            profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`
+        } else if (currentPage.endsWith('signUp.html')) {
+            profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`;
+        } else {
+            profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`;
         }
     }
 });
-
-window.toggleDropdown = function() {
-    const dropdown = document.getElementById('dropdown');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-};
 
 window.logout = function() {
     localStorage.removeItem('token');
     location.reload(); // Reload to update UI
 };
+// document.addEventListener('DOMContentLoaded', function() {
+//     const profileContainer = document.getElementById('profile-container');
+//     const userIsLoggedIn = localStorage.getItem('token'); // Assume token presence means logged in
+
+//     if (userIsLoggedIn) {
+//         // User is logged in, show profile button and dropdown with only Logout
+//         profileContainer.innerHTML = `
+//             <li>
+//                 <button class="navbar-link button" onclick="toggleDropdown()">Profile</button>
+//                 <div class="dropdown-content" id="dropdown">
+//                     <a href="#" onclick="logout()">Logout</a>
+//                 </div>
+//             </li>
+//         `;
+//     } else {
+//         // User is not logged in, determine if login or sign-up page is displayed
+//         const currentPage = window.location.pathname;
+
+//         if(currentPage.endsWith('login.html')){
+//             profileContainer.innerHTML = '<li><a href="/signUp.html" class="navbar-links">Sign Up</a></li>';
+//         } else if (currentPage.endsWith('signUp.html')){
+//             profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`
+//         } else{
+//             profileContainer.innerHTML = `<li><a href="/login.html" class="navbar-links">Login</a></li>`
+//         }
+//     }
+// });
+
+// window.toggleDropdown = function() {
+//     const dropdown = document.getElementById('dropdown');
+//     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+// };
+
+// window.logout = function() {
+//     localStorage.removeItem('token');
+//     location.reload(); // Reload to update UI
+// };
 
 
 // document.addEventListener('DOMContentLoaded', function() {
