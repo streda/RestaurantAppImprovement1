@@ -11,7 +11,7 @@ document
     console.log("Current token:", localStorage.getItem("token"));
 
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
+      const response = await fetch("https://truefood.rest/api/login", {  // ✅ Change API URL to your live server
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -27,7 +27,7 @@ document
         localStorage.setItem("token", data.token);
         console.log("Logged in successfully, token:", data.token);
         await fetchMenuItems(true);
-        window.location.href = "http://localhost:3000"; // Redirect to main page after successful login
+       window.location.href = "https://truefood.rest";  // ✅ Redirect to live site after login
       } else {
         throw new Error(data.message || "Login failed");
       }

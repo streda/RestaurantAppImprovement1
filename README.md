@@ -1,36 +1,63 @@
-Restaurant app project
+# 🍽️ Restaurant Ordering App
 
+A **full-stack** restaurant ordering system that allows users to browse menus, add items to their cart, and complete checkout seamlessly. The app includes **real-time order tracking** and a **scalable backend** for managing restaurant operations.
 
-In the scenario you described, where you have moved sensitive data (like a password) from `server.js` to an `.env` file and now want to remove the old version of `server.js` that contained the password from your repository's history, the `git filter-branch` command can be used to edit the history of commits to remove or alter `server.js` in each commit where it contained the sensitive data.
+## 🚀 Features
 
-Here's how you can approach this with `git filter-branch`:
+- 📋 **Menu Browsing** - View categories and available food items.
+- 🛒 **Cart Management** - Add/remove items before checkout.
+- ✅ **Order Processing** - Place orders and receive real-time updates.
+- 🔐 **Authentication** - Secure login/signup using JWT authentication.
+- 📡 **Real-Time Order Tracking** - Uses **WebSockets** for live order status updates.
+- 🛠️ **Admin Dashboard** - Manage orders, menu items, and customers.
+- ☁️ **Cloud Deployment** - Hosted on **Render** for easy access.
 
-1. **Identify the sensitive content**: First, you need to identify where the sensitive data was in your `server.js` file.
+---
 
-2. **Prepare the `git filter-branch` command**: You will use a filter that adjusts `server.js` for each commit. The `--index-filter` option is suitable for this purpose because it allows you to modify the index (staging area) directly without checking out the code, which makes it faster.
+## 🏗️ **Tech Stack**
+| **Technology** | **Usage** |
+|--------------|----------------|
+| **React.js** | Frontend UI |
+| **Node.js & Express.js** | Backend API |
+| **MongoDB** | Database (Mongoose ODM) |
+| **Socket.io** | Real-time order updates |
+| **Tailwind CSS** | UI Styling |
+| **JWT & bcrypt.js** | Authentication & Security |
+| **Render** | Deployment |
 
-3. **Use a script to remove sensitive data**: Instead of deleting the file, you'll want to modify it to remove the sensitive content for each commit. You can do this with a script or a command that edits the file to remove the password.
+---
 
-4. **Apply the filter to all branches and tags**: You need to make sure that this change affects all branches and tags in your repository.
-
-Here is an example command that might be used:
+## 💻 **Getting Started**
+### **1️⃣ Clone the Repository**
 ```bash
-git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch server.js && (echo "filtering server.js" && sed "/SensitiveData/d" server.js > server.js.tmp && mv server.js.tmp server.js && git add server.js)' --prune-empty --tag-name-filter cat -- --all
+git clone https://github.com/streda/RestaurantAppImprovement1.git
+cd restaurant-app
 ```
-Here's a breakdown:
-- `git rm --cached --ignore-unmatch server.js`: This initially removes `server.js` from the index to prevent it from being included in the commit if no changes are made.
-- The command in parentheses is a series of shell commands to edit `server.js`:
-  - `sed "/SensitiveData/d" server.js > server.js.tmp`: This uses `sed` to delete lines containing "SensitiveData" from `server.js`, outputting to a temporary file. Replace `"SensitiveData"` with a pattern that matches your password or sensitive content.
-  - `mv server.js.tmp server.js`: Replace the old `server.js` with the modified version.
-  - `git add server.js`: Add the modified `server.js` back to the index.
-- `--prune-empty`: This option tells `git filter-branch` to remove any commits that become empty as a result (i.e., commits that only involved changes to the now-cleaned `server.js`).
-- `--tag-name-filter cat`: This updates all tags to point to their new, rewritten commits.
-- `-- --all`: This tells `git filter-branch` to apply the filter to all branches and tags in your repository.
 
-### Important Considerations
-- **Backup your repository** before running this command, as it irreversibly changes your repository history.
-- **Test the command** on a copy of your repository first to ensure it works as expected.
-- After rewriting history, **force push** your changes to any remote repositories and inform any collaborators to re-clone the repository, as their local histories will be incompatible with the rewritten history.
-- **Review** your repository to ensure no sensitive data remains and that the repository still functions correctly after the changes.
 
-Using `git filter-branch` like this is a powerful tool to scrub your repository history of sensitive data, ensuring that passwords or other credentials do not linger in source control, where they could pose a security risk.
+### 2️⃣ Install Dependencies
+
+```bash
+npm install
+```
+
+### 3️⃣ Set Up Environmental Variables
+Create your own .env file specified as in the example below
+
+```MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+PORT=5000
+CLIENT_ORIGIN=http://localhost:3000
+```
+
+### 4️⃣ Start the Backend Server
+
+```bash
+npm run server
+```
+
+### 5️⃣ Start the Frontend
+```bash
+cd client
+npm start
+```

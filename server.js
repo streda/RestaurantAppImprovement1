@@ -1,3 +1,4 @@
+import open from "open";
 import express from "express";
 import path from "path";
 
@@ -30,14 +31,28 @@ import { error } from "console";
 
 // Initialize dotenv
 dotenv.config();
+console.log("Loaded JWT_SECRET:", process.env.JWT_SECRET);
+console.log("Loaded REFRESH_SECRET:", process.env.REFRESH_SECRET);
+console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
+console.log("Loaded STRIPE_SECRET_KEY :", process.env.STRIPE_SECRET_KEY);
+
 const app = express();
 
-app.use((req, res, next) => {
-  if (req.headers['x-forwarded-proto'] !== 'https') {
-    return res.redirect(`https://${req.hostname}${req.url}`);
-  }
-  next();
-});
+// if (process.env.NODE_ENV === "production") {
+//   app.use((req, res, next) => {
+//     if (req.headers["x-forwarded-proto"] !== "https") {
+//       return res.redirect(`https://${req.hostname}${req.url}`);
+//     }
+//     next();
+//   });
+// }
+
+// app.use((req, res, next) => {
+//   if (req.headers['x-forwarded-proto'] !== 'https') {
+//     return res.redirect(`https://${req.hostname}${req.url}`);
+//   }
+//   next();
+// });
 
 
 app.use(express.json());
@@ -59,8 +74,6 @@ app.use(
 const __filename = fileURLToPath(import.meta.url); // 'import.meta.url' provides the URL of the current module file and then passed to fileURLToPath() to convert it into file path. Now '__filename' will hold the absolute path to the current module file.
 const __dirname = dirname(__filename); // The 'dirname' function is used to extract the directory name from `__filename', which represents the directory containing the current module file. '__dirname' will now hold the absolute path to the directory containing the current module.
 
-// Serve static files like favicon and webmanifest
-app.use(express.static(path.join(__dirname, "public")));
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -77,26 +90,26 @@ app.use(loginRouter);
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
+
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
+      if (err.name === "TokenExpiredError") {
+        console.error("Token expired at:", err.expiredAt);
+        return res.status(401).json({ message: "Token expired" });
+      }
       console.error("Token verification failed:", err);
-      return res
-        .status(403)
-        .json({ message: "Failed to authenticate token", error: err.message });
+      return res.status(403).json({ message: "Invalid token" });
     }
-    console.log("Verified User:", decoded);
 
-    //! Note:
-    //? req.myUser is only available in route handlers that use the authenticateToken middleware
-    req.myUser = decoded; // Assuming decoded token that comes from the login token includes { userId: user._id }
+    console.log("Verified User:", decoded);
+    req.myUser = decoded; // Attach decoded token payload (e.g., { userId: user._id }) to the request
     next();
   });
 };
-
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
 
@@ -342,9 +355,36 @@ app.get("/logout", (req, res) => {
   res.redirect("/login.html");
 });
 
+//~ place the following route 
+
+// Serve static files like favicon and webmanifest. This middleware serves all the files in the "public" directory (e.g., HTML, CSS, JS, images) for any matching route. It ensures that requests for static resources like "/index.html", "/styles.css", or "/favicon.ico" are properly resolved.
+app.use(express.static(path.join(__dirname, "public")));
+
+// Route all requests to 'index.html' for frontend routing. This catch-all route is necessary for Single Page Applications (SPAs) like React, Angular, or Vue. It ensures that any unmatched routes (e.g., "/about", "/dashboard") are redirected to "index.html". This allows the frontend framework to handle client-side routing and display the appropriate view. Placing this route at the bottom ensures that API routes (defined earlier) take precedence, so requests like "/api/menu-items" are handled by the backend and not routed to "index.html".
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+  // Open the default browser
+  await open(`http://localhost:${PORT}`);
 });
+
+
+
+//^ Replaced by the above code
+
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, "127.0.0.1", () => {
+//   console.log(`Server is running on http://127.0.0.1:${PORT}`);
+// });
