@@ -29,32 +29,72 @@ export function hideLoginForm() {
 
 export async function fetchMenuItems(redirect = false) {
   const token = localStorage.getItem("token");
-  console.log("Checking existence of token before fetchMenuItems sends Authorization header: ", token);
 
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  if (!token) {
+    console.error("No token found, user might be logged out.");
+    return;
+  }
+
+  console.log("Using token for authentication:", token);
+  console.log("Authorization Header:", `Bearer ${token}`);
 
   try {
     const response = await fetch("https://truefood.rest/menu-items", {
-      headers,
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        console.error("Unauthorized! Redirecting to login.");
+        alert("Session expired. Please log in again.");
+        window.location.href = "/login.html";
+        return;
+      }
       throw new Error(`Failed to load menu items: ${response.statusText}`);
     }
 
     const data = await response.json();
-
-    menuArray.length = 0; // Clear the existing array
-    menuArray.push(...data); // Update the menuArray with the fetched items
+    menuArray.length = 0;
+    menuArray.push(...data);
+    console.log("Menu items loaded:", data);
 
     if (redirect) {
-      renderLandingPage(); // Ensure landing page is rendered after login
-      hideLoginForm(); // Ensure the login form is hidden after login
+      renderLandingPage();
+      hideLoginForm();
     }
   } catch (error) {
     console.error("Failed to load menu items:", error);
   }
 }
+
+// export async function fetchMenuItems(redirect = false) {
+//   const token = localStorage.getItem("token");
+//   console.log("Checking existence of token before fetchMenuItems sends Authorization header: ", token);
+
+//   const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+//   try {
+//     const response = await fetch("https://truefood.rest/menu-items", {
+//       headers,
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`Failed to load menu items: ${response.statusText}`);
+//     }
+
+//     const data = await response.json();
+
+//     menuArray.length = 0; // Clear the existing array
+//     menuArray.push(...data); // Update the menuArray with the fetched items
+
+//     if (redirect) {
+//       renderLandingPage(); // Ensure landing page is rendered after login
+//       hideLoginForm(); // Ensure the login form is hidden after login
+//     }
+//   } catch (error) {
+//     console.error("Failed to load menu items:", error);
+//   }
+// }
 
 export async function fetchCartData() {
   const token = localStorage.getItem("token");
