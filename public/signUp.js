@@ -4,7 +4,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('http://truefood.rest/register', {
+        const response = await fetch('https://truefood.rest/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
@@ -16,7 +16,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
 
         const data = await response.json();
         alert('Registration successful');
-        window.location.href = 'http://truefood.rest';
+        window.location.href = 'https://truefood.rest';
     } catch (error) {
         console.error('Registration error:', error);
         alert('Registration failed: ' + error.message);
