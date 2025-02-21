@@ -87,26 +87,51 @@ app.use(registerRouter);
 app.use(loginRouter);
 
 //! Make sure the authenticateToken is defined first before it is used down below.
+// const authenticateToken = (req, res, next) => {
+//   const authHeader = req.headers["authorization"];
+//   const token = authHeader && authHeader.split(" ")[1];
+
+//   if (!token) {
+//     return res.status(401).json({ message: "No token provided" });
+//   }
+
+//   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+//     if (err) {
+//       if (err.name === "TokenExpiredError") {
+//         console.error("Token expired at:", err.expiredAt);
+//         return res.status(401).json({ message: "Token expired" });
+//       }
+//       console.error("Token verification failed:", err);
+//       return res.status(403).json({ message: "Invalid token" });
+//     }
+
+//     console.log("Verified User:", decoded);
+//     req.myUser = decoded; // Attach decoded token payload (e.g., { userId: user._id }) to the request
+//     next();
+//   });
+// };
+
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
+  const authHeader = req.headers["authorization"] || req.headers["Authorization"]; // Fix case insensitivity
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
+    console.error("❌ No token provided in request headers");
     return res.status(401).json({ message: "No token provided" });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
-        console.error("Token expired at:", err.expiredAt);
+        console.error("❌ Token expired at:", err.expiredAt);
         return res.status(401).json({ message: "Token expired" });
       }
-      console.error("Token verification failed:", err);
+      console.error("❌ Token verification failed:", err);
       return res.status(403).json({ message: "Invalid token" });
     }
 
-    console.log("Verified User:", decoded);
-    req.myUser = decoded; // Attach decoded token payload (e.g., { userId: user._id }) to the request
+    console.log("✅ Verified User:", decoded);
+    req.myUser = decoded;
     next();
   });
 };

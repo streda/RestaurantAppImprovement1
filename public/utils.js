@@ -95,14 +95,16 @@ export async function fetchMenuItems(redirect = false) {
 //     console.error("Failed to load menu items:", error);
 //   }
 // }
-
 export async function fetchCartData() {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    console.error("No token found in localStorage");
+    console.error("❌ No token found in localStorage");
     return [];
   }
+
+  console.log("🛒 Fetching cart data with token:", token);
+  console.log("🛒 Authorization Header:", `Bearer ${token}`);
 
   try {
     const response = await fetch("https://truefood.rest/cart", {
@@ -113,47 +115,85 @@ export async function fetchCartData() {
       },
     });
 
+    console.log("🛒 Cart API Response Status:", response.status);
+
     if (!response.ok) {
+      if (response.status === 401) {
+        console.error("❌ Unauthorized! Redirecting to login.");
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        window.location.href = "/login.html";
+        return [];
+      }
       throw new Error(`Failed to fetch cart data: ${response.statusText}`);
     }
 
-    if (response.status === 404) {
-      console.warn("Your cart is empty.");
-      return []; // Treat 404 as an empty cart
-    }
-
     const data = await response.json();
-    console.log('This a the structure of the order:', data.order);
-
-    // data = The JavaScript object that I want to convert to a JSON string
-    // null = a placeholder for the replacer function. Setting it to null means that no replacer function is used, and all properties of the object will be included in the JSON string.
-    // 2 = is the space parameter. It specifies the number of spaces to use for indentation in the output JSON string. It makes the JSON string more readable by formatting it with line breaks and indentations.
-    console.log("Cart data fetched:", JSON.stringify(data, null, 2));
-
-    if (data && data.order && Array.isArray(data.order.items)) {
-      // Filter out items with null menuItem
-      const validItems = data.order.items.filter(
-        (item) => item.menuItem !== null
-      );
-
-      // Update the order with valid items only
-      if (validItems.length !== data.order.items.length) {
-        await updateOrderWithValidItems(data.order._id, validItems);
-      }
-
-      console.log("Valid Cart Items:", validItems);
-      orderArray.length = 0; // Clear the existing array
-      orderArray.push(...validItems); // Update the global orderArray
-      return validItems;
-    } else {
-      console.error("Invalid cart data:", data);
-      return [];
-    }
+    console.log("✅ Cart data fetched successfully:", data);
+    return data.order.items || [];
   } catch (error) {
-    console.error("Failed to fetch cart data:", error);
+    console.error("❌ Failed to fetch cart data:", error);
     return [];
   }
 }
+// export async function fetchCartData() {
+//   const token = localStorage.getItem("token");
+
+//   if (!token) {
+//     console.error("No token found in localStorage");
+//     return [];
+//   }
+
+//   try {
+//     const response = await fetch("https://truefood.rest/cart", {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`Failed to fetch cart data: ${response.statusText}`);
+//     }
+
+//     if (response.status === 404) {
+//       console.warn("Your cart is empty.");
+//       return []; // Treat 404 as an empty cart
+//     }
+
+//     const data = await response.json();
+//     console.log('This a the structure of the order:', data.order);
+
+//     // data = The JavaScript object that I want to convert to a JSON string
+//     // null = a placeholder for the replacer function. Setting it to null means that no replacer function is used, and all properties of the object will be included in the JSON string.
+//     // 2 = is the space parameter. It specifies the number of spaces to use for indentation in the output JSON string. It makes the JSON string more readable by formatting it with line breaks and indentations.
+//     console.log("Cart data fetched:", JSON.stringify(data, null, 2));
+
+//     if (data && data.order && Array.isArray(data.order.items)) {
+//       // Filter out items with null menuItem
+//       const validItems = data.order.items.filter(
+//         (item) => item.menuItem !== null
+//       );
+
+//       // Update the order with valid items only
+//       if (validItems.length !== data.order.items.length) {
+//         await updateOrderWithValidItems(data.order._id, validItems);
+//       }
+
+//       console.log("Valid Cart Items:", validItems);
+//       orderArray.length = 0; // Clear the existing array
+//       orderArray.push(...validItems); // Update the global orderArray
+//       return validItems;
+//     } else {
+//       console.error("Invalid cart data:", data);
+//       return [];
+//     }
+//   } catch (error) {
+//     console.error("Failed to fetch cart data:", error);
+//     return [];
+//   }
+// }
 
 export function renderMenuByType(menuType, isUserLoggedIn) {
   const filteredMenu = menuArray.filter((item) => item.type === menuType);
