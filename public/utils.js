@@ -34,7 +34,7 @@ export async function fetchMenuItems(redirect = false) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const response = await fetch("http://truefood.rest/menu-items", {
+    const response = await fetch("https://truefood.rest/menu-items", {
       headers,
     });
 
@@ -65,7 +65,7 @@ export async function fetchCartData() {
   }
 
   try {
-    const response = await fetch("http://truefood.rest/cart", {
+    const response = await fetch("https://truefood.rest/cart", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -509,7 +509,7 @@ export default async function handleCheckout(orderArray) {
   }));
 
   console.log("Prepared items for checkout:", JSON.stringify({ items }));
-  const response = await fetch('http://truefood.rest/create-checkout-session', {
+  const response = await fetch('https://truefood.rest/create-checkout-session', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
