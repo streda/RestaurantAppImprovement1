@@ -13,25 +13,31 @@ document.addEventListener('DOMContentLoaded', function() {
             </li>
         `;
 
-        // Add event listeners for dropdown behavior
         const profileBtn = document.getElementById('profile-btn');
         const dropdown = document.getElementById('dropdown');
+        const dropdownContainer = profileBtn.parentElement; // The <li> element
 
-        profileBtn.addEventListener('click', function() {
+        // Show dropdown when clicking the Profile button
+        profileBtn.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent click from closing it immediately
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         });
 
-        // Hide dropdown when mouse leaves the dropdown or the profile button
-        dropdown.addEventListener('mouseleave', function() {
+        // Show dropdown when hovering over Profile
+        dropdownContainer.addEventListener('mouseenter', function() {
+            dropdown.style.display = 'block';
+        });
+
+        // Hide dropdown when the cursor leaves both the profile and the dropdown
+        dropdownContainer.addEventListener('mouseleave', function() {
             dropdown.style.display = 'none';
         });
 
-        profileBtn.addEventListener('mouseleave', function(event) {
-            setTimeout(() => {
-                if (!dropdown.matches(':hover')) {
-                    dropdown.style.display = 'none';
-                }
-            }, 200); // Delay to allow moving into the dropdown
+        // Hide dropdown when clicking outside of it
+        document.addEventListener('click', function(event) {
+            if (!dropdownContainer.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
         });
     } else {
         // User is not logged in, determine if login or sign-up page is displayed
