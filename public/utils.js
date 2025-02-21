@@ -95,11 +95,33 @@ export async function fetchMenuItems(redirect = false) {
 //     console.error("Failed to load menu items:", error);
 //   }
 // }
+
 export async function fetchCartData() {
   const token = localStorage.getItem("token");
 
   if (!token) {
     console.error("❌ No token found in localStorage");
+    return [];
+  }
+
+  // Decode and check if token is expired
+  try {
+    const payloadBase64 = token.split(".")[1]; 
+    const decodedPayload = JSON.parse(atob(payloadBase64));
+
+    console.log("🔍 Token Expiration Time:", new Date(decodedPayload.exp * 1000));
+    console.log("🔍 Current Time:", new Date());
+
+    if (new Date(decodedPayload.exp * 1000) < new Date()) {
+      console.warn("❌ Token expired, logging out user.");
+      localStorage.removeItem("token");
+      window.location.href = "/login.html";
+      return []; // Prevent further execution
+    }
+  } catch (error) {
+    console.error("❌ Failed to decode JWT:", error);
+    localStorage.removeItem("token");
+    window.location.href = "/login.html";
     return [];
   }
 
