@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         profileContainer.innerHTML = `
             <li><button class="navbar-link button" onclick="toggleDropdown()">Profile</button>
             <div class="dropdown-content" id="dropdown">
-                <a href="#">Cart</a>
+                // <a href="#">Cart</a>
                 <a href="#" onclick="logout()">Logout</a>
             </div></li>
         `;
