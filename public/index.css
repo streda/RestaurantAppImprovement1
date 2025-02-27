@@ -14,9 +14,6 @@ body{
     max-width: 1000px;
 }
 
-
-
-
 .body-content-container {
     display: flex;  
     flex-direction: row;  
@@ -35,13 +32,6 @@ body{
     flex: 1; 
     overflow: auto; 
     padding: 20px;  
-}
-
-@media (max-width: 768px) {
-    .body-content-container {
-        flex-direction: column;  
-        width: 90%; /* Reduce width on smaller screens */
-    }
 }
 
 @media (max-width: 768px) {
