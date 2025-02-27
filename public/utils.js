@@ -13,6 +13,49 @@ export function renderLandingPage() {
   }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("canceled") === "true") {
+    alert("Payment canceled. Restoring your cart.");
+    restoreCart();
+  }
+});
+
+async function restoreCart() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in localStorage");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://truefood.rest/cart", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to restore cart:", response.statusText);
+      return;
+    }
+
+    const data = await response.json();
+    const validCartItems = data.order?.items || [];
+
+    if (validCartItems.length > 0) {
+      updateOrderSummary(validCartItems);
+      toggleCompleteOrderButton(true);
+    }
+  } catch (error) {
+    console.error("Error restoring cart:", error);
+  }
+}
+
 export function isLoggedIn() {
   const token = localStorage.getItem("token");
   return !!token;

@@ -28,16 +28,16 @@ dotenv.config();
 
 const app = express();
 
-app.set('trust proxy', 1); // Trust Heroku proxy
+// app.set('trust proxy', 1); // Trust Heroku proxy
 // 🚀 Apply Rate Limiting Middleware (Place it at the top before other middlewares)
 import rateLimit from "express-rate-limit"; // Import if using ES modules
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-});
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 100, // Limit each IP to 100 requests per windowMs
+// });
 
-app.use(limiter); // Apply rate limiter globally
+// app.use(limiter); // Apply rate limiter globally
 
 app.use(express.json());
 app.use(express.static("public")); // Serving static files normally without {index: false}
@@ -135,21 +135,16 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 
   try {
-    const lineItems = items.map((item) => {
-      if (!item || !item.name) {
-        throw new Error("Item details are missing");
-      }
-      return {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: item.name, 
-          },
-          unit_amount: parseInt(item.price * 100), 
-        },
-        quantity: item.quantity,
-      };
-    });
+    req.session.cart = items; // Store cart in session
+
+    const lineItems = items.map((item) => ({
+      price_data: {
+        currency: "usd",
+        product_data: { name: item.name },
+        unit_amount: parseInt(item.price * 100), 
+      },
+      quantity: item.quantity,
+    }));
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -165,6 +160,47 @@ app.post("/create-checkout-session", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+// app.post("/create-checkout-session", async (req, res) => {
+//   const { items } = req.body; 
+//   if (!items || !items.length) {
+//     return res
+//       .status(400)
+//       .json({ error: "No items provided or incorrect data format." });
+//   }
+
+//   try {
+//     const lineItems = items.map((item) => {
+//       if (!item || !item.name) {
+//         throw new Error("Item details are missing");
+//       }
+//       return {
+//         price_data: {
+//           currency: "usd",
+//           product_data: {
+//             name: item.name, 
+//           },
+//           unit_amount: parseInt(item.price * 100), 
+//         },
+//         quantity: item.quantity,
+//       };
+//     });
+
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ["card"],
+//       line_items: lineItems,
+//       mode: "payment",
+//       success_url: `${req.headers.origin}/?success=true`,
+//       cancel_url: `${req.headers.origin}/?canceled=true`,
+//     });
+
+//     res.json({ url: session.url });
+//   } catch (error) {
+//     console.error("Failed to create stripe session:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 app.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;
@@ -230,17 +266,44 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
   }
 });
 
+// app.get("/cart", authenticateToken, async (req, res) => {
+//   try {
+//     const order = await Order.findOne({
+//       userId: req.myUser.userId,
+//       status: "pending",
+//     }).populate("items.menuItem");
+
+
+//     if (!order) {
+//       // When a new user logs in, i.e no order is in the cart yet
+//       return res.json({order: {items: [], total: 0}});
+//     }
+
+//     res.json({ order });
+//   } catch (error) {
+//     console.error("Error fetching cart:", error);
+//     res.status(500).json({ error: "Failed to fetch cart" });
+//   }
+// });
+
 app.get("/cart", authenticateToken, async (req, res) => {
   try {
-    const order = await Order.findOne({
+    let order = await Order.findOne({
       userId: req.myUser.userId,
       status: "pending",
     }).populate("items.menuItem");
 
+    // If user returned from Stripe and cart is empty, restore from session
+    if (!order && req.session.cart) {
+      order = {
+        items: req.session.cart,
+        total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
+      };
+      req.session.cart = null; // Clear session cart after restoring
+    }
 
     if (!order) {
-      // When a new user logs in, i.e no order is in the cart yet
-      return res.json({order: {items: [], total: 0}});
+      return res.json({ order: { items: [], total: 0 } });
     }
 
     res.json({ order });
@@ -249,6 +312,7 @@ app.get("/cart", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch cart" });
   }
 });
+
 
 app.get("/menu-items", async (req, res) => {
   try {
