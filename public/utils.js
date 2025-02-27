@@ -1,4 +1,46 @@
 import { menuArray, orderArray } from "./index.js";
+async function restoreCartFromDatabase() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in localStorage. Cannot restore cart.");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://truefood.rest/cart", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to restore cart from database:", response.statusText);
+      return;
+    }
+
+    const data = await response.json();
+    const validCartItems = data.order?.items || [];
+
+    if (validCartItems.length > 0) {
+      console.log("✅ Restoring cart with items:", validCartItems);
+
+      orderArray.length = 0; // Clear the existing orderArray
+      orderArray.push(...validCartItems); // ✅ Ensure orderArray is updated
+
+      updateOrderSummary(validCartItems);
+      toggleCompleteOrderButton(true);
+      toggleOrderSummaryDisplay(true);
+    } else {
+      console.warn("⚠️ Cart was empty upon restoration.");
+    }
+  } catch (error) {
+    console.error("Error restoring cart from database:", error);
+  }
+}
 
 export function renderLandingPage() {
   const menuContainer = document.getElementById("section-menu");
