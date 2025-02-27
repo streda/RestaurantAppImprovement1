@@ -68,12 +68,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(session({
-  secret: "your_secret_key",
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
-}))
+
 // Converting import.meta.url to a file path and get the directory name
 
 const __filename = fileURLToPath(import.meta.url); 
@@ -116,6 +111,20 @@ const authenticateToken = (req, res, next) => {
 };
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
+
+app.use(session({
+  secret: "your_secret_key",
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+}))
+
+app.post("/api/cart", (req, res) => {
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+  res.json({ cart: req.session.cart });
+});
 
 app.post("/create-checkout-session", async (req, res) => {
   const { items } = req.body; 
