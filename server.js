@@ -27,6 +27,18 @@ import { error } from "console";
 dotenv.config();
 
 const app = express();
+
+
+// 🚀 Apply Rate Limiting Middleware (Place it at the top before other middlewares)
+import rateLimit from "express-rate-limit"; // Import if using ES modules
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+});
+
+app.use(limiter); // Apply rate limiter globally
+
 app.use(express.json());
 app.use(express.static("public")); // Serving static files normally without {index: false}
 app.use(cookieParser());
@@ -41,6 +53,14 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// 🚨 Block malicious requests targeting WordPress and admin-related paths
+app.use((req, res, next) => {
+    if (req.path.startsWith('/wp-') || req.path.startsWith('/wordpress') || req.path.startsWith('/admin')) {
+        return res.status(403).send('Access Denied');
+    }
+    next();
+});
 
 // Converting import.meta.url to a file path and get the directory name
 
