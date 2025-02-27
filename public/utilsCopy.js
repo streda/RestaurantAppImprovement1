@@ -9,11 +9,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+
 async function restoreCartFromDatabase() {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    console.error("🚨 No token found in localStorage. Cannot restore cart.");
+    console.error("No token found in localStorage. Cannot restore cart.");
     return;
   }
 
@@ -28,35 +29,30 @@ async function restoreCartFromDatabase() {
     });
 
     if (!response.ok) {
-      console.error("❌ Failed to restore cart from database:", response.statusText);
+      console.error("Failed to restore cart from database:", response.statusText);
       return;
     }
 
     const data = await response.json();
-    console.log("✅ Cart data restored from database:", data);
-
     const validCartItems = data.order?.items || [];
 
     if (validCartItems.length > 0) {
-      console.log("🛒 Updating orderArray with restored items:", validCartItems);
+      console.log("✅ Restoring cart with items:", validCartItems);
 
-      // ✅ Properly updating `orderArray`
-      orderArray.length = 0;
-      orderArray.push(...validCartItems.map(item => ({
-        menuItem: item.menuItem,
-        quantity: item.quantity
-      })));
+      orderArray.length = 0; // Clear the existing orderArray
+      orderArray.push(...validCartItems); // ✅ Ensure orderArray is updated
 
-      updateOrderSummary(orderArray);
+      updateOrderSummary(validCartItems);
       toggleCompleteOrderButton(true);
       toggleOrderSummaryDisplay(true);
     } else {
       console.warn("⚠️ Cart was empty upon restoration.");
     }
   } catch (error) {
-    console.error("🚨 Error restoring cart from database:", error);
+    console.error("Error restoring cart from database:", error);
   }
 }
+
 export function renderLandingPage() {
   const menuContainer = document.getElementById("section-menu");
   if (menuContainer) {
@@ -69,6 +65,49 @@ export function renderLandingPage() {
       `;
   }
 }
+
+// document.addEventListener("DOMContentLoaded", () => {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   if (urlParams.get("canceled") === "true") {
+//     alert("Payment canceled. Restoring your cart.");
+//     restoreCart();
+//   }
+// });
+
+// async function restoreCart() {
+//   const token = localStorage.getItem("token");
+
+//   if (!token) {
+//     console.error("No token found in localStorage");
+//     return;
+//   }
+
+//   try {
+//     const response = await fetch("https://truefood.rest/cart", {
+//       method: "GET",
+//       credentials: "include",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     if (!response.ok) {
+//       console.error("Failed to restore cart:", response.statusText);
+//       return;
+//     }
+
+//     const data = await response.json();
+//     const validCartItems = data.order?.items || [];
+
+//     if (validCartItems.length > 0) {
+//       updateOrderSummary(validCartItems);
+//       toggleCompleteOrderButton(true);
+//     }
+//   } catch (error) {
+//     console.error("Error restoring cart:", error);
+//   }
+// }
 
 export function isLoggedIn() {
   const token = localStorage.getItem("token");
@@ -603,8 +642,6 @@ export default async function handleCheckout(orderArray) {
   },
   body: JSON.stringify({ items }), // Send the items to the backend
 });
-
-
 
 
   if(!response.ok){
