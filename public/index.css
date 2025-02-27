@@ -4,24 +4,15 @@
     box-sizing: border-box;
 }
 
-body {
-    margin: 0;
-    padding: 20px; /* Add padding to prevent stretching */
-    font-family: 'Roboto', sans-serif;
-    overflow-x: auto; 
-    width: 100%;
-    max-width: 100%;
-    background-color: #f8f8f8; /* Light background for contrast */
-}
 
-/* body{
+body{
     padding: 0;
     margin: auto; 
     font-family: 'Roboto', sans-serif;
     overflow-x: auto; 
     width: 100%;
     max-width: 1000px;
-} */
+}
 
 
 
