@@ -22,13 +22,13 @@ import loginRouter from "./routes/login.js";
 
 import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
-
+import session from "express-session";
 // Initialize dotenv
 dotenv.config();
 
 const app = express();
 
-
+app.set('trust proxy', 1); // Trust Heroku proxy
 // 🚀 Apply Rate Limiting Middleware (Place it at the top before other middlewares)
 import rateLimit from "express-rate-limit"; // Import if using ES modules
 
@@ -68,6 +68,12 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use(session({
+  secret: "your_secret_key",
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+}))
 // Converting import.meta.url to a file path and get the directory name
 
 const __filename = fileURLToPath(import.meta.url); 

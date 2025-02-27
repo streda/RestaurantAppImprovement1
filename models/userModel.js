@@ -33,7 +33,7 @@ userSchema.pre('save', async function (next) {
 //! Define a custom method "comparePassword" that verifies the password
 userSchema.methods.comparePassword = async function (candidatePassword) {
     // Compare the provided password with the hashed password in the database
-    return bcrypt.compare(candidatePassword, this.password); 
+    return await bcrypt.compare(candidatePassword, this.password); 
 };
 
 // Create a Mongoose model for the "User" collection
