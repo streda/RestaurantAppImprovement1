@@ -24,22 +24,9 @@ body {
 } */
 
 
-.body-content-container {
-    display: flex;  
-    flex-direction: row;  
-    justify-content: space-between;  
-    align-items: stretch;  
-    width: 100%;  
-    max-width: 1000px;  
-    margin: 0 auto;  
-    padding: 20px; /* Increased padding */
-    gap: 20px; 
-    background: white; /* Optional: Background for separation */
-    border-radius: 10px; /* Optional: Soft rounded edges */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Slight elevation */
-}
 
-/* .body-content-container {
+
+.body-content-container {
     display: flex;  
     flex-direction: row;  
     justify-content: space-between;  
@@ -50,7 +37,7 @@ body {
     padding: 10px;
     gap: 20px; 
     
-} */
+}
 
 .items-container,
 .order-summary-container {
