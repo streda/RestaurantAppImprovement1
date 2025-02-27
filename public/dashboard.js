@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
     if (token) {
-        fetch('http://localhost:3000/api/protected-route', {
+
+       const API_BASE_URL = window.location.origin;
+        fetch(`${API_BASE_URL}/api/protected-route`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

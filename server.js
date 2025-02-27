@@ -53,6 +53,12 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.use((req, res, next) => {
+    if (req.hostname !== "truefood.rest") {
+        return res.redirect(301, `https://truefood.rest${req.originalUrl}`);
+    }
+    next();
+});
 
 // 🚨 Block malicious requests targeting WordPress and admin-related paths
 app.use((req, res, next) => {
@@ -338,10 +344,13 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-  // Open the default browser
-  await open(`http://localhost:${PORT}`);
+const PORT = process.env.PORT || 5005;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
+// app.listen(PORT, async () => {
+//   // Open the default browser
+//   await open(`http://localhost:${PORT}`);
+// });
 
 

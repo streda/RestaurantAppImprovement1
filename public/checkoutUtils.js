@@ -6,7 +6,8 @@ export default async function handleCheckout(orderArray) {
       quantity: quantity,
     }));
   
-    const response = await fetch('http://localhost:3000/create-checkout-session', {
+    const API_BASE_URL = window.location.origin;
+    const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
