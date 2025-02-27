@@ -61,3 +61,22 @@ npm run server
 cd client
 npm start
 ```
+
+## 🛒 Stripe Payment (Test Mode)
+
+This project includes a **Stripe Checkout integration** for demonstration purposes. Since this app is in **Test Mode**, no real transactions will be processed.
+
+### 🔹 How to Test the Payment Feature
+
+To simulate a successful payment, use the following **test card details**:
+
+- **Card Number:** `4242 4242 4242 4242`
+- **Expiration Date:** Any future date (e.g., `12/34`)
+- **CVC:** Any 3-digit number (e.g., `123`)
+- **ZIP Code:** Any 5-digit number (e.g., `10001`)
+
+### ⚠️ Important Notes:
+- This is a **test checkout**, so no real money is involved.
+- You can use different [Stripe test cards](https://stripe.com/docs/testing) to simulate various scenarios, such as declined payments or insufficient funds.
+
+If you have any questions, feel free to reach out! 🚀

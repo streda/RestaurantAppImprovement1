@@ -2,11 +2,8 @@ import open from "open";
 import express from "express";
 import path from "path";
 
-// import https from "https";
-// import fs from "fs";
-
-import { fileURLToPath } from "url"; // Imports the 'fileURLToPath' function from the Node.js 'url' module, and is used to convert a file URL to a file path.
-import { dirname } from "path"; // Imports the 'dirname' function from the Node.js 'path' module, and is used to get the directory name of a file path.
+import { fileURLToPath } from "url"; 
+import { dirname } from "path"; 
 
 import cors from "cors";
 import Stripe from "stripe";
@@ -23,38 +20,13 @@ import User from "./models/userModel.js";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
 
-// const ObjectId = mongoose.Types.ObjectId;  // Ensure you import mongoose at the top of the file
-
 import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
-// import * as orderService from './services/orderService.js';
 
 // Initialize dotenv
 dotenv.config();
-console.log("Loaded JWT_SECRET:", process.env.JWT_SECRET);
-console.log("Loaded REFRESH_SECRET:", process.env.REFRESH_SECRET);
-console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
-console.log("Loaded STRIPE_SECRET_KEY :", process.env.STRIPE_SECRET_KEY);
 
 const app = express();
-
-// if (process.env.NODE_ENV === "production") {
-//   app.use((req, res, next) => {
-//     if (req.headers["x-forwarded-proto"] !== "https") {
-//       return res.redirect(`https://${req.hostname}${req.url}`);
-//     }
-//     next();
-//   });
-// }
-
-// app.use((req, res, next) => {
-//   if (req.headers['x-forwarded-proto'] !== 'https') {
-//     return res.redirect(`https://${req.hostname}${req.url}`);
-//   }
-//   next();
-// });
-
-
 app.use(express.json());
 app.use(express.static("public")); // Serving static files normally without {index: false}
 app.use(cookieParser());
@@ -70,14 +42,15 @@ app.use(
   })
 );
 
-// Convert import.meta.url to a file path and get the directory name
-const __filename = fileURLToPath(import.meta.url); // 'import.meta.url' provides the URL of the current module file and then passed to fileURLToPath() to convert it into file path. Now '__filename' will hold the absolute path to the current module file.
-const __dirname = dirname(__filename); // The 'dirname' function is used to extract the directory name from `__filename', which represents the directory containing the current module file. '__dirname' will now hold the absolute path to the directory containing the current module.
+// Converting import.meta.url to a file path and get the directory name
+
+const __filename = fileURLToPath(import.meta.url); 
+
+const __dirname = dirname(__filename); 
 
 
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB successfully connected! 🎉"))
   .catch((err) => {
     console.error("MongoDB connection error:", err);
     process.exit(1);
@@ -86,51 +59,25 @@ mongoose
 app.use(registerRouter); 
 app.use(loginRouter);
 
-//! Make sure the authenticateToken is defined first before it is used down below.
-// const authenticateToken = (req, res, next) => {
-//   const authHeader = req.headers["authorization"];
-//   const token = authHeader && authHeader.split(" ")[1];
-
-//   if (!token) {
-//     return res.status(401).json({ message: "No token provided" });
-//   }
-
-//   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-//     if (err) {
-//       if (err.name === "TokenExpiredError") {
-//         console.error("Token expired at:", err.expiredAt);
-//         return res.status(401).json({ message: "Token expired" });
-//       }
-//       console.error("Token verification failed:", err);
-//       return res.status(403).json({ message: "Invalid token" });
-//     }
-
-//     console.log("Verified User:", decoded);
-//     req.myUser = decoded; // Attach decoded token payload (e.g., { userId: user._id }) to the request
-//     next();
-//   });
-// };
-
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"] || req.headers["Authorization"]; // Fix case insensitivity
+  const authHeader = req.headers["authorization"] || req.headers["Authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    console.error("❌ No token provided in request headers");
+    console.error("No token provided in request headers");
     return res.status(401).json({ message: "No token provided" });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
-        console.error("❌ Token expired at:", err.expiredAt);
+        console.error("Token expired at:", err.expiredAt);
         return res.status(401).json({ message: "Token expired" });
       }
-      console.error("❌ Token verification failed:", err);
+      console.error("Token verification failed:", err);
       return res.status(403).json({ message: "Invalid token" });
     }
 
-    console.log("✅ Verified User:", decoded);
     req.myUser = decoded;
     next();
   });
@@ -139,9 +86,7 @@ const authenticateToken = (req, res, next) => {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
 
 app.post("/create-checkout-session", async (req, res) => {
-  console.log(req.body); // Log the entire body to see what's coming in
-
-  const { items } = req.body; // Ensure items are passed correctly
+  const { items } = req.body; 
   if (!items || !items.length) {
     return res
       .status(400)
@@ -157,9 +102,9 @@ app.post("/create-checkout-session", async (req, res) => {
         price_data: {
           currency: "usd",
           product_data: {
-            name: item.name, // Direct access without .item
+            name: item.name, 
           },
-          unit_amount: parseInt(item.price * 100), // Assume price is directly on item
+          unit_amount: parseInt(item.price * 100), 
         },
         quantity: item.quantity,
       };
@@ -179,8 +124,6 @@ app.post("/create-checkout-session", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-// app.use(authenticateToken);
 
 app.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;
@@ -231,7 +174,6 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
     }
 
     //! Update the total price
-    // order.total += menuItem.price * quantity;
     order.total = order.items.reduce((acc, item) =>{
       return acc + item.quantity + menuItem.price;
     }, 0);
@@ -247,13 +189,6 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
   }
 });
 
-/* 
-    When a user requests to view their cart, the /cart endpoint is called
-    Authentication: The request is authenticated using a middleware that verifies the user's token.
-    Order Retrieval: The server retrieves the pending order for the user.
-    Order Population: The items in the order are populated with details from the MenuItem collection.
-    Response: The populated order is sent back to the client.
-  */
 app.get("/cart", authenticateToken, async (req, res) => {
   try {
     const order = await Order.findOne({
@@ -261,12 +196,9 @@ app.get("/cart", authenticateToken, async (req, res) => {
       status: "pending",
     }).populate("items.menuItem");
 
-    console.log('This a the structure of the order:', order);
 
     if (!order) {
-      // return res.status(404).json({ message: "Cart not found" });
-
-      // When a new user logs in, i.e no order is in the cart yet, instead of sending 404 error, send an empty cart structure
+      // When a new user logs in, i.e no order is in the cart yet
       return res.json({order: {items: [], total: 0}});
     }
 
@@ -380,36 +312,16 @@ app.get("/logout", (req, res) => {
   res.redirect("/login.html");
 });
 
-//~ place the following route 
-
-// Serve static files like favicon and webmanifest. This middleware serves all the files in the "public" directory (e.g., HTML, CSS, JS, images) for any matching route. It ensures that requests for static resources like "/index.html", "/styles.css", or "/favicon.ico" are properly resolved.
 app.use(express.static(path.join(__dirname, "public")));
 
-// Route all requests to 'index.html' for frontend routing. This catch-all route is necessary for Single Page Applications (SPAs) like React, Angular, or Vue. It ensures that any unmatched routes (e.g., "/about", "/dashboard") are redirected to "index.html". This allows the frontend framework to handle client-side routing and display the appropriate view. Placing this route at the bottom ensures that API routes (defined earlier) take precedence, so requests like "/api/menu-items" are handled by the backend and not routed to "index.html".
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
-  console.log(`Server is running on port ${PORT}`);
   // Open the default browser
   await open(`http://localhost:${PORT}`);
 });
 
 
-
-//^ Replaced by the above code
-
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
-
-
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, "127.0.0.1", () => {
-//   console.log(`Server is running on http://127.0.0.1:${PORT}`);
-// });

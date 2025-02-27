@@ -23,8 +23,8 @@
 
   .header-logo{
     width: 100%; /* Makes the image responsive, filling the width of its container */
-    height: auto; /* Maintains aspect ratio */
-    display: block; /* Removes bottom margin/gap */
+    height: auto; 
+    display: block; 
   }
 
   .header-text {
@@ -32,10 +32,10 @@
     top: 50%; /* Positions the top edge of the element at the middle of the parent */
     left: 40%; /* Positions the left edge of the element at the middle of the parent */
     transform: translate(-50%, -50%); /* Centers the element both horizontally and vertically */
-    color: white; /* Adjust text color for better visibility */
-    width: 90%; /* Gives some padding inside the container */
-    padding: 10px; /* Padding around the text */
-    border-radius: 10px; /* Rounded corners for the background */
+    color: white; 
+    width: 90%; 
+    padding: 10px; 
+    border-radius: 10px; 
 }
 
 

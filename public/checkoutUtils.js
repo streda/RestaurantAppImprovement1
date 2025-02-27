@@ -6,7 +6,6 @@ export default async function handleCheckout(orderArray) {
       quantity: quantity,
     }));
   
-    console.log("Prepared items for checkout:", JSON.stringify({ items }));
     const response = await fetch('http://localhost:3000/create-checkout-session', {
     method: 'POST',
     headers: {
@@ -14,11 +13,6 @@ export default async function handleCheckout(orderArray) {
     },
     body: JSON.stringify({ items }), // Send the items to the backend
   });
-  
-  
-    console.log(JSON.stringify({ items: orderArray })); // This will show the exact structure being sent to the server
-  
-  
     if(!response.ok){
       throw new Error('Network response was not ok.');
     }
@@ -29,14 +23,9 @@ export default async function handleCheckout(orderArray) {
     } catch (error) {
       throw new Error('Failed to parse JSON response.');
     }
-    // session = await response.json();
     window.location.href = session.url; // Redirect to Stripe Checkout
-  
-    console.log("Another check is a check")
-  
   }
   
-
 export function initializeCheckoutButton() {
     const checkoutButton = document.getElementById("complete-order-button");
     
@@ -46,7 +35,6 @@ export function initializeCheckoutButton() {
       console.error("Checkout button not found");
     }
   }
-
 
   export function toggleCompleteOrderButton(isRequired) {
     let completeOrderButton = document.getElementById("complete-order-button");

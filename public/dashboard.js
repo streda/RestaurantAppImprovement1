@@ -12,10 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return response.json();
         })
-        .then(data => console.log(data))
         .catch(error => {
             console.error('Error fetching protected data:', error);
-            // Optionally handle a failed request - e.g., redirect to login
+            // handle a failed request - e.g., redirect to login
             window.location.href = '/login.html';
         });
     } else {

@@ -128,3 +128,94 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# testing
+/coverage
+
+# build outputs
+/build
+/dist
+
+# misc
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.lock
+*.bak
+
+# OS-specific files
+*.swp
+*.swo
+
+# npm / yarn debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE or editor files
+*.iml
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# Mac system files
+.DS_Store
+._*
+
+# Images or uploads (if generated dynamically)
+/uploads
+/images/tmp
+
+# Parcel cache (if used)
+/.cache
+.parcel-cache
+
+# Build tools (optional)
+/out/
+
+
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Environment variables
+.env
+.env.production
+.env.development
+
+# Build artifacts
+build/
+dist/
+.DS_Store
+
+# Logs
+logs/
+*.log
+combined.log
+error.log
+
+# IDE and OS-specific files
+.vscode/
+.idea/
+*.swp
+Thumbs.db

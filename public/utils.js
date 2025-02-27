@@ -1,4 +1,3 @@
-// import handleCheckout from "./handleCheckout.js";
 import { menuArray, orderArray } from "./index.js";
 
 export function renderLandingPage() {
@@ -21,7 +20,6 @@ export function isLoggedIn() {
 
 export function hideLoginForm() {
     const loginForm = document.getElementById("login-container");
-//   const loginForm = document.querySelector(".login-container");
   if (loginForm) {
     loginForm.style.display = "none";
   }
@@ -35,8 +33,6 @@ export async function fetchMenuItems(redirect = false) {
     return;
   }
 
-  console.log("Using token for authentication:", token);
-  console.log("Authorization Header:", `Bearer ${token}`);
 
   try {
     const response = await fetch("https://truefood.rest/menu-items", {
@@ -56,7 +52,6 @@ export async function fetchMenuItems(redirect = false) {
     const data = await response.json();
     menuArray.length = 0;
     menuArray.push(...data);
-    console.log("Menu items loaded:", data);
 
     if (redirect) {
       renderLandingPage();
@@ -67,40 +62,11 @@ export async function fetchMenuItems(redirect = false) {
   }
 }
 
-// export async function fetchMenuItems(redirect = false) {
-//   const token = localStorage.getItem("token");
-//   console.log("Checking existence of token before fetchMenuItems sends Authorization header: ", token);
-
-//   const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-//   try {
-//     const response = await fetch("https://truefood.rest/menu-items", {
-//       headers,
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Failed to load menu items: ${response.statusText}`);
-//     }
-
-//     const data = await response.json();
-
-//     menuArray.length = 0; // Clear the existing array
-//     menuArray.push(...data); // Update the menuArray with the fetched items
-
-//     if (redirect) {
-//       renderLandingPage(); // Ensure landing page is rendered after login
-//       hideLoginForm(); // Ensure the login form is hidden after login
-//     }
-//   } catch (error) {
-//     console.error("Failed to load menu items:", error);
-//   }
-// }
-
 export async function fetchCartData() {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    console.error("❌ No token found in localStorage");
+    console.error("No token found in localStorage");
     return [];
   }
 
@@ -109,24 +75,20 @@ export async function fetchCartData() {
     const payloadBase64 = token.split(".")[1]; 
     const decodedPayload = JSON.parse(atob(payloadBase64));
 
-    console.log("🔍 Token Expiration Time:", new Date(decodedPayload.exp * 1000));
-    console.log("🔍 Current Time:", new Date());
 
     if (new Date(decodedPayload.exp * 1000) < new Date()) {
-      console.warn("❌ Token expired, logging out user.");
+      console.warn("Token expired, logging out user.");
       localStorage.removeItem("token");
       window.location.href = "/login.html";
       return []; // Prevent further execution
     }
   } catch (error) {
-    console.error("❌ Failed to decode JWT:", error);
+    console.error("Failed to decode JWT:", error);
     localStorage.removeItem("token");
     window.location.href = "/login.html";
     return [];
   }
 
-  console.log("🛒 Fetching cart data with token:", token);
-  console.log("🛒 Authorization Header:", `Bearer ${token}`);
 
   try {
     const response = await fetch("https://truefood.rest/cart", {
@@ -137,11 +99,10 @@ export async function fetchCartData() {
       },
     });
 
-    console.log("🛒 Cart API Response Status:", response.status);
 
     if (!response.ok) {
       if (response.status === 401) {
-        console.error("❌ Unauthorized! Redirecting to login.");
+        console.error("Unauthorized! Redirecting to login.");
         alert("Session expired. Please log in again.");
         localStorage.removeItem("token");
         window.location.href = "/login.html";
@@ -151,71 +112,20 @@ export async function fetchCartData() {
     }
 
     const data = await response.json();
-    console.log("✅ Cart data fetched successfully:", data);
-    return data.order.items || [];
+        const validCartItems = data.order.items || [];
+
+
+        // Ensure Order Summary is updated
+        updateOrderSummary(validCartItems);
+        toggleCompleteOrderButton(validCartItems.length > 0);
+         toggleOrderSummaryDisplay(validCartItems.length > 0); 
+
+        return validCartItems;
   } catch (error) {
-    console.error("❌ Failed to fetch cart data:", error);
+    console.error("Failed to fetch cart data:", error);
     return [];
   }
 }
-// export async function fetchCartData() {
-//   const token = localStorage.getItem("token");
-
-//   if (!token) {
-//     console.error("No token found in localStorage");
-//     return [];
-//   }
-
-//   try {
-//     const response = await fetch("https://truefood.rest/cart", {
-//       method: "GET",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Failed to fetch cart data: ${response.statusText}`);
-//     }
-
-//     if (response.status === 404) {
-//       console.warn("Your cart is empty.");
-//       return []; // Treat 404 as an empty cart
-//     }
-
-//     const data = await response.json();
-//     console.log('This a the structure of the order:', data.order);
-
-//     // data = The JavaScript object that I want to convert to a JSON string
-//     // null = a placeholder for the replacer function. Setting it to null means that no replacer function is used, and all properties of the object will be included in the JSON string.
-//     // 2 = is the space parameter. It specifies the number of spaces to use for indentation in the output JSON string. It makes the JSON string more readable by formatting it with line breaks and indentations.
-//     console.log("Cart data fetched:", JSON.stringify(data, null, 2));
-
-//     if (data && data.order && Array.isArray(data.order.items)) {
-//       // Filter out items with null menuItem
-//       const validItems = data.order.items.filter(
-//         (item) => item.menuItem !== null
-//       );
-
-//       // Update the order with valid items only
-//       if (validItems.length !== data.order.items.length) {
-//         await updateOrderWithValidItems(data.order._id, validItems);
-//       }
-
-//       console.log("Valid Cart Items:", validItems);
-//       orderArray.length = 0; // Clear the existing array
-//       orderArray.push(...validItems); // Update the global orderArray
-//       return validItems;
-//     } else {
-//       console.error("Invalid cart data:", data);
-//       return [];
-//     }
-//   } catch (error) {
-//     console.error("Failed to fetch cart data:", error);
-//     return [];
-//   }
-// }
 
 export function renderMenuByType(menuType, isUserLoggedIn) {
   const filteredMenu = menuArray.filter((item) => item.type === menuType);
@@ -271,27 +181,20 @@ export function renderMenu(menuItems, isUserLoggedIn) {
 }
 
 export async function addItem(itemId) {
-  console.log("Attempting to add item with ID:", itemId);
-
-  // Check if menuArray is defined and has elements
   if (!menuArray || menuArray.length === 0) {
     console.error("menuArray is not defined or empty.");
     alert("Menu items are not loaded. Please try again later.");
-    return; // Exit the function early
+    return;
   }
 
   const itemInMenuArray = menuArray.find((item) => item._id === itemId);
-
-  // Check if the item is found in the menuArray
   if (!itemInMenuArray) {
     console.error(`Item with ID ${itemId} not found in the menuArray.`);
     alert(`Item with ID ${itemId} not found in the menu.`);
-    return; // Exit the function if the item is not found
+    return;
   }
 
   const token = localStorage.getItem("token");
-  console.log("Authorization Header:", `Bearer ${token}`);
-  console.log("Client Time:", new Date().toString());
 
   try {
     const response = await fetch("/add-to-cart", {
@@ -312,16 +215,19 @@ export async function addItem(itemId) {
     }
 
     const data = await response.json();
-    console.log("Added to cart successfully", data);
-
     const validCartItems = await fetchCartData();
-    console.log("Valid Cart Items:", validCartItems);
 
-    orderArray.length = 0; //! Clear the existing array
-    // orderArray = validCartItems; // Update the global orderArray with the valid items
-    orderArray.push(...validCartItems); // Update the global orderArray with the valid items
-    updateOrderSummary(validCartItems); // Call updateOrderSummary with the fetched cart items
-    updateQuantityIndicators(validCartItems); // Update quantity indicators
+    orderArray.length = 0; 
+    orderArray.push(...validCartItems);
+
+    // Immediately update the UI
+    updateOrderSummary(validCartItems);
+    updateQuantityIndicators(validCartItems);
+
+    // Ensure the order summary section appears immediately after adding an item
+    toggleOrderSummaryDisplay(validCartItems.length > 0);
+    toggleCompleteOrderButton(validCartItems.length > 0);
+
   } catch (error) {
     console.error("Failed to add item to cart:", error);
     if (error.message.includes("Unauthorized")) {
@@ -351,7 +257,6 @@ export async function addSingleItem(itemId) {
     }
 
     const data = await response.json();
-    console.log("Removed item successfully", data);
 
     const validCartItems = await fetchCartData();
     updateOrderSummary(validCartItems);
@@ -379,7 +284,6 @@ export async function removeSingleItem(itemId) {
     }
 
     const data = await response.json();
-    console.log("Removed item successfully", data);
 
     const validCartItems = await fetchCartData();
 
@@ -407,13 +311,13 @@ export async function removeAllItem(itemId) {
       throw new Error("Failed to remove item");
     }
 
-    const data = await response.json();
-    console.log("Removed item successfully", data);
-
     const validCartItems = await fetchCartData();
-
     updateOrderSummary(validCartItems);
-    updateQuantityIndicators(validCartItems); // update quantity indicators
+    updateQuantityIndicators(validCartItems);
+
+    // Ensure Order Summary visibility updates in real-time
+    toggleOrderSummaryDisplay(validCartItems.length > 0);
+    toggleCompleteOrderButton(validCartItems.length > 0);
   } catch (error) {
     console.error("Error removing item:", error);
   }
@@ -421,6 +325,7 @@ export async function removeAllItem(itemId) {
 
 export function toggleOrderSummaryDisplay(show) {
   const orderSummaryContainer = document.getElementById("section-summary");
+  
   if (orderSummaryContainer) {
     orderSummaryContainer.style.display = show ? "block" : "none";
   }
@@ -428,26 +333,41 @@ export function toggleOrderSummaryDisplay(show) {
 
 export function toggleCompleteOrderButton(isRequired) {
   let completeOrderButton = document.getElementById("complete-order-button");
+
   if (!completeOrderButton) {
-    completeOrderButton = createCompleteOrderButton();
+    completeOrderButton = document.createElement("button");
+    completeOrderButton.id = "complete-order-button";
+    completeOrderButton.textContent = "Complete Order";
+    completeOrderButton.classList.add("complete-order-btn");
+    completeOrderButton.disabled = !isRequired;
+    completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
+
+    // Attach inside the #section-summary div
+    const orderSummaryContainer = document.getElementById("section-summary");
+    if (orderSummaryContainer) {
+      orderSummaryContainer.appendChild(completeOrderButton);
+    }
   }
+
   completeOrderButton.style.display = isRequired ? "block" : "none";
 }
 
 export function createCompleteOrderButton() {
-  const btn = document.createElement("button");
-  btn.id = "complete-order-button";
-  btn.textContent = "Complete Order";
-  btn.addEventListener("click", handleCompleteOrderButtonClick);
+    const btn = document.createElement("button");
+    btn.id = "complete-order-button";
+    btn.textContent = "Complete Order";
+    btn.classList.add("complete-order-btn");
+    btn.disabled = true; // Initially disabled
 
-  const displayCompleteOrderButton =
-    document.getElementById("section-complete");
-  if (displayCompleteOrderButton) {
-    displayCompleteOrderButton.appendChild(btn);
-  } else {
-    console.error("section-complete element is not available on this page.");
-  }
-  return btn;
+    btn.addEventListener("click", handleCompleteOrderButtonClick);
+
+    const orderSummaryContainer = document.getElementById("section-summary"); // Fix: Append inside #section-summary
+    if (orderSummaryContainer) {
+        orderSummaryContainer.appendChild(btn);
+    } else {
+        console.error("#section-summary is MISSING in the DOM!");
+    }
+    return btn;
 }
 
 export function handleCompleteOrderButtonClick() {
@@ -482,7 +402,6 @@ export async function updateOrderWithValidItems(orderId, validItems) {
       },
       body: JSON.stringify({ items: validItems }),
     });
-    console.log("Order updated with valid items");
   } catch (error) {
     console.error("Failed to update order:", error);
   }
@@ -490,7 +409,6 @@ export async function updateOrderWithValidItems(orderId, validItems) {
 
 export function updateQuantityIndicators(orderArray) {
   document.querySelectorAll(".quantity-indicator").forEach((indicator) => {
-    // Set the initial quantity indicator for each item to "0"
     indicator.textContent = "0 item";
   });
 
@@ -507,7 +425,8 @@ export function updateQuantityIndicators(orderArray) {
 
 /*  
     Client-Side calculateTotalPrice: 
-    On the client side, I need a quick calculation using the data already present in the client’s state. This function does not need to fetch any additional data and hence can be synchronous.
+    On the client side, I need a quick calculation using the data already present in the client’s state. 
+    This function does not need to fetch any additional data and hence can be synchronous.
   */
 
 export function calculateTotalPrice(orders) {
@@ -527,14 +446,13 @@ export function updateOrderSummary(items) {
     return;
   }
 
-  console.log("Updating order summary with items:", items);
 
   const orderSummaryContainer = document.getElementById("section-summary");
 
   if (!orderSummaryContainer) {
     return;
   }
-  orderSummaryContainer.innerHTML = "";
+  orderSummaryContainer.innerHTML = ""; // Clear previous summary
 
   const receiptDate = new Date().toLocaleDateString("en-US", {
     month: "long",
@@ -596,6 +514,17 @@ export function updateOrderSummary(items) {
 
   orderSummaryContainer.innerHTML = summaryHtml;
 
+  //! Ensure button is inside order summary
+    const completeOrderBtn = document.createElement("button");
+    completeOrderBtn.id = "complete-order-button";
+    completeOrderBtn.textContent = "Complete Order";
+    completeOrderBtn.classList.add("complete-order-btn");
+    completeOrderBtn.disabled = items.length === 0; 
+
+    completeOrderBtn.addEventListener("click", handleCompleteOrderButtonClick);
+    orderSummaryContainer.appendChild(completeOrderBtn); // Append inside summary
+
+
   updateQuantityIndicators(items);
   toggleCompleteOrderButton(items.length > 0);
 }
@@ -610,7 +539,6 @@ export default async function handleCheckout(orderArray) {
     quantity: quantity,
   }));
 
-  console.log("Prepared items for checkout:", JSON.stringify({ items }));
   const response = await fetch('https://truefood.rest/create-checkout-session', {
   method: 'POST',
   headers: {
@@ -620,7 +548,6 @@ export default async function handleCheckout(orderArray) {
 });
 
 
-  console.log(JSON.stringify({ items: orderArray })); // This will show the exact structure being sent to the server
 
 
   if(!response.ok){
@@ -633,9 +560,7 @@ export default async function handleCheckout(orderArray) {
   } catch (error) {
     throw new Error('Failed to parse JSON response.');
   }
-  // session = await response.json();
   window.location.href = session.url; // Redirect to Stripe Checkout
 
-  console.log("Another check is a check")
-
 }
+

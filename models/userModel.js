@@ -1,16 +1,16 @@
-import mongoose from 'mongoose'; // Import Mongoose for MongoDB interactions
-import bcrypt from "bcrypt"; // Import bcrypt library for password hashing
+import mongoose from 'mongoose'; 
+import bcrypt from "bcrypt"; 
 
 // Define a schema for the user collection
 const userSchema = new mongoose.Schema({
     username: { 
-        type: String, // Field type: String for the username
-        required: true, // Field is mandatory
-        unique: true // Field must be unique across the collection
+        type: String, 
+        required: true, 
+        unique: true 
     },
     password: { 
-        type: String, // Field type: String for the hashed password
-        required: true // Field is mandatory
+        type: String, 
+        required: true 
     },
 });
 
@@ -30,20 +30,10 @@ userSchema.pre('save', async function (next) {
     }
 });
 
-// //! Define a custom method "comparePassword" that verifies the password
-// userSchema.methods.comparePassword = async function (candidatePassword) {
-//     return bcrypt.compare(candidatePassword, this.password); 
-//     // Compare the provided password with the hashed password in the database
-// };
-
+//! Define a custom method "comparePassword" that verifies the password
 userSchema.methods.comparePassword = async function (candidatePassword) {
-    console.log("Entered password:", candidatePassword);
-    console.log("Stored hashed password:", this.password);
-
-    const isMatch = await bcrypt.compare(candidatePassword, this.password);
-    console.log("Password match result:", isMatch);
-
-    return isMatch;
+    // Compare the provided password with the hashed password in the database
+    return bcrypt.compare(candidatePassword, this.password); 
 };
 
 // Create a Mongoose model for the "User" collection
