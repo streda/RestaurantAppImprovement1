@@ -22,8 +22,10 @@ import loginRouter from "./routes/login.js";
 
 import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
+// import RedisStore from "connect-redis";
+import { createClient } from "redis";
 import session from "express-session";
-import RedisStore from "connect-redis";
+import connectRedis from "connect-redis";
 import redis from "redis";
 // Initialize dotenv
 dotenv.config();
@@ -51,14 +53,19 @@ app.use((req, res, next) => {
 });
 
 
-const redisClient = redis.createClient();
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: true, sameSite: "none" }
-}));
+// Create Redis store
+const RedisStore = connectRedis(session);
+const redisClient = createClient();
+
+app.use(
+  session({
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: true, sameSite: "none" },
+  })
+);
 
 
 app.use((req, res, next) => {
