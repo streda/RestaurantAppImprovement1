@@ -23,36 +23,46 @@ import loginRouter from "./routes/login.js";
 import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
 import session from "express-session";
+
+import session from "express-session";
+import RedisStore from "connect-redis";
+import redis from "redis";
 // Initialize dotenv
 dotenv.config();
 
 const app = express();
 
-// app.set('trust proxy', 1); // Trust Heroku proxy
-// 🚀 Apply Rate Limiting Middleware (Place it at the top before other middlewares)
-import rateLimit from "express-rate-limit"; // Import if using ES modules
-
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 minutes
-//     max: 100, // Limit each IP to 100 requests per windowMs
-// });
-
-// app.use(limiter); // Apply rate limiter globally
-
 app.use(express.json());
 app.use(express.static("public")); // Serving static files normally without {index: false}
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5500",
-      "http://127.0.0.1:5500",
-      "http://localhost:3000",
-    ],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({ origin: ["http://localhost:5500","http://localhost:3000", "http://127.0.0.1:5500", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
+
+const allowedOrigins = [
+  "http://localhost:5500",
+  "http://localhost:3000",
+  "http://127.0.0.1:5500",
+  "https://truefood.rest",
+  "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"
+];
+
+app.use((req, res, next) => {
+  if (!allowedOrigins.includes(req.get("Origin"))) {
+    return res.status(403).json({ message: "Unauthorized request" });
+  }
+  next();
+});
+
+
+const redisClient = redis.createClient();
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: true, sameSite: "none" }
+}));
+
+
 app.use((req, res, next) => {
     if (req.hostname !== "truefood.rest") {
         return res.redirect(301, `https://truefood.rest${req.originalUrl}`);
@@ -60,7 +70,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// 🚨 Block malicious requests targeting WordPress and admin-related paths
+// Block malicious requests targeting WordPress and admin-related paths
 app.use((req, res, next) => {
     if (req.path.startsWith('/wp-') || req.path.startsWith('/wordpress') || req.path.startsWith('/admin')) {
         return res.status(403).send('Access Denied');
@@ -87,13 +97,14 @@ app.use(registerRouter);
 app.use(loginRouter);
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"] || req.headers["Authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const authHeader = req.headers["authorization"];
 
-  if (!token) {
-    console.error("No token provided in request headers");
-    return res.status(401).json({ message: "No token provided" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.error("Invalid or missing Authorization header:", authHeader);
+    return res.status(401).json({ message: "Invalid or missing Authorization header" });
   }
+
+  const token = authHeader.split(" ")[1]; // Extract the token after "Bearer"
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
@@ -111,13 +122,6 @@ const authenticateToken = (req, res, next) => {
 };
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
-
-app.use(session({
-  secret: "your_secret_key",
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
-}))
 
 app.post("/api/cart", (req, res) => {
   if (!req.session.cart) {
@@ -160,47 +164,6 @@ app.post("/create-checkout-session", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
-// app.post("/create-checkout-session", async (req, res) => {
-//   const { items } = req.body; 
-//   if (!items || !items.length) {
-//     return res
-//       .status(400)
-//       .json({ error: "No items provided or incorrect data format." });
-//   }
-
-//   try {
-//     const lineItems = items.map((item) => {
-//       if (!item || !item.name) {
-//         throw new Error("Item details are missing");
-//       }
-//       return {
-//         price_data: {
-//           currency: "usd",
-//           product_data: {
-//             name: item.name, 
-//           },
-//           unit_amount: parseInt(item.price * 100), 
-//         },
-//         quantity: item.quantity,
-//       };
-//     });
-
-//     const session = await stripe.checkout.sessions.create({
-//       payment_method_types: ["card"],
-//       line_items: lineItems,
-//       mode: "payment",
-//       success_url: `${req.headers.origin}/?success=true`,
-//       cancel_url: `${req.headers.origin}/?canceled=true`,
-//     });
-
-//     res.json({ url: session.url });
-//   } catch (error) {
-//     console.error("Failed to create stripe session:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
 
 app.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;
@@ -252,7 +215,7 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
 
     //! Update the total price
     order.total = order.items.reduce((acc, item) =>{
-      return acc + item.quantity + menuItem.price;
+      return acc + item.quantity * menuItem.price;
     }, 0);
 
     //  The updated order is saved back to the database
@@ -425,7 +388,6 @@ app.get("*", (req, res) => {
 
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });
 // app.listen(PORT, async () => {
 //   // Open the default browser

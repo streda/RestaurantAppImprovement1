@@ -13,7 +13,7 @@ async function restoreCartFromDatabase() {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    console.error("🚨 No token found in localStorage. Cannot restore cart.");
+    console.error("No token found in localStorage. Cannot restore cart.");
     return;
   }
 
@@ -28,19 +28,17 @@ async function restoreCartFromDatabase() {
     });
 
     if (!response.ok) {
-      console.error("❌ Failed to restore cart from database:", response.statusText);
+      console.error("Failed to restore cart from database:", response.statusText);
       return;
     }
 
     const data = await response.json();
-    console.log("✅ Cart data restored from database:", data);
 
     const validCartItems = data.order?.items || [];
 
     if (validCartItems.length > 0) {
-      console.log("🛒 Updating orderArray with restored items:", validCartItems);
 
-      // ✅ Properly updating `orderArray`
+      // Properly updating `orderArray`
       orderArray.length = 0;
       orderArray.push(...validCartItems.map(item => ({
         menuItem: item.menuItem,
@@ -51,10 +49,10 @@ async function restoreCartFromDatabase() {
       toggleCompleteOrderButton(true);
       toggleOrderSummaryDisplay(true);
     } else {
-      console.warn("⚠️ Cart was empty upon restoration.");
+      console.warn("Cart was empty upon restoration.");
     }
   } catch (error) {
-    console.error("🚨 Error restoring cart from database:", error);
+    console.error("Error restoring cart from database:", error);
   }
 }
 export function renderLandingPage() {
@@ -603,9 +601,6 @@ export default async function handleCheckout(orderArray) {
   },
   body: JSON.stringify({ items }), // Send the items to the backend
 });
-
-
-
 
   if(!response.ok){
     throw new Error('Network response was not ok.');
