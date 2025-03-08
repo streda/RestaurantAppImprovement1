@@ -22,7 +22,6 @@ import loginRouter from "./routes/login.js";
 
 import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
-import RedisStore from "connect-redis";
 import { createClient } from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
