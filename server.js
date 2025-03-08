@@ -51,33 +51,28 @@ app.use((req, res, next) => {
   next();
 });
 
-// Create Redis client
-const redisClient = createClient({
+
+// Switch only the Redis store to CommonJS:
+const connectRedis = require("connect-redis");
+const redis = require("redis");
+
+// Then proceed as normal
+const RedisStore = connectRedis(session);
+const redisClient = redis.createClient({ 
   socket: {
     host: process.env.REDIS_HOST || "127.0.0.1",
     port: process.env.REDIS_PORT || 6379,
   }
 });
-
-// Ensure Redis client connects properly
 redisClient.connect().catch(console.error);
 
-// Create Redis store
-const RedisStore = new connectRedis({
-  client: redisClient,
-  prefix: "session:",
-});
-
-app.use(
-  session({
-    store: RedisStore,
-    secret: process.env.SESSION_SECRET || "your_secret_key",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: true, sameSite: "none" },
-  })
-);
-
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET || "your_secret_key",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: true, sameSite: "none" },
+}));
 
 app.use((req, res, next) => {
     if (req.hostname !== "truefood.rest") {
