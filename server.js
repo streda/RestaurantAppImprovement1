@@ -1,4 +1,5 @@
-import open from "open";
+// import open from "open";
+import express from "express";
 import path from "path";
 
 import { fileURLToPath } from "url"; 
@@ -14,24 +15,18 @@ import "express-async-errors";
 import mongoose from "mongoose";
 import MenuItem from "./models/menuItemModel.js";
 import Order from "./models/order.js";
-import User from "./models/userModel.js";
+// import User from "./models/userModel.js";
 
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
 
 import { calculateTotalPrice } from "./services/orderService.js";
-import { error } from "console";
-
-// createRequire function to create a require function that works within an ES module.
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
+// import { error } from "console";
 
 import { createClient } from "redis";
-
-import express from "express";
 import session from "express-session";
-// import connectRedis from "connect-redis";
-// import redis from "redis";
+import { RedisStore } from "connect-redis"; // Use the named export
+
 // Initialize dotenv
 dotenv.config();
 
@@ -57,37 +52,26 @@ app.use((req, res, next) => {
   next();
 });
 
-// Import CommonJS modules using require()
-const connectRedisModule = require("connect-redis");
-const redis = require("redis");
-
-
-// Use the function from connect-redis properly:
-const connectRedis =
-  typeof connectRedisModule === "function"
-    ? connectRedisModule
-    : connectRedisModule.default;
-
-// Now create the Redis store:
-const RedisStore = connectRedis(session);
-
-// Create a Redis client:
-const redisClient = redis.createClient({
+// Create Redis client using ES module syntax:
+const redisClient = createClient({
   socket: {
     host: process.env.REDIS_HOST || "127.0.0.1",
-    port: process.env.REDIS_PORT || 6379,
-  },
+    port: process.env.REDIS_PORT || 6379
+  }
 });
 redisClient.connect().catch(console.error);
 
-// Use the session middleware with RedisStore:
+// Create Redis store using the named export
+const redisStore = new RedisStore({ client: redisClient, prefix: "session:" });
+
+// Use session middleware with the Redis store:
 app.use(
   session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || "your_secret_key",
+    store: redisStore,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true, sameSite: "none" },
+    cookie: { secure: true, sameSite: "none" }
   })
 );
 
