@@ -23,8 +23,6 @@ import loginRouter from "./routes/login.js";
 import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
 import session from "express-session";
-
-import session from "express-session";
 import RedisStore from "connect-redis";
 import redis from "redis";
 // Initialize dotenv
