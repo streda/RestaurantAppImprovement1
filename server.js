@@ -45,12 +45,12 @@ const allowedOrigins = [
   "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"
 ];
 
-app.use((req, res, next) => {
-  if (!allowedOrigins.includes(req.get("Origin"))) {
-    return res.status(403).json({ message: "Unauthorized request" });
-  }
-  next();
-});
+// app.use((req, res, next) => {
+//   if (!allowedOrigins.includes(req.get("Origin"))) {
+//     return res.status(403).json({ message: "Unauthorized request" });
+//   }
+//   next();
+// });
 
 // Create Redis client using ES module syntax:
 const redisClient = createClient({
