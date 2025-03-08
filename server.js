@@ -1,5 +1,4 @@
 import open from "open";
-import express from "express";
 import path from "path";
 
 import { fileURLToPath } from "url"; 
@@ -22,7 +21,14 @@ import loginRouter from "./routes/login.js";
 
 import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
+
+// createRequire function to create a require function that works within an ES module.
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
 import { createClient } from "redis";
+
+import express from "express";
 import session from "express-session";
 // import connectRedis from "connect-redis";
 // import redis from "redis";
@@ -68,7 +74,7 @@ redisClient.connect().catch(console.error);
 
 app.use(session({
   store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET || "your_secret_key",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { secure: true, sameSite: "none" },
