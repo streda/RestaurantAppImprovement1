@@ -24,6 +24,7 @@ import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
 import { createClient } from "redis";
 import session from "express-session";
+import connectRedis from "connect-redis";
 import redis from "redis";
 // Initialize dotenv
 dotenv.config();
@@ -50,16 +51,27 @@ app.use((req, res, next) => {
   next();
 });
 
-const { default: connectRedis } = await import("connect-redis");
+// Create Redis client
+const redisClient = createClient({
+  socket: {
+    host: process.env.REDIS_HOST || "127.0.0.1",
+    port: process.env.REDIS_PORT || 6379,
+  }
+});
+
+// Ensure Redis client connects properly
+redisClient.connect().catch(console.error);
 
 // Create Redis store
-const RedisStore = connectRedis(session);
-const redisClient = createClient();
+const RedisStore = new connectRedis({
+  client: redisClient,
+  prefix: "session:",
+});
 
 app.use(
   session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET,
+    store: RedisStore,
+    secret: process.env.SESSION_SECRET || "your_secret_key",
     resave: false,
     saveUninitialized: false,
     cookie: { secure: true, sameSite: "none" },
