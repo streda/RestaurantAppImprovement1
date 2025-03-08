@@ -24,7 +24,7 @@ import { calculateTotalPrice } from "./services/orderService.js";
 import { error } from "console";
 import { createClient } from "redis";
 import session from "express-session";
-import connectRedis from "connect-redis";
+// import connectRedis from "connect-redis";
 import redis from "redis";
 // Initialize dotenv
 dotenv.config();
