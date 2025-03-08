@@ -29,6 +29,7 @@
     "mongoose": "^8.4.1",
     "node-fetch": "^3.3.2",
     "open": "^10.1.0",
+    "redis": "^4.7.0",
     "stripe": "^14.18.0"
   },
   "devDependencies": {
