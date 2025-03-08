@@ -57,28 +57,39 @@ app.use((req, res, next) => {
   next();
 });
 
-
-// Switch only the Redis store to CommonJS:
-const connectRedis = require("connect-redis");
+// Import CommonJS modules using require()
+const connectRedisModule = require("connect-redis");
 const redis = require("redis");
 
-// Then proceed as normal
+
+// Use the function from connect-redis properly:
+const connectRedis =
+  typeof connectRedisModule === "function"
+    ? connectRedisModule
+    : connectRedisModule.default;
+
+// Now create the Redis store:
 const RedisStore = connectRedis(session);
-const redisClient = redis.createClient({ 
+
+// Create a Redis client:
+const redisClient = redis.createClient({
   socket: {
     host: process.env.REDIS_HOST || "127.0.0.1",
     port: process.env.REDIS_PORT || 6379,
-  }
+  },
 });
 redisClient.connect().catch(console.error);
 
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: true, sameSite: "none" },
-}));
+// Use the session middleware with RedisStore:
+app.use(
+  session({
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET || "your_secret_key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: true, sameSite: "none" },
+  })
+);
 
 app.use((req, res, next) => {
     if (req.hostname !== "truefood.rest") {
