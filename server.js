@@ -54,12 +54,12 @@ app.use((req, res, next) => {
 
 // Create Redis client using ES module syntax:
 const redisClient = createClient({
-  socket: {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: process.env.REDIS_PORT || 6379
-  }
+  url: process.env.REDIS_URL  // Heroku sets this automatically
 });
-redisClient.connect().catch(console.error);
+
+redisClient.connect().catch((err) => {
+  console.error("Redis connection error:", err);
+});
 
 // Create Redis store using the named export
 const redisStore = new RedisStore({ client: redisClient, prefix: "session:" });
