@@ -599,6 +599,7 @@ export default async function handleCheckout(orderArray) {
   headers: {
     'Content-Type': 'application/json',
   },
+  credentials: 'include',
   body: JSON.stringify({ items }), // Send the items to the backend
 });
 
