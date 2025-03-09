@@ -15,6 +15,9 @@ const userSchema = new mongoose.Schema({
 });
 
 //! Middleware: Pre-save hook to hash the password before saving the user
+/* 
+    a pre-save hook (userSchema.pre("save", async function (next) { ... }) that hashes the password before saving it to the database. This approach ensures that passwords are automatically hashed when creating new users or updating passwords.
+*/
 userSchema.pre('save', async function (next) {
     if (!this.isModified("password")) {
         // If the password has not been modified, skip the hashing process

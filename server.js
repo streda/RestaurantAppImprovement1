@@ -1,7 +1,6 @@
 // import open from "open";
 import express from "express";
 import path from "path";
-
 import { fileURLToPath } from "url"; 
 import { dirname } from "path"; 
 
@@ -30,36 +29,59 @@ import { RedisStore } from "connect-redis"; // Use the named export
 // Initialize dotenv
 dotenv.config();
 
-const app = express();
+console.log("SERVER_URL:", process.env.SERVER_URL);
 
+// Disable TLS certificate validation in development
+// if (process.env.NODE_ENV !== 'production') {
+//   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+// }
+
+const app = express();
 app.use(express.json());
 app.use(express.static("public")); // Serving static files normally without {index: false}
 app.use(cookieParser());
-app.use(cors({ origin: ["http://localhost:5500","http://localhost:3000", "http://127.0.0.1:5500", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
+// app.use(registerRouter);
+app.use("/api", registerRouter);
 
+app.use(cors({ origin: ["http://localhost:5005","http://localhost:3000", "http://127.0.0.1:5005", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
+
+// "http://localhost:5500",
+// "http://127.0.0.1:5500",
 const allowedOrigins = [
-  "http://localhost:5500",
   "http://localhost:3000",
-  "http://127.0.0.1:5500",
   "https://truefood.rest",
   "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"
 ];
 
-// app.use((req, res, next) => {
-//   if (!allowedOrigins.includes(req.get("Origin"))) {
-//     return res.status(403).json({ message: "Unauthorized request" });
-//   }
-//   next();
+//^ For local testing only
+// const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+// const redisClient = createClient({
+//   url: redisUrl,
+// });
+// const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+// const redisClient = createClient({
+//   url: redisUrl,
+//   socket: redisUrl.startsWith("rediss://")
+//     ? { tls: { rejectUnauthorized: false } }
+//     : {}
 // });
 
+// redisClient.connect().catch((err) => {
+//   console.error("Redis connection error:", err);
+// });
+
+//! Use the below code for production
+
 // Create Redis client using ES module syntax:
+
 const redisClient = createClient({
-  url: process.env.REDIS_URL  // Heroku sets this automatically
+  url: process.env.REDIS_URL, // Heroku sets this automatically
+  socket: { tls: true }, // Ensure secure connection
 });
 
 redisClient.connect().catch((err) => {
   console.error("Redis connection error:", err);
-});
+}); 
 
 // Create Redis store using the named export
 const redisStore = new RedisStore({ client: redisClient, prefix: "session:" });
@@ -75,12 +97,21 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
+
+if (process.env.NODE_ENV === 'production') {
+  app.set("trust proxy", 1); // Trust Heroku or other reverse proxies
+}
+
+//  This middleware is checking if the hostname is "truefood.rest" and redirecting otherwise.
+// Wrap the redirection middleware so that it only runs in production.
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
     if (req.hostname !== "truefood.rest") {
-        return res.redirect(301, `https://truefood.rest${req.originalUrl}`);
+      return res.redirect(301, `https://truefood.rest${req.originalUrl}`);
     }
     next();
-});
+  });
+}
 
 // Block malicious requests targeting WordPress and admin-related paths
 app.use((req, res, next) => {
@@ -143,39 +174,82 @@ app.post("/api/cart", (req, res) => {
 });
 
 app.post("/create-checkout-session", async (req, res) => {
-  const { items } = req.body; 
+  const { items } = req.body;
   if (!items || !items.length) {
-    return res
-      .status(400)
-      .json({ error: "No items provided or incorrect data format." });
+    return res.status(400).json({ error: "No items provided or incorrect data format." });
   }
-
+  
   try {
     req.session.cart = items; // Store cart in session
-
+    
     const lineItems = items.map((item) => ({
       price_data: {
         currency: "usd",
         product_data: { name: item.name },
-        unit_amount: parseInt(item.price * 100), 
+        unit_amount: Math.round(item.price * 100),
       },
       quantity: item.quantity,
     }));
-
+    
+    // Use req.headers.origin if available, otherwise fall back to process.env.SERVER_URL, or localhost for local testing.
+    const origin = req.headers.origin || process.env.SERVER_URL || "http://localhost:5005";
+    
+    console.log("Creating Stripe session with success URL:", `${origin}/?success=true`);
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.origin}/?success=true`,
-      cancel_url: `${req.headers.origin}/?canceled=true`,
+      success_url: `${origin}/?success=true`,
+      cancel_url: `${origin}/?canceled=true`,
     });
-
+    
     res.json({ url: session.url });
   } catch (error) {
     console.error("Failed to create stripe session:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+//! Commented out original code 
+// app.post("/create-checkout-session", async (req, res) => {
+//   const { items } = req.body; 
+//   if (!items || !items.length) {
+//     return res
+//       .status(400)
+//       .json({ error: "No items provided or incorrect data format." });
+//   }
+
+//   try {
+//     req.session.cart = items; // Store cart in session
+
+//     const lineItems = items.map((item) => ({
+//       price_data: {
+//         currency: "usd",
+//         product_data: { name: item.name },
+//         unit_amount: parseInt(item.price * 100), 
+//       },
+//       quantity: item.quantity,
+//     }));
+
+//     console.log("Creating Stripe session at", new Date());
+
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ["card"],
+//       line_items: lineItems,
+//       mode: "payment",
+//       success_url: `${req.headers.origin}/?success=true`,
+//       cancel_url: `${req.headers.origin}/?canceled=true`,
+//     });
+
+//     console.log("Stripe session created at", new Date());
+
+//     res.json({ url: session.url });
+//   } catch (error) {
+//     console.error("Failed to create stripe session:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 app.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;

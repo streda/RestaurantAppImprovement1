@@ -1,5 +1,7 @@
 import { menuArray, orderArray } from "./index.js";
 
+const API_BASE_URL = "https://truefood.rest";
+
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   
@@ -18,7 +20,7 @@ async function restoreCartFromDatabase() {
   }
 
   try {
-    const response = await fetch("https://truefood.rest/cart", {
+    const response = await fetch(`${API_BASE_URL}/cart`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -90,7 +92,7 @@ export async function fetchMenuItems(redirect = false) {
 
 
   try {
-    const response = await fetch("https://truefood.rest/menu-items", {
+    const response = await fetch(`${API_BASE_URL}/menu-items`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -146,7 +148,7 @@ export async function fetchCartData() {
 
 
   try {
-    const response = await fetch("https://truefood.rest/cart", {
+    const response = await fetch(`${API_BASE_URL}/cart`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -594,7 +596,7 @@ export default async function handleCheckout(orderArray) {
     quantity: quantity,
   }));
 
-  const response = await fetch('https://truefood.rest/create-checkout-session', {
+  const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -617,3 +619,8 @@ export default async function handleCheckout(orderArray) {
 
 }
 
+
+
+// const API_BASE_URL = window.location.origin.includes("localhost")
+//   ? "http://localhost:5005"
+//   : "https://truefood.rest";

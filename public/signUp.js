@@ -1,10 +1,16 @@
 document.getElementById('register-form').addEventListener('submit', async function(event) {
     event.preventDefault();
+
+    const API_BASE_URL = window.location.origin.includes("localhost")
+  ? "http://localhost:5005"
+  : "https://truefood.rest";
+
+
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('https://truefood.rest/register', {
+        const response = await fetch(`${API_BASE_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
