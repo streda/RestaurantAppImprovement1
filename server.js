@@ -48,32 +48,11 @@ app.use(express.static("public")); // Serving static files normally without {ind
 
 app.use(cors({ origin: ["http://localhost:5005","http://localhost:3000", "http://127.0.0.1:5005", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
 
-// "http://localhost:5500",
-// "http://127.0.0.1:5500",
 const allowedOrigins = [
   "http://localhost:3000",
   "https://truefood.rest",
   "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"
 ];
-
-//^ For local testing only
-// const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
-// const redisClient = createClient({
-//   url: redisUrl,
-// });
-// const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
-// const redisClient = createClient({
-//   url: redisUrl,
-//   socket: redisUrl.startsWith("rediss://")
-//     ? { tls: { rejectUnauthorized: false } }
-//     : {}
-// });
-
-// redisClient.connect().catch((err) => {
-//   console.error("Redis connection error:", err);
-// });
-
-//! Use the below code for production
 
 // Create Redis client using ES module syntax:
 
@@ -178,8 +157,6 @@ app.post("/api/cart", (req, res) => {
   res.json({ cart: req.session.cart });
 });
 
-// ... [imports and configuration code remain the same]
-
 /* ---------------------- ADD-TO-CART ROUTE ---------------------- */
 app.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;
@@ -224,13 +201,13 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
 
     // Recalculate total (using the current menuItem price for simplicity)
     order.total = order.items.reduce((acc, item) => {
-      // Here, item.menuItem may not be populated yet. You could either populate later or
-      // re-fetch the price from MenuItem if needed. For now, assume each added item’s price is correct.
       return acc + item.quantity * menuItem.price;
     }, 0);
 
     await order.save();
     await order.populate("items.menuItem");
+
+    console.log("Order after saving:", JSON.stringify(order, null, 2));
 
     res.json({ message: "Item added to cart", order });
   } catch (error) {
@@ -284,16 +261,7 @@ app.post("/create-checkout-session", authenticateToken, async (req, res) => {
       quantity: item.quantity,
     }));
 
-    // Use the SERVER_URL from environment for success/cancel URLs
     const origin = process.env.SERVER_URL; // Should be set to your production URL in .env
-
-    // const session = await stripe.checkout.sessions.create({
-    //   payment_method_types: ["card"],
-    //   line_items: lineItems,
-    //   mode: "payment",
-    //   success_url: `${origin}/checkout-success`,
-    //   cancel_url: `${origin}/checkout-cancel`,
-    // });
  
     const session = await stripe.checkout.sessions.create({
   payment_method_types: ["card"],
@@ -337,161 +305,7 @@ app.get("/checkout-success", async (req, res) => {
   res.redirect("/?paymentSuccess=true");
 });
 
-
-// app.get("/checkout-success", async (req, res) => {
-//   console.log("Payment successful. Clearing persistent cart...");
-
-//   // If possible, identify the user (e.g., via a query parameter added by Stripe, or use a fallback)
-// // For this example, we'll assume you have a mechanism (e.g., a session or query parameter) to identify the user.
-// // If not, you might need to modify your success URL to include the user ID securely.
-
-//   // Example: if the user ID is passed as a query parameter "userId"
-//   const userId = req.query.userId;
-//   if (userId) {
-//     try {
-//       await Order.deleteMany({ userId, status: "pending" });
-//     } catch (error) {
-//       console.error("Error clearing persistent cart:", error);
-//     }
-//   } else {
-//     console.warn("No user ID provided on checkout success; cannot clear persistent order.");
-//   }
-
-//   // Also clear the session cart if any
-//   req.session.cart = null;
-
-//   // Redirect the user to the homepage with a payment success message
-//   res.redirect("/?paymentSuccess=true");
-// });
-
 //************************************************************** */
-// app.post("/create-checkout-session", async (req, res) => {
-//   try {
-//     let order = await Order.findOne({
-//       userId: req.myUser.userId,
-//       status: "pending",
-//     }).populate("items.menuItem");
-
-//     if (!order || order.items.length === 0) {
-//       return res.status(400).json({ error: "Please add items to your order before proceeding to payment" });
-//     }
-
-//     const lineItems = order.items.map((item) => ({
-//       price_data: {
-//         currency: "usd",
-//         product_data: { name: item.menuItem.name },
-//         unit_amount: Math.round(item.menuItem.price * 100),
-//       },
-//       quantity: item.quantity,
-//     }));
-
-//     const session = await stripe.checkout.sessions.create({
-//       payment_method_types: ["card"],
-//       line_items: lineItems,
-//       mode: "payment",
-//       success_url: `${process.env.SERVER_URL}/checkout-success`,
-//       cancel_url: `${process.env.SERVER_URL}/checkout-cancel`,
-//     });
-
-//     res.json({ url: session.url });
-//   } catch (error) {
-//     console.error("Failed to create checkout session:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
-
-// // /checkout-success route to clear both Redis session cart and MongoDB order:
-// app.get("/checkout-success", async (req, res) => {
-//   console.log("Payment successful. Clearing cart and pending orders...");
-
-//   // Ensure the user is authenticated
-//   if (!req.myUser || !req.myUser.userId) {
-//     console.error("No user found in session.");
-//     return res.status(401).json({ error: "Unauthorized" });
-//   }
-
-//   // Clear pending orders in the database for this user
-//   await Order.deleteMany({ userId: req.myUser.userId, status: "pending" });
-
-//   // Clear session cart
-//   req.session.cart = null;
-
-//   res.redirect("/?paymentSuccess=true"); 
-// });
-
-
-// app.post("/add-to-cart", authenticateToken, async (req, res) => {
-//   const { menuItemId, quantity } = req.body;
-//   try {
-//     const menuItem = await MenuItem.findById(menuItemId);
-//     if (!menuItem) {
-//       return res.status(404).json({ success: false, message: "Menu item not found" });
-//     }
-
-//     // Delete any old empty orders before adding a new one
-// await Order.deleteMany({
-//   userId: req.myUser.userId,
-//   status: "pending",
-//   items: { $size: 0 } // Only delete empty orders
-// });
-
-// // Now find or create a new order
-// let order = await Order.findOne({
-//   userId: req.myUser.userId,
-//   status: "pending",
-// });
-
-//     if (!order) {
-//       order = new Order({
-//         userId: req.myUser.userId,
-//         items: [],
-//         status: "pending",
-//       });
-//     }
-
-//     const existingItemIndex = order.items.findIndex((item) => item.menuItem.equals(menuItemId));
-//     if (existingItemIndex > -1) {
-//       order.items[existingItemIndex].quantity += quantity;
-//     } else {
-//       order.items.push({ menuItem: menuItemId, quantity });
-//     }
-
-//     order.total = order.items.reduce((acc, item) => acc + item.quantity * menuItem.price, 0);
-//     await order.save(); // 🚀 Ensure order is saved
-// console.log("Order saved:", order);
-//     res.json({ message: "Item added to cart", order });
-//   } catch (error) {
-//     console.error("Error adding to cart:", error);
-//     res.status(500).json({ error: "Failed to add item to cart" });
-//   }
-// });
-
-// app.get("/cart", authenticateToken, async (req, res) => {
-//   try {
-//     let order = await Order.findOne({
-//   userId: req.myUser.userId,
-//   status: "pending",
-//   items: { $exists: true, $ne: [] } // Ensure it has items
-// }).populate("items.menuItem");
-
-//     if (!order) {
-//       if (req.session.cart) {
-//         order = {
-//           items: req.session.cart,
-//           total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
-//         };
-//       } else {
-//         return res.json({ order: { items: [], total: 0 } });
-//       }
-//     }
-
-//     res.json({ order });
-//   } catch (error) {
-//     console.error("Error fetching cart:", error);
-//     res.status(500).json({ error: "Failed to fetch cart" });
-//   }
-// });
 
 //************************************************************** */
 
@@ -606,9 +420,5 @@ app.get("*", (req, res) => {
 
 const PORT = process.env.PORT || 5005; // Heroku dynamically assigns a PORT
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-// app.listen(PORT, async () => {
-//   // Open the default browser
-//   await open(`http://localhost:${PORT}`);
-// });
 
 
