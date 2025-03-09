@@ -1,31 +1,43 @@
 export default async function handleCheckout(orderArray) {
-    const items = orderArray.map(({menuItem, quantity})=> ({
-      id: menuItem._id,
-      name: menuItem.name,
-      price: menuItem.price,
-      quantity: quantity,
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        console.error("No auth token found, cannot proceed to checkout");
+        alert("You must be logged in to complete your order.");
+        return;
+    }
+
+    const items = orderArray.map(({ menuItem, quantity }) => ({
+        id: menuItem._id,
+        name: menuItem.name,
+        price: menuItem.price,
+        quantity: quantity,
     }));
-  
+
     const API_BASE_URL = window.location.origin;
-    const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ items }), // Send the items to the backend
-  });
-    if(!response.ok){
-      throw new Error('Network response was not ok.');
-    }
-  
-    let session;
     try {
-      session = await response.json();
+        const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,  // ✅ Fix: Ensure token is included
+            },
+            body: JSON.stringify({ items }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Network response was not ok.");
+        }
+
+        const session = await response.json();
+        window.location.href = session.url; // Redirect to Stripe Checkout
     } catch (error) {
-      throw new Error('Failed to parse JSON response.');
+        console.error("Checkout failed", error);
+        alert("Something went wrong. Please try again.");
     }
-    window.location.href = session.url; // Redirect to Stripe Checkout
-  }
+}
+
+
   
 export function initializeCheckoutButton() {
     const checkoutButton = document.getElementById("complete-order-button");
