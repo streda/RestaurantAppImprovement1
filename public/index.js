@@ -22,6 +22,14 @@ export let menuArray = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
 
+  // Optionally check if paymentSuccess flag is present
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("paymentSuccess") === "true") {
+    // Re-fetch cart data to update UI
+    const cartData = await fetchCartData();
+    updateOrderSummary(cartData);
+  }
+
   const currentPagePath = window.location.pathname;
   const isAuthenticationPage = currentPagePath === '/login.html' || currentPagePath === '/signUp.html';
 
