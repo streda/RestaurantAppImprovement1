@@ -205,8 +205,10 @@ app.post("/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${origin}/?success=true`,
-      cancel_url: `${origin}/?canceled=true`,
+      // success_url: `${origin}/?success=true`,
+      // cancel_url: `${origin}/?canceled=true`,
+      success_url: `${origin}/checkout-success`, // Redirect here after successful payment
+      cancel_url: `${origin}/checkout-cancel`,  // Redirect here if canceled
     });
     
     res.json({ url: session.url });
@@ -214,6 +216,15 @@ app.post("/create-checkout-session", async (req, res) => {
     console.error("Failed to create stripe session:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+app.get("/checkout-success", (req, res) => {
+  console.log("Payment successful. Clearing cart...");
+
+  // Clear cart from session
+  req.session.cart = null;
+
+  res.redirect("/?paymentSuccess=true"); // Redirect to homepage (or order confirmation page)
 });
 
 //! Commented out original code 
