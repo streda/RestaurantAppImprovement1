@@ -179,44 +179,79 @@ app.post("/api/cart", (req, res) => {
 });
 
 app.post("/create-checkout-session", async (req, res) => {
-  const { items } = req.body;
-  if (!items || !items.length) {
-    return res.status(400).json({ error: "No items provided or incorrect data format." });
-  }
-  
   try {
-    req.session.cart = items; // Store cart in session
-    
-    const lineItems = items.map((item) => ({
+    let order = await Order.findOne({
+      userId: req.myUser.userId,
+      status: "pending",
+    }).populate("items.menuItem");
+
+    if (!order || order.items.length === 0) {
+      return res.status(400).json({ error: "Please add items to your order before proceeding to payment" });
+    }
+
+    const lineItems = order.items.map((item) => ({
       price_data: {
         currency: "usd",
-        product_data: { name: item.name },
-        unit_amount: Math.round(item.price * 100),
+        product_data: { name: item.menuItem.name },
+        unit_amount: Math.round(item.menuItem.price * 100),
       },
       quantity: item.quantity,
     }));
-    
-    // Use req.headers.origin if available, otherwise fall back to process.env.SERVER_URL, or localhost for local testing.
-    const origin = req.headers.origin || process.env.SERVER_URL || "http://localhost:5005";
-    
-    console.log("Creating Stripe session with success URL:", `${origin}/?success=true`);
-    
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      // success_url: `${origin}/?success=true`,
-      // cancel_url: `${origin}/?canceled=true`,
-      success_url: `${origin}/checkout-success`, // Redirect here after successful payment
-      cancel_url: `${origin}/checkout-cancel`,  // Redirect here if canceled
+      success_url: `${process.env.SERVER_URL}/checkout-success`,
+      cancel_url: `${process.env.SERVER_URL}/checkout-cancel`,
     });
-    
+
     res.json({ url: session.url });
   } catch (error) {
-    console.error("Failed to create stripe session:", error);
+    console.error("Failed to create checkout session:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// app.post("/create-checkout-session", async (req, res) => {
+//   const { items } = req.body;
+//   if (!items || !items.length) {
+//     return res.status(400).json({ error: "No items provided or incorrect data format." });
+//   }
+  
+//   try {
+//     req.session.cart = items; // Store cart in session
+    
+//     const lineItems = items.map((item) => ({
+//       price_data: {
+//         currency: "usd",
+//         product_data: { name: item.name },
+//         unit_amount: Math.round(item.price * 100),
+//       },
+//       quantity: item.quantity,
+//     }));
+    
+//     // Use req.headers.origin if available, otherwise fall back to process.env.SERVER_URL, or localhost for local testing.
+//     const origin = req.headers.origin || process.env.SERVER_URL || "http://localhost:5005";
+    
+//     console.log("Creating Stripe session with success URL:", `${origin}/?success=true`);
+    
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ["card"],
+//       line_items: lineItems,
+//       mode: "payment",
+//       // success_url: `${origin}/?success=true`,
+//       // cancel_url: `${origin}/?canceled=true`,
+//       success_url: `${origin}/checkout-success`, // Redirect here after successful payment
+//       cancel_url: `${origin}/checkout-cancel`,  // Redirect here if canceled
+//     });
+    
+//     res.json({ url: session.url });
+//   } catch (error) {
+//     console.error("Failed to create stripe session:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 //* /checkout-success route to clear both Redis session cart and MongoDB order:
 app.get("/checkout-success", async (req, res) => {
@@ -355,14 +390,16 @@ app.get("/cart", authenticateToken, async (req, res) => {
       status: "pending",
     }).populate("items.menuItem");
 
-    // Check if session cart is cleared
-    if (!req.session.cart) {
-      req.session.cart = null;
-    }
-
-    // Check if there's no pending order
-    if (!order || order.items.length === 0) {
-      return res.json({ order: { items: [], total: 0 } });
+    if (!order) {
+      // If no order exists, try to restore it from the session
+      if (req.session.cart) {
+        order = {
+          items: req.session.cart,
+          total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
+        };
+      } else {
+        return res.json({ order: { items: [], total: 0 } });
+      }
     }
 
     res.json({ order });
@@ -371,6 +408,30 @@ app.get("/cart", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch cart" });
   }
 });
+
+// app.get("/cart", authenticateToken, async (req, res) => {
+//   try {
+//     let order = await Order.findOne({
+//       userId: req.myUser.userId,
+//       status: "pending",
+//     }).populate("items.menuItem");
+
+//     // Check if session cart is cleared
+//     if (!req.session.cart) {
+//       req.session.cart = null;
+//     }
+
+//     // Check if there's no pending order
+//     if (!order || order.items.length === 0) {
+//       return res.json({ order: { items: [], total: 0 } });
+//     }
+
+//     res.json({ order });
+//   } catch (error) {
+//     console.error("Error fetching cart:", error);
+//     res.status(500).json({ error: "Failed to fetch cart" });
+//   }
+// });
 
 // app.get("/cart", authenticateToken, async (req, res) => {
 //   try {
