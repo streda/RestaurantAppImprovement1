@@ -257,27 +257,43 @@ app.post("/create-checkout-session", async (req, res) => {
 app.get("/checkout-success", async (req, res) => {
   console.log("Payment successful. Clearing cart...");
 
-  // Step 1: Clear cart from session
+  // Mark the order as completed
+  await Order.findOneAndUpdate(
+    { userId: req.myUser.userId, status: "pending" },
+    { status: "completed" }
+  );
+
+  // Clear session-based cart
   req.session.cart = null;
-  req.session.save(err => {
-    if (err) {
-      console.error("Error saving session after clearing cart:", err);
-    }
-  });
 
-  // Step 2: Clear pending order from MongoDB
-  try {
-    await Order.findOneAndUpdate(
-      { userId: req.myUser.userId, status: "pending" },
-      { $set: { items: [], total: 0, status: "completed" } }
-    );
-  } catch (error) {
-    console.error("Error clearing order from MongoDB:", error);
-  }
-
-  // Step 3: Redirect back to homepage
   res.redirect("/?paymentSuccess=true");
 });
+
+
+// app.get("/checkout-success", async (req, res) => {
+//   console.log("Payment successful. Clearing cart...");
+
+//   // Step 1: Clear cart from session
+//   req.session.cart = null;
+//   req.session.save(err => {
+//     if (err) {
+//       console.error("Error saving session after clearing cart:", err);
+//     }
+//   });
+
+//   // Step 2: Clear pending order from MongoDB
+//   try {
+//     await Order.findOneAndUpdate(
+//       { userId: req.myUser.userId, status: "pending" },
+//       { $set: { items: [], total: 0, status: "completed" } }
+//     );
+//   } catch (error) {
+//     console.error("Error clearing order from MongoDB:", error);
+//   }
+
+//   // Step 3: Redirect back to homepage
+//   res.redirect("/?paymentSuccess=true");
+// });
 
 //! Commented out original code 
 // app.post("/create-checkout-session", async (req, res) => {
@@ -319,23 +335,21 @@ app.get("/checkout-success", async (req, res) => {
 //   }
 // });
 
+
+
 app.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;
   try {
-    //! Check if the menu item exists
     const menuItem = await MenuItem.findById(menuItemId);
     if (!menuItem) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Menu item not found" });
+      return res.status(404).json({ success: false, message: "Menu item not found" });
     }
-    // The server checks if there's a pending order for the user, and if a pending order exists, it is retrieved
+
     let order = await Order.findOne({
       userId: req.myUser.userId,
       status: "pending",
     });
 
-    // If no pending order exists, a new order is created for the user
     if (!order) {
       order = new Order({
         userId: req.myUser.userId,
@@ -344,37 +358,15 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
       });
     }
 
-    if(isNaN(menuItem.price)){
-      console.error("Invalid price for menuItem:", menuItem);
-      return res.status(400).json({error: "Invalid menu item price"});
-    }
-    if(isNaN(quantity) || quantity <= 0){
-      console.error("Invalid quantity:", quantity);
-      return res.status(400).json({error: "Invalid quantity"});
-    }
-    /* 
-        If the item is already in the order, the server uses the retrieved pending order's index and update quantity.
-        If the item is not in the order, it is added to the items array.
-      */
-    const existingItemIndex = order.items.findIndex((item) =>
-      item.menuItem.equals(menuItemId)
-    );
-
+    const existingItemIndex = order.items.findIndex((item) => item.menuItem.equals(menuItemId));
     if (existingItemIndex > -1) {
-      // If this item and its index is found
       order.items[existingItemIndex].quantity += quantity;
     } else {
       order.items.push({ menuItem: menuItemId, quantity });
     }
 
-    //! Update the total price
-    order.total = order.items.reduce((acc, item) =>{
-      return acc + item.quantity * menuItem.price;
-    }, 0);
-
-    //  The updated order is saved back to the database
-    await order.save();
-    await order.populate("items.menuItem");
+    order.total = order.items.reduce((acc, item) => acc + item.quantity * menuItem.price, 0);
+    await order.save(); // 🚀 Ensure order is saved
 
     res.json({ message: "Item added to cart", order });
   } catch (error) {
@@ -382,6 +374,72 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to add item to cart" });
   }
 });
+
+
+
+// app.post("/add-to-cart", authenticateToken, async (req, res) => {
+//   const { menuItemId, quantity } = req.body;
+//   try {
+//     //! Check if the menu item exists
+//     const menuItem = await MenuItem.findById(menuItemId);
+//     if (!menuItem) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Menu item not found" });
+//     }
+//     // The server checks if there's a pending order for the user, and if a pending order exists, it is retrieved
+//     let order = await Order.findOne({
+//       userId: req.myUser.userId,
+//       status: "pending",
+//     });
+
+//     // If no pending order exists, a new order is created for the user
+//     if (!order) {
+//       order = new Order({
+//         userId: req.myUser.userId,
+//         items: [],
+//         status: "pending",
+//       });
+//     }
+
+//     if(isNaN(menuItem.price)){
+//       console.error("Invalid price for menuItem:", menuItem);
+//       return res.status(400).json({error: "Invalid menu item price"});
+//     }
+//     if(isNaN(quantity) || quantity <= 0){
+//       console.error("Invalid quantity:", quantity);
+//       return res.status(400).json({error: "Invalid quantity"});
+//     }
+//     /* 
+//         If the item is already in the order, the server uses the retrieved pending order's index and update quantity.
+//         If the item is not in the order, it is added to the items array.
+//       */
+//     const existingItemIndex = order.items.findIndex((item) =>
+//       item.menuItem.equals(menuItemId)
+//     );
+
+//     if (existingItemIndex > -1) {
+//       // If this item and its index is found
+//       order.items[existingItemIndex].quantity += quantity;
+//     } else {
+//       order.items.push({ menuItem: menuItemId, quantity });
+//     }
+
+//     //! Update the total price
+//     order.total = order.items.reduce((acc, item) =>{
+//       return acc + item.quantity * menuItem.price;
+//     }, 0);
+
+//     //  The updated order is saved back to the database
+//     await order.save();
+//     await order.populate("items.menuItem");
+
+//     res.json({ message: "Item added to cart", order });
+//   } catch (error) {
+//     console.error("Error adding to cart:", error);
+//     res.status(500).json({ error: "Failed to add item to cart" });
+//   }
+// });
 
 app.get("/cart", authenticateToken, async (req, res) => {
   try {
@@ -391,7 +449,6 @@ app.get("/cart", authenticateToken, async (req, res) => {
     }).populate("items.menuItem");
 
     if (!order) {
-      // If no order exists, try to restore it from the session
       if (req.session.cart) {
         order = {
           items: req.session.cart,
