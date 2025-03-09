@@ -219,7 +219,7 @@ app.post("/create-checkout-session", async (req, res) => {
 });
 
 //* /checkout-success route to clear both Redis session cart and MongoDB order:
-app.get("/checkout-success", authenticateToken, async (req, res) => {
+app.get("/checkout-success", async (req, res) => {
   console.log("Payment successful. Clearing cart...");
 
   // Step 1: Clear cart from session
