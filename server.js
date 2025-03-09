@@ -38,10 +38,13 @@ console.log("SERVER_URL:", process.env.SERVER_URL);
 
 const app = express();
 app.use(express.json());
-app.use(express.static("public")); // Serving static files normally without {index: false}
-app.use(cookieParser());
-// app.use(registerRouter);
 app.use("/api", registerRouter);
+app.use(registerRouter); 
+// app.use(loginRouter);
+app.use("/api", loginRouter);
+app.use(cookieParser());
+app.use(express.static("public")); // Serving static files normally without {index: false}
+
 
 app.use(cors({ origin: ["http://localhost:5005","http://localhost:3000", "http://127.0.0.1:5005", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
 
@@ -76,7 +79,10 @@ const allowedOrigins = [
 
 const redisClient = createClient({
   url: process.env.REDIS_URL, // Heroku sets this automatically
-  socket: { tls: true }, // Ensure secure connection
+  socket: { 
+    tls: true , // Ensure secure connection
+    rejectUnauthorized: false, // Allow self-signed certificates
+  } 
 });
 
 redisClient.connect().catch((err) => {
@@ -136,8 +142,7 @@ mongoose
     process.exit(1);
   });
 
-app.use(registerRouter); 
-app.use(loginRouter);
+
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
