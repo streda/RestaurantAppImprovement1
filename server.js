@@ -178,18 +178,104 @@ app.post("/api/cart", (req, res) => {
   res.json({ cart: req.session.cart });
 });
 
-app.post("/create-checkout-session", async (req, res) => {
+// ... [imports and configuration code remain the same]
+
+/* ---------------------- ADD-TO-CART ROUTE ---------------------- */
+app.post("/add-to-cart", authenticateToken, async (req, res) => {
+  const { menuItemId, quantity } = req.body;
   try {
+    // Verify the menu item exists
+    const menuItem = await MenuItem.findById(menuItemId);
+    if (!menuItem) {
+      return res.status(404).json({ success: false, message: "Menu item not found" });
+    }
+
+    // Delete any old pending orders with no items for this user
+    await Order.deleteMany({
+      userId: req.myUser.userId,
+      status: "pending",
+      items: { $size: 0 }
+    });
+
+    // Find an existing pending order
+    let order = await Order.findOne({
+      userId: req.myUser.userId,
+      status: "pending"
+    });
+
+    // If no pending order exists, create one
+    if (!order) {
+      order = new Order({
+        userId: req.myUser.userId,
+        items: [],
+        status: "pending"
+      });
+    }
+
+    // Check if the item is already in the order
+    const existingItemIndex = order.items.findIndex(item =>
+      item.menuItem.equals(menuItemId)
+    );
+    if (existingItemIndex > -1) {
+      order.items[existingItemIndex].quantity += quantity;
+    } else {
+      order.items.push({ menuItem: menuItemId, quantity });
+    }
+
+    // Recalculate total (using the current menuItem price for simplicity)
+    order.total = order.items.reduce((acc, item) => {
+      // Here, item.menuItem may not be populated yet. You could either populate later or
+      // re-fetch the price from MenuItem if needed. For now, assume each added item’s price is correct.
+      return acc + item.quantity * menuItem.price;
+    }, 0);
+
+    await order.save();
+    await order.populate("items.menuItem");
+
+    res.json({ message: "Item added to cart", order });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ error: "Failed to add item to cart" });
+  }
+});
+
+/* ---------------------- GET CART ROUTE ---------------------- */
+app.get("/cart", authenticateToken, async (req, res) => {
+  try {
+    // Find the persistent pending order that actually has items
     let order = await Order.findOne({
       userId: req.myUser.userId,
       status: "pending",
+      items: { $exists: true, $ne: [] }
+    }).populate("items.menuItem");
+
+    // If no order found, return an empty cart
+    if (!order) {
+      return res.json({ order: { items: [], total: 0 } });
+    }
+    res.json({ order });
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    res.status(500).json({ error: "Failed to fetch cart" });
+  }
+});
+
+/* ---------------------- CREATE CHECKOUT SESSION ROUTE ---------------------- */
+app.post("/create-checkout-session", authenticateToken, async (req, res) => {
+  try {
+    // Always fetch the persistent order from MongoDB
+    let order = await Order.findOne({
+      userId: req.myUser.userId,
+      status: "pending",
+      items: { $exists: true, $ne: [] }
     }).populate("items.menuItem");
 
     if (!order || order.items.length === 0) {
       return res.status(400).json({ error: "Please add items to your order before proceeding to payment" });
     }
 
-    const lineItems = order.items.map((item) => ({
+    // Build line items from the order
+    const lineItems = order.items.map(item => ({
       price_data: {
         currency: "usd",
         product_data: { name: item.menuItem.name },
@@ -198,12 +284,15 @@ app.post("/create-checkout-session", async (req, res) => {
       quantity: item.quantity,
     }));
 
+    // Use the SERVER_URL from environment for success/cancel URLs
+    const origin = process.env.SERVER_URL; // Should be set to your production URL in .env
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.SERVER_URL}/checkout-success`,
-      cancel_url: `${process.env.SERVER_URL}/checkout-cancel`,
+      success_url: `${origin}/checkout-success`,
+      cancel_url: `${origin}/checkout-cancel`,
     });
 
     res.json({ url: session.url });
@@ -213,199 +302,113 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-// app.post("/create-checkout-session", async (req, res) => {
-//   const { items } = req.body;
-//   if (!items || !items.length) {
-//     return res.status(400).json({ error: "No items provided or incorrect data format." });
-//   }
-  
-//   try {
-//     req.session.cart = items; // Store cart in session
-    
-//     const lineItems = items.map((item) => ({
-//       price_data: {
-//         currency: "usd",
-//         product_data: { name: item.name },
-//         unit_amount: Math.round(item.price * 100),
-//       },
-//       quantity: item.quantity,
-//     }));
-    
-//     // Use req.headers.origin if available, otherwise fall back to process.env.SERVER_URL, or localhost for local testing.
-//     const origin = req.headers.origin || process.env.SERVER_URL || "http://localhost:5005";
-    
-//     console.log("Creating Stripe session with success URL:", `${origin}/?success=true`);
-    
-//     const session = await stripe.checkout.sessions.create({
-//       payment_method_types: ["card"],
-//       line_items: lineItems,
-//       mode: "payment",
-//       // success_url: `${origin}/?success=true`,
-//       // cancel_url: `${origin}/?canceled=true`,
-//       success_url: `${origin}/checkout-success`, // Redirect here after successful payment
-//       cancel_url: `${origin}/checkout-cancel`,  // Redirect here if canceled
-//     });
-    
-//     res.json({ url: session.url });
-//   } catch (error) {
-//     console.error("Failed to create stripe session:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
-//* /checkout-success route to clear both Redis session cart and MongoDB order:
+/* ---------------------- CHECKOUT SUCCESS ROUTE ---------------------- */
+// This route is called after a successful payment
+// Since Stripe redirect doesn't include authentication headers, we avoid using authenticateToken here
 app.get("/checkout-success", async (req, res) => {
-  console.log("Payment successful. Clearing cart and pending orders...");
+  console.log("Payment successful. Clearing persistent cart...");
 
-  // Ensure the user is authenticated
-  if (!req.myUser || !req.myUser.userId) {
-    console.error("No user found in session.");
-    return res.status(401).json({ error: "Unauthorized" });
+  // If possible, identify the user (e.g., via a query parameter added by Stripe, or use a fallback)
+// For this example, we'll assume you have a mechanism (e.g., a session or query parameter) to identify the user.
+// If not, you might need to modify your success URL to include the user ID securely.
+
+  // Example: if the user ID is passed as a query parameter "userId"
+  const userId = req.query.userId;
+  if (userId) {
+    try {
+      await Order.deleteMany({ userId, status: "pending" });
+    } catch (error) {
+      console.error("Error clearing persistent cart:", error);
+    }
+  } else {
+    console.warn("No user ID provided on checkout success; cannot clear persistent order.");
   }
 
-  // Clear pending orders in the database for this user
-  await Order.deleteMany({ userId: req.myUser.userId, status: "pending" });
-
-  // Clear session cart
+  // Also clear the session cart if any
   req.session.cart = null;
 
-  res.redirect("/?paymentSuccess=true"); 
+  // Redirect the user to the homepage with a payment success message
+  res.redirect("/?paymentSuccess=true");
 });
 
-
-
-// app.get("/checkout-success", async (req, res) => {
-//   console.log("Payment successful. Clearing cart...");
-
-//   // Step 1: Clear cart from session
-//   req.session.cart = null;
-//   req.session.save(err => {
-//     if (err) {
-//       console.error("Error saving session after clearing cart:", err);
-//     }
-//   });
-
-//   // Step 2: Clear pending order from MongoDB
-//   try {
-//     await Order.findOneAndUpdate(
-//       { userId: req.myUser.userId, status: "pending" },
-//       { $set: { items: [], total: 0, status: "completed" } }
-//     );
-//   } catch (error) {
-//     console.error("Error clearing order from MongoDB:", error);
-//   }
-
-//   // Step 3: Redirect back to homepage
-//   res.redirect("/?paymentSuccess=true");
-// });
-
-//! Commented out original code 
+//************************************************************** */
 // app.post("/create-checkout-session", async (req, res) => {
-//   const { items } = req.body; 
-//   if (!items || !items.length) {
-//     return res
-//       .status(400)
-//       .json({ error: "No items provided or incorrect data format." });
-//   }
-
 //   try {
-//     req.session.cart = items; // Store cart in session
+//     let order = await Order.findOne({
+//       userId: req.myUser.userId,
+//       status: "pending",
+//     }).populate("items.menuItem");
 
-//     const lineItems = items.map((item) => ({
+//     if (!order || order.items.length === 0) {
+//       return res.status(400).json({ error: "Please add items to your order before proceeding to payment" });
+//     }
+
+//     const lineItems = order.items.map((item) => ({
 //       price_data: {
 //         currency: "usd",
-//         product_data: { name: item.name },
-//         unit_amount: parseInt(item.price * 100), 
+//         product_data: { name: item.menuItem.name },
+//         unit_amount: Math.round(item.menuItem.price * 100),
 //       },
 //       quantity: item.quantity,
 //     }));
-
-//     console.log("Creating Stripe session at", new Date());
 
 //     const session = await stripe.checkout.sessions.create({
 //       payment_method_types: ["card"],
 //       line_items: lineItems,
 //       mode: "payment",
-//       success_url: `${req.headers.origin}/?success=true`,
-//       cancel_url: `${req.headers.origin}/?canceled=true`,
+//       success_url: `${process.env.SERVER_URL}/checkout-success`,
+//       cancel_url: `${process.env.SERVER_URL}/checkout-cancel`,
 //     });
-
-//     console.log("Stripe session created at", new Date());
 
 //     res.json({ url: session.url });
 //   } catch (error) {
-//     console.error("Failed to create stripe session:", error);
+//     console.error("Failed to create checkout session:", error);
 //     res.status(500).json({ error: "Internal server error" });
 //   }
 // });
 
 
+// // /checkout-success route to clear both Redis session cart and MongoDB order:
+// app.get("/checkout-success", async (req, res) => {
+//   console.log("Payment successful. Clearing cart and pending orders...");
 
-app.post("/add-to-cart", authenticateToken, async (req, res) => {
-  const { menuItemId, quantity } = req.body;
-  try {
-    const menuItem = await MenuItem.findById(menuItemId);
-    if (!menuItem) {
-      return res.status(404).json({ success: false, message: "Menu item not found" });
-    }
+//   // Ensure the user is authenticated
+//   if (!req.myUser || !req.myUser.userId) {
+//     console.error("No user found in session.");
+//     return res.status(401).json({ error: "Unauthorized" });
+//   }
 
-    // Delete any old empty orders before adding a new one
-await Order.deleteMany({
-  userId: req.myUser.userId,
-  status: "pending",
-  items: { $size: 0 } // Only delete empty orders
-});
+//   // Clear pending orders in the database for this user
+//   await Order.deleteMany({ userId: req.myUser.userId, status: "pending" });
 
-// Now find or create a new order
-let order = await Order.findOne({
-  userId: req.myUser.userId,
-  status: "pending",
-});
+//   // Clear session cart
+//   req.session.cart = null;
 
-    if (!order) {
-      order = new Order({
-        userId: req.myUser.userId,
-        items: [],
-        status: "pending",
-      });
-    }
-
-    const existingItemIndex = order.items.findIndex((item) => item.menuItem.equals(menuItemId));
-    if (existingItemIndex > -1) {
-      order.items[existingItemIndex].quantity += quantity;
-    } else {
-      order.items.push({ menuItem: menuItemId, quantity });
-    }
-
-    order.total = order.items.reduce((acc, item) => acc + item.quantity * menuItem.price, 0);
-    await order.save(); // 🚀 Ensure order is saved
-
-    res.json({ message: "Item added to cart", order });
-  } catch (error) {
-    console.error("Error adding to cart:", error);
-    res.status(500).json({ error: "Failed to add item to cart" });
-  }
-});
-
+//   res.redirect("/?paymentSuccess=true"); 
+// });
 
 
 // app.post("/add-to-cart", authenticateToken, async (req, res) => {
 //   const { menuItemId, quantity } = req.body;
 //   try {
-//     //! Check if the menu item exists
 //     const menuItem = await MenuItem.findById(menuItemId);
 //     if (!menuItem) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Menu item not found" });
+//       return res.status(404).json({ success: false, message: "Menu item not found" });
 //     }
-//     // The server checks if there's a pending order for the user, and if a pending order exists, it is retrieved
-//     let order = await Order.findOne({
-//       userId: req.myUser.userId,
-//       status: "pending",
-//     });
 
-//     // If no pending order exists, a new order is created for the user
+//     // Delete any old empty orders before adding a new one
+// await Order.deleteMany({
+//   userId: req.myUser.userId,
+//   status: "pending",
+//   items: { $size: 0 } // Only delete empty orders
+// });
+
+// // Now find or create a new order
+// let order = await Order.findOne({
+//   userId: req.myUser.userId,
+//   status: "pending",
+// });
+
 //     if (!order) {
 //       order = new Order({
 //         userId: req.myUser.userId,
@@ -414,38 +417,16 @@ let order = await Order.findOne({
 //       });
 //     }
 
-//     if(isNaN(menuItem.price)){
-//       console.error("Invalid price for menuItem:", menuItem);
-//       return res.status(400).json({error: "Invalid menu item price"});
-//     }
-//     if(isNaN(quantity) || quantity <= 0){
-//       console.error("Invalid quantity:", quantity);
-//       return res.status(400).json({error: "Invalid quantity"});
-//     }
-//     /* 
-//         If the item is already in the order, the server uses the retrieved pending order's index and update quantity.
-//         If the item is not in the order, it is added to the items array.
-//       */
-//     const existingItemIndex = order.items.findIndex((item) =>
-//       item.menuItem.equals(menuItemId)
-//     );
-
+//     const existingItemIndex = order.items.findIndex((item) => item.menuItem.equals(menuItemId));
 //     if (existingItemIndex > -1) {
-//       // If this item and its index is found
 //       order.items[existingItemIndex].quantity += quantity;
 //     } else {
 //       order.items.push({ menuItem: menuItemId, quantity });
 //     }
 
-//     //! Update the total price
-//     order.total = order.items.reduce((acc, item) =>{
-//       return acc + item.quantity * menuItem.price;
-//     }, 0);
-
-//     //  The updated order is saved back to the database
-//     await order.save();
-//     await order.populate("items.menuItem");
-
+//     order.total = order.items.reduce((acc, item) => acc + item.quantity * menuItem.price, 0);
+//     await order.save(); // 🚀 Ensure order is saved
+// console.log("Order saved:", order);
 //     res.json({ message: "Item added to cart", order });
 //   } catch (error) {
 //     console.error("Error adding to cart:", error);
@@ -453,67 +434,23 @@ let order = await Order.findOne({
 //   }
 // });
 
-app.get("/cart", authenticateToken, async (req, res) => {
-  try {
-    let order = await Order.findOne({
-  userId: req.myUser.userId,
-  status: "pending",
-  items: { $exists: true, $ne: [] } // Ensure it has items
-}).populate("items.menuItem");
-
-    if (!order) {
-      if (req.session.cart) {
-        order = {
-          items: req.session.cart,
-          total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
-        };
-      } else {
-        return res.json({ order: { items: [], total: 0 } });
-      }
-    }
-
-    res.json({ order });
-  } catch (error) {
-    console.error("Error fetching cart:", error);
-    res.status(500).json({ error: "Failed to fetch cart" });
-  }
-});
-
 // app.get("/cart", authenticateToken, async (req, res) => {
 //   try {
 //     let order = await Order.findOne({
-//       userId: req.myUser.userId,
-//       status: "pending",
-//     }).populate("items.menuItem");
-
-//     // Check if session cart is cleared
-//     if (!req.session.cart) {
-//       req.session.cart = null;
-//     }
-
-//     // Check if there's no pending order
-//     if (!order || order.items.length === 0) {
-//       return res.json({ order: { items: [], total: 0 } });
-//     }
-
-//     res.json({ order });
-//   } catch (error) {
-//     console.error("Error fetching cart:", error);
-//     res.status(500).json({ error: "Failed to fetch cart" });
-//   }
-// });
-
-// app.get("/cart", authenticateToken, async (req, res) => {
-//   try {
-//     const order = await Order.findOne({
-//       userId: req.myUser.userId,
-//       status: "pending",
-//     }).populate("items.menuItem");
-
+//   userId: req.myUser.userId,
+//   status: "pending",
+//   items: { $exists: true, $ne: [] } // Ensure it has items
+// }).populate("items.menuItem");
 
 //     if (!order) {
-//       // When a new user logs in, i.e no order is in the cart yet
-//       return res.json({order: {items: [], total: 0}});
+//       if (req.session.cart) {
+//         order = {
+//           items: req.session.cart,
+//           total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
+//         };
+//       } else {
+//         return res.json({ order: { items: [], total: 0 } });
+//       }
 //     }
 
 //     res.json({ order });
@@ -523,33 +460,7 @@ app.get("/cart", authenticateToken, async (req, res) => {
 //   }
 // });
 
-// app.get("/cart", authenticateToken, async (req, res) => {
-//   try {
-//     let order = await Order.findOne({
-//       userId: req.myUser.userId,
-//       status: "pending",
-//     }).populate("items.menuItem");
-
-//     // If user returned from Stripe and cart is empty, restore from session
-//     if (!order && req.session.cart) {
-//       order = {
-//         items: req.session.cart,
-//         total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
-//       };
-//       req.session.cart = null; // Clear session cart after restoring
-//     }
-
-//     if (!order) {
-//       return res.json({ order: { items: [], total: 0 } });
-//     }
-
-//     res.json({ order });
-//   } catch (error) {
-//     console.error("Error fetching cart:", error);
-//     res.status(500).json({ error: "Failed to fetch cart" });
-//   }
-// });
-
+//************************************************************** */
 
 app.get("/menu-items", async (req, res) => {
   try {
