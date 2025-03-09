@@ -218,13 +218,30 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-app.get("/checkout-success", (req, res) => {
+//* /checkout-success route to clear both Redis session cart and MongoDB order:
+app.get("/checkout-success", authenticateToken, async (req, res) => {
   console.log("Payment successful. Clearing cart...");
 
-  // Clear cart from session
+  // Step 1: Clear cart from session
   req.session.cart = null;
+  req.session.save(err => {
+    if (err) {
+      console.error("Error saving session after clearing cart:", err);
+    }
+  });
 
-  res.redirect("/?paymentSuccess=true"); // Redirect to homepage (or order confirmation page)
+  // Step 2: Clear pending order from MongoDB
+  try {
+    await Order.findOneAndUpdate(
+      { userId: req.myUser.userId, status: "pending" },
+      { $set: { items: [], total: 0, status: "completed" } }
+    );
+  } catch (error) {
+    console.error("Error clearing order from MongoDB:", error);
+  }
+
+  // Step 3: Redirect back to homepage
+  res.redirect("/?paymentSuccess=true");
 });
 
 //! Commented out original code 
@@ -331,6 +348,30 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/cart", authenticateToken, async (req, res) => {
+  try {
+    let order = await Order.findOne({
+      userId: req.myUser.userId,
+      status: "pending",
+    }).populate("items.menuItem");
+
+    // Check if session cart is cleared
+    if (!req.session.cart) {
+      req.session.cart = null;
+    }
+
+    // Check if there's no pending order
+    if (!order || order.items.length === 0) {
+      return res.json({ order: { items: [], total: 0 } });
+    }
+
+    res.json({ order });
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    res.status(500).json({ error: "Failed to fetch cart" });
+  }
+});
+
 // app.get("/cart", authenticateToken, async (req, res) => {
 //   try {
 //     const order = await Order.findOne({
@@ -351,32 +392,32 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
 //   }
 // });
 
-app.get("/cart", authenticateToken, async (req, res) => {
-  try {
-    let order = await Order.findOne({
-      userId: req.myUser.userId,
-      status: "pending",
-    }).populate("items.menuItem");
+// app.get("/cart", authenticateToken, async (req, res) => {
+//   try {
+//     let order = await Order.findOne({
+//       userId: req.myUser.userId,
+//       status: "pending",
+//     }).populate("items.menuItem");
 
-    // If user returned from Stripe and cart is empty, restore from session
-    if (!order && req.session.cart) {
-      order = {
-        items: req.session.cart,
-        total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
-      };
-      req.session.cart = null; // Clear session cart after restoring
-    }
+//     // If user returned from Stripe and cart is empty, restore from session
+//     if (!order && req.session.cart) {
+//       order = {
+//         items: req.session.cart,
+//         total: req.session.cart.reduce((acc, item) => acc + item.quantity * item.price, 0),
+//       };
+//       req.session.cart = null; // Clear session cart after restoring
+//     }
 
-    if (!order) {
-      return res.json({ order: { items: [], total: 0 } });
-    }
+//     if (!order) {
+//       return res.json({ order: { items: [], total: 0 } });
+//     }
 
-    res.json({ order });
-  } catch (error) {
-    console.error("Error fetching cart:", error);
-    res.status(500).json({ error: "Failed to fetch cart" });
-  }
-});
+//     res.json({ order });
+//   } catch (error) {
+//     console.error("Error fetching cart:", error);
+//     res.status(500).json({ error: "Failed to fetch cart" });
+//   }
+// });
 
 
 app.get("/menu-items", async (req, res) => {
