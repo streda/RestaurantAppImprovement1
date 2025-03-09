@@ -255,19 +255,23 @@ app.post("/create-checkout-session", async (req, res) => {
 
 //* /checkout-success route to clear both Redis session cart and MongoDB order:
 app.get("/checkout-success", async (req, res) => {
-  console.log("Payment successful. Clearing cart...");
+  console.log("Payment successful. Clearing cart and pending orders...");
 
-  // Mark the order as completed
-  await Order.findOneAndUpdate(
-    { userId: req.myUser.userId, status: "pending" },
-    { status: "completed" }
-  );
+  // Ensure the user is authenticated
+  if (!req.myUser || !req.myUser.userId) {
+    console.error("No user found in session.");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
-  // Clear session-based cart
+  // Clear pending orders in the database for this user
+  await Order.deleteMany({ userId: req.myUser.userId, status: "pending" });
+
+  // Clear session cart
   req.session.cart = null;
 
-  res.redirect("/?paymentSuccess=true");
+  res.redirect("/?paymentSuccess=true"); 
 });
+
 
 
 // app.get("/checkout-success", async (req, res) => {
@@ -345,10 +349,18 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
       return res.status(404).json({ success: false, message: "Menu item not found" });
     }
 
-    let order = await Order.findOne({
-      userId: req.myUser.userId,
-      status: "pending",
-    });
+    // Delete any old empty orders before adding a new one
+await Order.deleteMany({
+  userId: req.myUser.userId,
+  status: "pending",
+  items: { $size: 0 } // Only delete empty orders
+});
+
+// Now find or create a new order
+let order = await Order.findOne({
+  userId: req.myUser.userId,
+  status: "pending",
+});
 
     if (!order) {
       order = new Order({
@@ -444,9 +456,10 @@ app.post("/add-to-cart", authenticateToken, async (req, res) => {
 app.get("/cart", authenticateToken, async (req, res) => {
   try {
     let order = await Order.findOne({
-      userId: req.myUser.userId,
-      status: "pending",
-    }).populate("items.menuItem");
+  userId: req.myUser.userId,
+  status: "pending",
+  items: { $exists: true, $ne: [] } // Ensure it has items
+}).populate("items.menuItem");
 
     if (!order) {
       if (req.session.cart) {
