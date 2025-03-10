@@ -50,15 +50,25 @@ export function initializeCheckoutButton() {
 }
 
 export function toggleCompleteOrderButton(isRequired) {
-    let completeOrderButton = document.getElementById("complete-order-button");
+  let completeOrderButton = document.getElementById("complete-order-button");
 
-    if (!completeOrderButton) {
-        completeOrderButton = createCompleteOrderButton();
+  if (!completeOrderButton) {
+    completeOrderButton = document.createElement("button");
+    completeOrderButton.id = "complete-order-button";
+    completeOrderButton.textContent = "Complete Order";
+    completeOrderButton.classList.add("complete-order-btn");
+    completeOrderButton.disabled = !isRequired;
+    completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
+
+    // Attach inside the #section-summary div
+    const orderSummaryContainer = document.getElementById("section-summary");
+    if (orderSummaryContainer) {
+      orderSummaryContainer.appendChild(completeOrderButton);
     }
+  }
 
-    completeOrderButton.style.display = isRequired ? "block" : "none";
+  completeOrderButton.style.display = isRequired ? "block" : "none";
 }
-
 export function createCompleteOrderButton() {
     const btn = document.createElement("button");
     btn.id = "complete-order-button";
