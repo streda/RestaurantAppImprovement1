@@ -112,6 +112,17 @@ app.use(
   })
 );
 
+//* Send periodic keep-alive pings to prevent disconnection. Currently, the app crashes (disconnects) every 5 minutes whenever there is no active user. This happens because I am using Redis low tier plan. To avoid this, I need to dynamically ping the redis instance to mimic as an active user. This will trick the redis from disconnecting and reconnect every 5 minutes.
+setInterval(async () => {
+  try {
+    await redisClient.ping();
+    console.log("🔄 Redis keep-alive ping sent");
+  } catch (err) {
+    console.error("Redis ping failed:", err);
+  }
+}, 240000); // Send a ping every 4 minutes (before the 5 min timeout)
+
+
 // 🔹 Handle uncaught exceptions to prevent Heroku crashes
 process.on("uncaughtException", (err) => {
   console.error("🚨 Uncaught Exception:", err);
