@@ -55,10 +55,6 @@ const allowedOrigins = [
 ];
 
 // Create Redis client using ES module syntax:
-import { createClient } from "redis";
-import session from "express-session";
-import RedisStore from "connect-redis";
-
 const redisClient = createClient({
   url: process.env.REDIS_URL, // Ensure this is set in Heroku
   socket: { 
