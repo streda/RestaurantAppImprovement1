@@ -9,7 +9,6 @@ import {
   isLoggedIn,
   toggleOrderSummaryDisplay,
   toggleCompleteOrderButton,
-  handleCompleteOrderButtonClick,
   initializeCheckoutButton,
   removeAllItem,
   removeSingleItem,
