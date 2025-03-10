@@ -39,46 +39,46 @@ export default async function handleCheckout(orderArray) {
 
 
   
-export function initializeCheckoutButton() {
-    const checkoutButton = document.getElementById("complete-order-button");
+// export function initializeCheckoutButton() {
+//     const checkoutButton = document.getElementById("complete-order-button");
     
-    if (checkoutButton) {
-      checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
-    } else {
-      console.error("Checkout button not found");
-    }
-  }
+//     if (checkoutButton) {
+//       checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
+//     } else {
+//       console.error("Checkout button not found");
+//     }
+//   }
 
-  export function toggleCompleteOrderButton(isRequired) {
-    let completeOrderButton = document.getElementById("complete-order-button");
-    if (!completeOrderButton) {
-      completeOrderButton = createCompleteOrderButton();
-    }
-    completeOrderButton.style.display = isRequired ? "block" : "none";
-  }
+//   export function toggleCompleteOrderButton(isRequired) {
+//     let completeOrderButton = document.getElementById("complete-order-button");
+//     if (!completeOrderButton) {
+//       completeOrderButton = createCompleteOrderButton();
+//     }
+//     completeOrderButton.style.display = isRequired ? "block" : "none";
+//   }
   
-  export function createCompleteOrderButton() {
-    const btn = document.createElement("button");
-    btn.id = "complete-order-button";
-    btn.textContent = "Complete Order";
-    btn.addEventListener("click", handleCompleteOrderButtonClick);
+//   export function createCompleteOrderButton() {
+//     const btn = document.createElement("button");
+//     btn.id = "complete-order-button";
+//     btn.textContent = "Complete Order";
+//     btn.addEventListener("click", handleCompleteOrderButtonClick);
   
-    const displayCompleteOrderButton =
-      document.getElementById("section-complete");
-    if (displayCompleteOrderButton) {
-      displayCompleteOrderButton.appendChild(btn);
-    } else {
-      console.error("section-complete element is not available on this page.");
-    }
-    return btn;
-  }
+//     const displayCompleteOrderButton =
+//       document.getElementById("section-complete");
+//     if (displayCompleteOrderButton) {
+//       displayCompleteOrderButton.appendChild(btn);
+//     } else {
+//       console.error("section-complete element is not available on this page.");
+//     }
+//     return btn;
+//   }
   
-  export function handleCompleteOrderButtonClick() {
-    if (orderArray.length > 0) {
-      handleCheckout(orderArray).catch((error) =>
-        console.error("Checkout failed", error)
-      );
-    } else {
-      alert("Please add items to your order before proceeding to payment.");
-    }
-  }
+//   export function handleCompleteOrderButtonClick() {
+//     if (orderArray.length > 0) {
+//       handleCheckout(orderArray).catch((error) =>
+//         console.error("Checkout failed", error)
+//       );
+//     } else {
+//       alert("Please add items to your order before proceeding to payment.");
+//     }
+//   }
