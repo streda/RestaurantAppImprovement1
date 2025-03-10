@@ -1,3 +1,5 @@
+import { orderArray } from "./index.js"; // Ensure this is imported properly
+
 export async function handleCheckout(orderArray) {
     const token = localStorage.getItem("token");
 
@@ -49,9 +51,11 @@ export function initializeCheckoutButton() {
 
 export function toggleCompleteOrderButton(isRequired) {
     let completeOrderButton = document.getElementById("complete-order-button");
+
     if (!completeOrderButton) {
         completeOrderButton = createCompleteOrderButton();
     }
+
     completeOrderButton.style.display = isRequired ? "block" : "none";
 }
 
@@ -61,9 +65,10 @@ export function createCompleteOrderButton() {
     btn.textContent = "Complete Order";
     btn.classList.add("complete-order-btn");
     btn.disabled = true; // Initially disabled
+
     btn.addEventListener("click", handleCompleteOrderButtonClick);
 
-    const orderSummaryContainer = document.getElementById("section-summary");
+    const orderSummaryContainer = document.getElementById("section-summary"); // Fix: Append inside #section-summary
     if (orderSummaryContainer) {
         orderSummaryContainer.appendChild(btn);
     } else {
