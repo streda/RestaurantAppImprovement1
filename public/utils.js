@@ -1,4 +1,4 @@
-import { initializeCheckoutButton, toggleCompleteOrderButton, handleCompleteOrderButtonClick } from "./checkoutUtils.js";
+import { handleCheckout } from "./checkoutUtils.js";
 
 import { menuArray, orderArray } from "./index.js";
 
@@ -590,36 +590,36 @@ export function updateOrderSummary(items) {
 
 
 
-export default async function handleCheckout(orderArray) {
-  const items = orderArray.map(({menuItem, quantity})=> ({
-    id: menuItem._id,
-    name: menuItem.name,
-    price: menuItem.price,
-    quantity: quantity,
-  }));
+// export default async function handleCheckout(orderArray) {
+//   const items = orderArray.map(({menuItem, quantity})=> ({
+//     id: menuItem._id,
+//     name: menuItem.name,
+//     price: menuItem.price,
+//     quantity: quantity,
+//   }));
 
-  const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  credentials: 'include',
-  body: JSON.stringify({ items }), // Send the items to the backend
-});
+//   const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
+//   method: 'POST',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+//   credentials: 'include',
+//   body: JSON.stringify({ items }), // Send the items to the backend
+// });
 
-  if(!response.ok){
-    throw new Error('Network response was not ok.');
-  }
+//   if(!response.ok){
+//     throw new Error('Network response was not ok.');
+//   }
 
-  let session;
-  try {
-    session = await response.json();
-  } catch (error) {
-    throw new Error('Failed to parse JSON response.');
-  }
-  window.location.href = session.url; // Redirect to Stripe Checkout
+//   let session;
+//   try {
+//     session = await response.json();
+//   } catch (error) {
+//     throw new Error('Failed to parse JSON response.');
+//   }
+//   window.location.href = session.url; // Redirect to Stripe Checkout
 
-}
+// }
 
 
 
