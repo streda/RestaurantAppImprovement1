@@ -1,5 +1,3 @@
-import { handleCheckout } from "./checkoutUtils.js";
-
 import { menuArray, orderArray } from "./index.js";
 
 const API_BASE_URL = "https://truefood.rest";

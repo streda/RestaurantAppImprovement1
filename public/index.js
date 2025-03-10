@@ -9,12 +9,15 @@ import {
   isLoggedIn,
   toggleOrderSummaryDisplay,
   toggleCompleteOrderButton,
-  initializeCheckoutButton,
   removeAllItem,
   removeSingleItem,
   addSingleItem,
   addItem,
 } from "./utils.js";
+
+import { 
+  initializeCheckoutButton 
+} from "./checkoutUtils.js"; 
 
 export let orderArray = [];
 export let menuArray = [];
