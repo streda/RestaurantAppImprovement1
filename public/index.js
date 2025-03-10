@@ -14,7 +14,8 @@ import {
 } from "./utils.js";
 
 import { 
-  initializeCheckoutButton 
+  initializeCheckoutButton,
+  toggleCompleteOrderButton
 } from "./checkoutUtils.js"; 
 
 export let orderArray = [];
