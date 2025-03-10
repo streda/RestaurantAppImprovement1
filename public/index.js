@@ -8,11 +8,9 @@ import {
   hideLoginForm,
   isLoggedIn,
   toggleOrderSummaryDisplay,
-  toggleCompleteOrderButton,
   removeAllItem,
   removeSingleItem,
   addSingleItem,
-  addItem,
 } from "./utils.js";
 
 import { 
