@@ -1,4 +1,4 @@
-export default async function handleCheckout(orderArray) {
+export async function handleCheckout(orderArray) {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -20,7 +20,7 @@ export default async function handleCheckout(orderArray) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,  // ✅ Fix: Ensure token is included
+                "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify({ items }),
         });
@@ -37,48 +37,47 @@ export default async function handleCheckout(orderArray) {
     }
 }
 
+export function initializeCheckoutButton() {
+    const checkoutButton = document.getElementById("complete-order-button");
 
-  
-// export function initializeCheckoutButton() {
-//     const checkoutButton = document.getElementById("complete-order-button");
-    
-//     if (checkoutButton) {
-//       checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
-//     } else {
-//       console.error("Checkout button not found");
-//     }
-//   }
+    if (checkoutButton) {
+        checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
+    } else {
+        console.error("Checkout button not found");
+    }
+}
 
-//   export function toggleCompleteOrderButton(isRequired) {
-//     let completeOrderButton = document.getElementById("complete-order-button");
-//     if (!completeOrderButton) {
-//       completeOrderButton = createCompleteOrderButton();
-//     }
-//     completeOrderButton.style.display = isRequired ? "block" : "none";
-//   }
-  
-//   export function createCompleteOrderButton() {
-//     const btn = document.createElement("button");
-//     btn.id = "complete-order-button";
-//     btn.textContent = "Complete Order";
-//     btn.addEventListener("click", handleCompleteOrderButtonClick);
-  
-//     const displayCompleteOrderButton =
-//       document.getElementById("section-complete");
-//     if (displayCompleteOrderButton) {
-//       displayCompleteOrderButton.appendChild(btn);
-//     } else {
-//       console.error("section-complete element is not available on this page.");
-//     }
-//     return btn;
-//   }
-  
-//   export function handleCompleteOrderButtonClick() {
-//     if (orderArray.length > 0) {
-//       handleCheckout(orderArray).catch((error) =>
-//         console.error("Checkout failed", error)
-//       );
-//     } else {
-//       alert("Please add items to your order before proceeding to payment.");
-//     }
-//   }
+export function toggleCompleteOrderButton(isRequired) {
+    let completeOrderButton = document.getElementById("complete-order-button");
+    if (!completeOrderButton) {
+        completeOrderButton = createCompleteOrderButton();
+    }
+    completeOrderButton.style.display = isRequired ? "block" : "none";
+}
+
+export function createCompleteOrderButton() {
+    const btn = document.createElement("button");
+    btn.id = "complete-order-button";
+    btn.textContent = "Complete Order";
+    btn.classList.add("complete-order-btn");
+    btn.disabled = true; // Initially disabled
+    btn.addEventListener("click", handleCompleteOrderButtonClick);
+
+    const orderSummaryContainer = document.getElementById("section-summary");
+    if (orderSummaryContainer) {
+        orderSummaryContainer.appendChild(btn);
+    } else {
+        console.error("#section-summary is MISSING in the DOM!");
+    }
+    return btn;
+}
+
+export function handleCompleteOrderButtonClick() {
+    if (orderArray.length > 0) {
+        handleCheckout(orderArray).catch((error) =>
+            console.error("Checkout failed", error)
+        );
+    } else {
+        alert("Please add items to your order before proceeding to payment.");
+    }
+}
