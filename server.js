@@ -55,32 +55,102 @@ const allowedOrigins = [
 ];
 
 // Create Redis client using ES module syntax:
+import { createClient } from "redis";
+import session from "express-session";
+import RedisStore from "connect-redis";
 
 const redisClient = createClient({
-  url: process.env.REDIS_URL, // Heroku sets this automatically
+  url: process.env.REDIS_URL, // Ensure this is set in Heroku
   socket: { 
-    tls: true , // Ensure secure connection
-    rejectUnauthorized: false, // Allow self-signed certificates
+    tls: true, // Ensure secure connection
+    rejectUnauthorized: false, // Only use this if needed
+    reconnectStrategy: (retries) => Math.min(retries * 500, 5000), // Retry logic
   } 
 });
 
-redisClient.connect().catch((err) => {
-  console.error("Redis connection error:", err);
-}); 
+// 🔹 Proper error handling to prevent crashes
+redisClient.on("error", (err) => {
+  console.error("Redis Client Error:", err);
+});
 
-// Create Redis store using the named export
+redisClient.on("connect", () => {
+  console.log("✅ Connected to Redis");
+});
+
+redisClient.on("end", () => {
+  console.warn("⚠️ Redis connection closed. Reconnecting...");
+  reconnectRedis();
+});
+
+async function reconnectRedis() {
+  try {
+    await redisClient.connect();
+    console.log("🔄 Redis reconnected successfully");
+  } catch (error) {
+    console.error("Redis reconnection failed:", error);
+    setTimeout(reconnectRedis, 5000); // Try reconnecting every 5 sec
+  }
+}
+
+// Connect Redis (ensures proper handling of async connection)
+redisClient.connect().catch((err) => {
+  console.error("Initial Redis connection error:", err);
+  reconnectRedis();
+});
+
+// 🔹 Create Redis store with proper handling
 const redisStore = new RedisStore({ client: redisClient, prefix: "session:" });
 
-// Use session middleware with the Redis store:
+// 🔹 Use session middleware with improved options
 app.use(
   session({
     store: redisStore,
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true, sameSite: "none" }
+    cookie: { 
+      secure: process.env.NODE_ENV === "production", // Secure only in production
+      sameSite: "none", // Allow cross-site cookies
+      httpOnly: true, // Prevent client-side access
+    }
   })
 );
+
+// 🔹 Handle uncaught exceptions to prevent Heroku crashes
+process.on("uncaughtException", (err) => {
+  console.error("🚨 Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("⚠️ Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+
+// const redisClient = createClient({
+//   url: process.env.REDIS_URL, // Heroku sets this automatically
+//   socket: { 
+//     tls: true , // Ensure secure connection
+//     rejectUnauthorized: false, // Allow self-signed certificates
+//   } 
+// });
+
+// redisClient.connect().catch((err) => {
+//   console.error("Redis connection error:", err);
+// }); 
+
+// // Create Redis store using the named export
+// const redisStore = new RedisStore({ client: redisClient, prefix: "session:" });
+
+// // Use session middleware with the Redis store:
+// app.use(
+//   session({
+//     store: redisStore,
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: { secure: true, sameSite: "none" }
+//   })
+// );
 
 
 if (process.env.NODE_ENV === 'production') {
