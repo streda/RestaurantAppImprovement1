@@ -1,5 +1,10 @@
 import { menuArray, orderArray } from "./index.js";
 
+import { 
+  toggleCompleteOrderButton, 
+  handleCompleteOrderButtonClick 
+} from "./checkoutUtils.js";
+
 const API_BASE_URL = "https://truefood.rest";
 
 document.addEventListener("DOMContentLoaded", async () => {
