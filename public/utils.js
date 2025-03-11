@@ -259,7 +259,7 @@ export async function addItem(itemId) {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch("/add-to-cart", {
+    const response = await fetch("/api/add-to-cart", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
