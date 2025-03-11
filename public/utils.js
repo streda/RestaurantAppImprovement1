@@ -25,7 +25,7 @@ async function restoreCartFromDatabase() {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
+    const response = await fetch(`${API_BASE_URL}/api/cart`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -97,7 +97,7 @@ export async function fetchMenuItems(redirect = false) {
 
 
   try {
-    const response = await fetch(`${API_BASE_URL}/menu-items`, {
+    const response = await fetch(`${API_BASE_URL}/api/menu-items`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -153,7 +153,7 @@ export async function fetchCartData() {
 
 
   try {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
+    const response = await fetch(`${API_BASE_URL}/api/cart`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -44,20 +44,18 @@ console.log("SERVER_URL:", process.env.SERVER_URL);
 const app = express();
 app.use(express.json());
 
-app.use("/api", loginRouter);
 app.use(registerRouter); 
-app.use("/api", registerRouter);
 
-app.use("/api/cart", cartRouter);
-app.use("/api/checkout", checkoutRouter);
-app.use("/api/login", loginRouter);
-app.use("/api/logout", logoutRouter);
-app.use("/api/menu", menuRouter);
-app.use("/api/orders", orderRouter); // Register order routes
-app.use("/api/payment", paymentRouter);
-app.use("/api/register", registerRouter);
-app.use("/api/remove", removeRouter);
-app.use("/api/update", updateRouter);
+app.use("/api", cartRouter);
+app.use("/api", checkoutRouter);
+app.use("/api", loginRouter);
+app.use("/api", logoutRouter);
+app.use("/api", menuRouter);
+app.use("/api", orderRouter); // Register order routes
+app.use("/api", paymentRouter);
+app.use("/api", registerRouter);
+app.use("/api", removeRouter);
+app.use("/api", updateRouter);
 
 
 app.use(cookieParser());
@@ -191,8 +189,15 @@ mongoose
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("*", (req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    return res.status(404).json({ error: "API route not found" });
+  }
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "public", "index.html"));
+// });
 
 const PORT = process.env.PORT || 5005; // Heroku dynamically assigns a PORT
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
