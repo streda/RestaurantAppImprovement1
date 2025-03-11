@@ -16,7 +16,7 @@ import MenuItem from "./models/menuItemModel.js";
 import Order from "./models/order.js";
 // import User from "./models/userModel.js";
 
-import authenticateToken from "../middleware/auth.js";
+// import authenticateToken from "./middleware/auth.js"; // Ensure correct path
 
 import cartRouter from "./routes/cart.js";
 import checkoutRouter from "./routes/checkout.js";
