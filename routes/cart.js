@@ -75,7 +75,13 @@ router.get("/cart", authenticateToken, async (req, res) => {
       items: { $exists: true, $ne: [] }
     }).populate("items.menuItem");
 
+     if (!order) {
+      console.warn("⚠️ No pending order found. Returning an empty cart.");
+      return res.json({ order: { items: [] } });
+    }
+
     // If no order found, return an empty cart
+    console.log("📦 Cart returned from backend:", order);
     res.json({ order: order || { items: [], total: 0 } });
   } catch (error) {
     console.error("Error fetching cart:", error);

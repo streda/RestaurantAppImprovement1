@@ -7,14 +7,42 @@ import {
 
 const API_BASE_URL = "https://truefood.rest";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const urlParams = new URLSearchParams(window.location.search);
+// document.addEventListener("DOMContentLoaded", async () => {
+//   const urlParams = new URLSearchParams(window.location.search);
   
-  if (urlParams.get("canceled") === "true") {
-    alert("Payment canceled. Restoring your cart.");
-    await restoreCartFromDatabase();
+//   if (urlParams.get("canceled") === "true") {
+//     alert("Payment canceled. Restoring your cart.");
+//     await restoreCartFromDatabase();
+//   }
+// });
+
+//! handle payment cancellation restoration and call fetchCartData() on page load.
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    console.log("🔄 Page loaded. Fetching cart data...");
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get("canceled") === "true") {
+      alert("Payment canceled. Restoring your cart.");
+      await restoreCartFromDatabase();
+    }
+
+    const cartData = await fetchCartData(); 
+
+    orderArray.length = 0; // Reset cart array
+    orderArray.push(...cartData); // Populate with fetched cart data
+
+    updateOrderSummary(orderArray);
+    toggleCompleteOrderButton(orderArray.length > 0);
+    toggleOrderSummaryDisplay(orderArray.length > 0);
+
+    console.log("✅ Cart loaded on page load:", orderArray);
+  } catch (error) {
+    console.error("❌ Failed to load cart on page load:", error);
   }
 });
+
 
 async function restoreCartFromDatabase() {
   const token = localStorage.getItem("token");
@@ -174,9 +202,9 @@ export async function fetchCartData() {
     }
 
     const data = await response.json();
-        const validCartItems = data.order.items || [];
+    const validCartItems = data?.order.items || [];
 
-
+console.log("📦 Cart items received:", validCartItems);
         // Ensure Order Summary is updated
         updateOrderSummary(validCartItems);
         toggleCompleteOrderButton(validCartItems.length > 0);
