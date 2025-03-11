@@ -393,83 +393,21 @@ export function toggleOrderSummaryDisplay(show) {
   }
 }
 
-// export function initializeCheckoutButton() {
-//   const checkoutButton = document.getElementById("complete-order-button");
-  
-//   if (checkoutButton) {
-//     checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
-//   } else {
-//     console.error("Checkout button not found");
+// export async function updateOrderWithValidItems(orderId, validItems) {
+//   const token = localStorage.getItem("token");
+//   try {
+//     await fetch(`/update-order/${orderId}`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//       body: JSON.stringify({ items: validItems }),
+//     });
+//   } catch (error) {
+//     console.error("Failed to update order:", error);
 //   }
 // }
-
-// export function toggleCompleteOrderButton(isRequired) {
-//   let completeOrderButton = document.getElementById("complete-order-button");
-
-//   if (!completeOrderButton) {
-//     completeOrderButton = document.createElement("button");
-//     completeOrderButton.id = "complete-order-button";
-//     completeOrderButton.textContent = "Complete Order";
-//     completeOrderButton.classList.add("complete-order-btn");
-//     completeOrderButton.disabled = !isRequired;
-//     completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
-
-//     // Attach inside the #section-summary div
-//     const orderSummaryContainer = document.getElementById("section-summary");
-//     if (orderSummaryContainer) {
-//       orderSummaryContainer.appendChild(completeOrderButton);
-//     }
-//   }
-
-//   completeOrderButton.style.display = isRequired ? "block" : "none";
-// }
-
-
-// export function createCompleteOrderButton() {
-//     const btn = document.createElement("button");
-//     btn.id = "complete-order-button";
-//     btn.textContent = "Complete Order";
-//     btn.classList.add("complete-order-btn");
-//     btn.disabled = true; // Initially disabled
-
-//     btn.addEventListener("click", handleCompleteOrderButtonClick);
-
-//     const orderSummaryContainer = document.getElementById("section-summary"); // Fix: Append inside #section-summary
-//     if (orderSummaryContainer) {
-//         orderSummaryContainer.appendChild(btn);
-//     } else {
-//         console.error("#section-summary is MISSING in the DOM!");
-//     }
-//     return btn;
-// }
-
-
-// export function handleCompleteOrderButtonClick() {
-//   if (orderArray.length > 0) {
-//     handleCheckout(orderArray).catch((error) =>
-//       console.error("Checkout failed", error)
-//     );
-//   } else {
-//     alert("Please add items to your order before proceeding to payment.");
-//   }
-// }
-
-
-export async function updateOrderWithValidItems(orderId, validItems) {
-  const token = localStorage.getItem("token");
-  try {
-    await fetch(`/update-order/${orderId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ items: validItems }),
-    });
-  } catch (error) {
-    console.error("Failed to update order:", error);
-  }
-}
 
 export function updateQuantityIndicators(orderArray) {
   document.querySelectorAll(".quantity-indicator").forEach((indicator) => {
@@ -592,42 +530,3 @@ export function updateOrderSummary(items) {
   updateQuantityIndicators(items);
   toggleCompleteOrderButton(items.length > 0);
 }
-
-
-
-// export default async function handleCheckout(orderArray) {
-//   const items = orderArray.map(({menuItem, quantity})=> ({
-//     id: menuItem._id,
-//     name: menuItem.name,
-//     price: menuItem.price,
-//     quantity: quantity,
-//   }));
-
-//   const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
-//   method: 'POST',
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-//   credentials: 'include',
-//   body: JSON.stringify({ items }), // Send the items to the backend
-// });
-
-//   if(!response.ok){
-//     throw new Error('Network response was not ok.');
-//   }
-
-//   let session;
-//   try {
-//     session = await response.json();
-//   } catch (error) {
-//     throw new Error('Failed to parse JSON response.');
-//   }
-//   window.location.href = session.url; // Redirect to Stripe Checkout
-
-// }
-
-
-
-// const API_BASE_URL = window.location.origin.includes("localhost")
-//   ? "http://localhost:5005"
-//   : "https://truefood.rest";
