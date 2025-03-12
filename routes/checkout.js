@@ -47,35 +47,59 @@ router.post("/create-checkout-session", authenticateToken, async (req, res) => {
 router.get("/checkout-success", async (req, res) => {
   const { userId } = req.query;
   if (!userId) {
-    console.warn("No userId provided in checkout-success.");
+    console.warn("No userId provided in checkout-success; cannot clear order properly.");
     return res.redirect("/?paymentSuccess=true");
   }
 
+  console.log("Payment successful for user:", userId, ". Clearing persistent order...");
+
   try {
-    console.log(`🔍 Searching for pending orders for userId: ${userId}`);
-
-    // Find and delete orders
-    const deleteResult = await Order.deleteMany({ userId, status: "pending" });
-
-    console.log(`🗑️ Orders deleted: ${deleteResult.deletedCount}`);
-
-    // ✅ Clear session cart if applicable
-    if (req.session) {
-      console.log("🛒 Clearing session cart...");
-      req.session.cart = null;
-    } else {
-      console.warn("⚠️ No session detected. Unable to clear session cart.");
-    }
-
-    console.log("✅ Cart successfully cleared after checkout.");
-
-    // ✅ Redirect user back to the homepage with a flag
-    res.redirect("/?paymentSuccess=true");
-
+    // Delete the pending order(s) for that user
+    await Order.deleteMany({ userId, status: "pending" });
   } catch (error) {
-    console.error("❌ Error clearing persistent order:", error);
-    res.redirect("/?paymentFailed=true");
+    console.error("Error clearing persistent order:", error);
   }
+
+  // Clear session cart if available
+  req.session.cart = null;
+
+  // Redirect back to the homepage (or a dedicated order confirmation page)
+  res.redirect("/?paymentSuccess=true");
 });
+
+
+// router.get("/checkout-success", async (req, res) => {
+//   const { userId } = req.query;
+//   if (!userId) {
+//     console.warn("No userId provided in checkout-success.");
+//     return res.redirect("/?paymentSuccess=true");
+//   }
+
+//   try {
+//     console.log(`🔍 Searching for pending orders for userId: ${userId}`);
+
+//     // Find and delete orders
+//     const deleteResult = await Order.deleteMany({ userId, status: "pending" });
+
+//     console.log(`🗑️ Orders deleted: ${deleteResult.deletedCount}`);
+
+//     // ✅ Clear session cart if applicable
+//     if (req.session) {
+//       console.log("🛒 Clearing session cart...");
+//       req.session.cart = null;
+//     } else {
+//       console.warn("⚠️ No session detected. Unable to clear session cart.");
+//     }
+
+//     console.log("✅ Cart successfully cleared after checkout.");
+
+//     // ✅ Redirect user back to the homepage with a flag
+//     res.redirect("/?paymentSuccess=true");
+
+//   } catch (error) {
+//     console.error("❌ Error clearing persistent order:", error);
+//     res.redirect("/?paymentFailed=true");
+//   }
+// });
 
 export default router;
