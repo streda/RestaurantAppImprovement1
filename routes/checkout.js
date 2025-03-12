@@ -53,7 +53,11 @@ router.get("/checkout-success", async (req, res) => {
 
   try {
     // Clear pending orders
-    await Order.deleteMany({ userId, status: "pending" });
+    // await Order.deleteMany({ userId, status: "pending" });
+    console.log(`🛠 Deleting orders for userId: ${userId}`);
+    const deleteResult = await Order.deleteMany({ userId, status: "pending" });
+
+    console.log(`✅ Deleted ${deleteResult.deletedCount} orders for userId: ${userId}`);
 
     // ✅ Clear session cart if applicable
     if (req.session) {

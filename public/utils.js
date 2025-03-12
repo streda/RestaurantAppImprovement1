@@ -223,6 +223,13 @@ export async function fetchCartData() {
     const validCartItems = data?.order.items || [];
 
 console.log("📦 Cart items received:", validCartItems);
+
+ if (validCartItems.length === 0) {
+      console.log("✅ Cart is empty. Clearing orderArray.");
+      orderArray.length = 0;
+    }
+
+    
         // Ensure Order Summary is updated
         updateOrderSummary(validCartItems);
         toggleCompleteOrderButton(validCartItems.length > 0);
