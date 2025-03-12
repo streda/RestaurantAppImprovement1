@@ -52,11 +52,22 @@ router.get("/checkout-success", async (req, res) => {
   }
 
   try {
+    // Clear pending orders
     await Order.deleteMany({ userId, status: "pending" });
-    req.session.cart = null; // Clear session cart if available
+
+    // ✅ Clear session cart if applicable
+    if (req.session) {
+      req.session.cart = null;
+    }
+
+    console.log("✅ Cart successfully cleared after checkout.");
+
+    // ✅ Redirect user back to the homepage with a flag
     res.redirect("/?paymentSuccess=true");
+
   } catch (error) {
-    console.error("Error clearing persistent order:", error);
+    console.error("❌ Error clearing persistent order:", error);
+    res.redirect("/?paymentFailed=true");
   }
 });
 

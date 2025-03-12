@@ -20,16 +20,34 @@ const API_BASE_URL = "https://truefood.rest";
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     console.log("🔄 Page loaded. Fetching cart data...");
-    
+
     const urlParams = new URLSearchParams(window.location.search);
-    
+
+    // ✅ If checkout was successful, clear the cart
+    if (urlParams.get("paymentSuccess") === "true") {
+      console.log("✅ Payment successful. Clearing cart...");
+
+      orderArray.length = 0; // ✅ Reset cart array
+      updateOrderSummary(orderArray);
+      toggleOrderSummaryDisplay(false);
+      toggleCompleteOrderButton(false);
+
+      // ✅ Ensure server reflects cleared cart
+      await fetchCartData();
+
+      // ✅ Remove the URL parameter to prevent clearing on every reload
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+
+
+    //* If the checkout was cancelled, restore the cart
     if (urlParams.get("canceled") === "true") {
       alert("Payment canceled. Restoring your cart.");
       await restoreCartFromDatabase();
     }
-
+    // 🔹 Fetch cart items and update UI
     const cartData = await fetchCartData(); 
-
     orderArray.length = 0; // Reset cart array
     orderArray.push(...cartData); // Populate with fetched cart data
 
