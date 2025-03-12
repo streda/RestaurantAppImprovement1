@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       toggleOrderSummaryDisplay(false);
       toggleCompleteOrderButton(false);
 
+       console.log("🗑️ Frontend cart cleared successfully.");
+       
       // ✅ Ensure server reflects cleared cart
       await fetchCartData();
 
@@ -40,12 +42,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.history.replaceState({}, document.title, newUrl);
     }
 
-
-    //* If the checkout was cancelled, restore the cart
+    // ✅ If checkout was canceled, restore the cart
     if (urlParams.get("canceled") === "true") {
       alert("Payment canceled. Restoring your cart.");
       await restoreCartFromDatabase();
     }
+
     // 🔹 Fetch cart items and update UI
     const cartData = await fetchCartData(); 
     orderArray.length = 0; // Reset cart array

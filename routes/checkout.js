@@ -52,16 +52,19 @@ router.get("/checkout-success", async (req, res) => {
   }
 
   try {
-    // Clear pending orders
-    // await Order.deleteMany({ userId, status: "pending" });
-    console.log(`🛠 Deleting orders for userId: ${userId}`);
+    console.log(`🔍 Searching for pending orders for userId: ${userId}`);
+
+    // Find and delete orders
     const deleteResult = await Order.deleteMany({ userId, status: "pending" });
 
-    console.log(`✅ Deleted ${deleteResult.deletedCount} orders for userId: ${userId}`);
+    console.log(`🗑️ Orders deleted: ${deleteResult.deletedCount}`);
 
     // ✅ Clear session cart if applicable
     if (req.session) {
+      console.log("🛒 Clearing session cart...");
       req.session.cart = null;
+    } else {
+      console.warn("⚠️ No session detected. Unable to clear session cart.");
     }
 
     console.log("✅ Cart successfully cleared after checkout.");
