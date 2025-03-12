@@ -5,7 +5,6 @@ import authenticateToken from "../middleware/auth.js";
 
 const router = express.Router();
 
-// 📌 Update item quantity in cart
 router.post("/update-item", authenticateToken, async (req, res) => {
   const { id, action } = req.body;
 

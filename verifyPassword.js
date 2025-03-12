@@ -15,15 +15,12 @@ async function verifyPassword() {
 
     const user = await User.findOne({ username });
     if (!user) {
-      console.log("User not found.");
       return;
     }
 
     const isMatch = await bcrypt.compare(enteredPassword, user.password);
     if (isMatch) {
-      console.log("✅ Password is CORRECT!");
     } else {
-      console.log("❌ Password is INCORRECT!");
     }
   } catch (error) {
     console.error("Error verifying password:", error);

@@ -3,7 +3,6 @@ import MenuItem from "../models/menuItemModel.js";
 
 const router = express.Router();
 
-// 📌 Get Menu Items
 router.get("/menu-items", async (req, res) => {
   try {
     const items = await MenuItem.find({});

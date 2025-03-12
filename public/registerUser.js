@@ -1,7 +1,3 @@
-// First install "npm install node-fetch"
-// Then, run "node registerUser.js"
-
-
 import fetch from 'node-fetch';
 
 async function registerUser(username, password) {

@@ -1,13 +1,11 @@
 import express from "express";
-import Order from "../models/order.js"; // Import Order model
-import authenticateToken from "../middleware/auth.js"; // Middleware for authentication
+import Order from "../models/order.js"; 
+import authenticateToken from "../middleware/auth.js"; 
 
 const router = express.Router();
 
-// 📌 Place an Order (Checkout)
 router.post("/checkout", authenticateToken, async (req, res) => {
   try {
-    // Find the user's pending order
     let order = await Order.findOne({
       userId: req.myUser.userId,
       status: "pending",
@@ -18,7 +16,6 @@ router.post("/checkout", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "No items in cart. Please add items before checkout." });
     }
 
-    // Mark the order as "completed"
     order.status = "completed";
     await order.save();
 
@@ -29,12 +26,11 @@ router.post("/checkout", authenticateToken, async (req, res) => {
   }
 });
 
-// 📌 Get User's Order History
 router.get("/history", authenticateToken, async (req, res) => {
   try {
     const orders = await Order.find({
       userId: req.myUser.userId,
-      status: { $ne: "pending" } // Exclude pending carts
+      status: { $ne: "pending" } 
     }).populate("items.menuItem");
 
     res.json({ orders });
@@ -44,10 +40,10 @@ router.get("/history", authenticateToken, async (req, res) => {
   }
 });
 
-// 📌 Update Order Status (Admin or User Cancelling an Order)
+
 router.patch("/update-status/:orderId", authenticateToken, async (req, res) => {
   const { orderId } = req.params;
-  const { status } = req.body; // Expect "completed" or "cancelled"
+  const { status } = req.body; 
 
   try {
     const order = await Order.findById(orderId);
@@ -55,7 +51,6 @@ router.patch("/update-status/:orderId", authenticateToken, async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Only allow valid status updates
     if (!["completed", "cancelled"].includes(status)) {
       return res.status(400).json({ error: "Invalid status update" });
     }

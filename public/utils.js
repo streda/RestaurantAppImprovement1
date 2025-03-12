@@ -7,59 +7,40 @@ import {
 
 const API_BASE_URL = "https://truefood.rest";
 
-// document.addEventListener("DOMContentLoaded", async () => {
-//   const urlParams = new URLSearchParams(window.location.search);
-  
-//   if (urlParams.get("canceled") === "true") {
-//     alert("Payment canceled. Restoring your cart.");
-//     await restoreCartFromDatabase();
-//   }
-// });
-
 //! handle payment cancellation restoration and call fetchCartData() on page load.
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    console.log("🔄 Page loaded. Fetching cart data...");
 
     const urlParams = new URLSearchParams(window.location.search);
 
-    // ✅ If checkout was successful, clear the cart
     if (urlParams.get("paymentSuccess") === "true") {
-      console.log("✅ Payment successful. Clearing cart...");
 
-      orderArray.length = 0; // ✅ Reset cart array
+      orderArray.length = 0; 
       updateOrderSummary(orderArray);
       toggleOrderSummaryDisplay(false);
       toggleCompleteOrderButton(false);
 
-       console.log("🗑️ Frontend cart cleared successfully.");
-       
-      // ✅ Ensure server reflects cleared cart
       await fetchCartData();
 
-      // ✅ Remove the URL parameter to prevent clearing on every reload
       const newUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
     }
 
-    // ✅ If checkout was canceled, restore the cart
     if (urlParams.get("canceled") === "true") {
       alert("Payment canceled. Restoring your cart.");
       await restoreCartFromDatabase();
     }
 
-    // 🔹 Fetch cart items and update UI
     const cartData = await fetchCartData(); 
-    orderArray.length = 0; // Reset cart array
-    orderArray.push(...cartData); // Populate with fetched cart data
+    orderArray.length = 0; 
+    orderArray.push(...cartData); 
 
     updateOrderSummary(orderArray);
     toggleCompleteOrderButton(orderArray.length > 0);
     toggleOrderSummaryDisplay(orderArray.length > 0);
 
-    console.log("✅ Cart loaded on page load:", orderArray);
   } catch (error) {
-    console.error("❌ Failed to load cart on page load:", error);
+    console.error("Failed to load cart on page load:", error);
   }
 });
 
@@ -93,7 +74,6 @@ async function restoreCartFromDatabase() {
 
     if (validCartItems.length > 0) {
 
-      // Properly updating `orderArray`
       orderArray.length = 0;
       orderArray.push(...validCartItems.map(item => ({
         menuItem: item.menuItem,
@@ -180,24 +160,23 @@ export async function fetchCartData() {
     return [];
   }
 
-  // Decode and check if token is expired
-  // try {
-  //   const payloadBase64 = token.split(".")[1]; 
-  //   const decodedPayload = JSON.parse(atob(payloadBase64));
+  try {
+    const payloadBase64 = token.split(".")[1]; 
+    const decodedPayload = JSON.parse(atob(payloadBase64));
 
 
-  //   if (new Date(decodedPayload.exp * 1000) < new Date()) {
-  //     console.warn("Token expired, logging out user.");
-  //     localStorage.removeItem("token");
-  //     window.location.href = "/login.html";
-  //     return []; // Prevent further execution
-  //   }
-  // } catch (error) {
-  //   console.error("Failed to decode JWT:", error);
-  //   localStorage.removeItem("token");
-  //   window.location.href = "/login.html";
-  //   return [];
-  // }
+    if (new Date(decodedPayload.exp * 1000) < new Date()) {
+      console.warn("Token expired, logging out user.");
+      localStorage.removeItem("token");
+      window.location.href = "/login.html";
+      return []; 
+    }
+  } catch (error) {
+    console.error("Failed to decode JWT:", error);
+    localStorage.removeItem("token");
+    window.location.href = "/login.html";
+    return [];
+  }
 
 
   try {
@@ -224,15 +203,10 @@ export async function fetchCartData() {
     const data = await response.json();
     const validCartItems = data?.order.items || [];
 
-console.log("📦 Cart items received:", validCartItems);
 
  if (validCartItems.length === 0) {
-      console.log("✅ Cart is empty. Clearing orderArray.");
       orderArray.length = 0;
     }
-
-
-        // Ensure Order Summary is updated
         updateOrderSummary(validCartItems);
         toggleCompleteOrderButton(validCartItems.length > 0);
          toggleOrderSummaryDisplay(validCartItems.length > 0); 
@@ -255,7 +229,7 @@ export function renderMenu(menuItems, isUserLoggedIn) {
     console.error("section-menu element is not available on this page.");
     return;
   }
-  menuContainer.innerHTML = ""; // Clear previous items
+  menuContainer.innerHTML = ""; 
   menuItems.forEach((item) => {
     const menuHtml = document.createElement("div");
     menuHtml.className = "menu-item-container";
@@ -286,7 +260,6 @@ export function renderMenu(menuItems, isUserLoggedIn) {
     menuContainer.appendChild(menuHtml);
   });
 
-  // Attach event listeners to "Add to Cart" buttons
   if (isUserLoggedIn) {
     document.querySelectorAll(".add-btn").forEach((button) => {
       button.addEventListener("click", async (event) => {
@@ -337,11 +310,9 @@ export async function addItem(itemId) {
     orderArray.length = 0; 
     orderArray.push(...validCartItems);
 
-    // Immediately update the UI
     updateOrderSummary(validCartItems);
     updateQuantityIndicators(validCartItems);
 
-    // Ensure the order summary section appears immediately after adding an item
     toggleOrderSummaryDisplay(validCartItems.length > 0);
     toggleCompleteOrderButton(validCartItems.length > 0);
 
@@ -432,7 +403,6 @@ export async function removeAllItem(itemId) {
     updateOrderSummary(validCartItems);
     updateQuantityIndicators(validCartItems);
 
-    // Ensure Order Summary visibility updates in real-time
     toggleOrderSummaryDisplay(validCartItems.length > 0);
     toggleCompleteOrderButton(validCartItems.length > 0);
   } catch (error) {
@@ -447,22 +417,6 @@ export function toggleOrderSummaryDisplay(show) {
     orderSummaryContainer.style.display = show ? "block" : "none";
   }
 }
-
-// export async function updateOrderWithValidItems(orderId, validItems) {
-//   const token = localStorage.getItem("token");
-//   try {
-//     await fetch(`/update-order/${orderId}`, {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//       },
-//       body: JSON.stringify({ items: validItems }),
-//     });
-//   } catch (error) {
-//     console.error("Failed to update order:", error);
-//   }
-// }
 
 export function updateQuantityIndicators(orderArray) {
   document.querySelectorAll(".quantity-indicator").forEach((indicator) => {
@@ -480,12 +434,6 @@ export function updateQuantityIndicators(orderArray) {
   });
 }
 
-/*  
-    Client-Side calculateTotalPrice: 
-    On the client side, I need a quick calculation using the data already present in the client’s state. 
-    This function does not need to fetch any additional data and hence can be synchronous.
-  */
-
 export function calculateTotalPrice(orders) {
   return orders.reduce((acc, order) => {
     if (!order.menuItem) {
@@ -499,7 +447,7 @@ export function calculateTotalPrice(orders) {
 export function updateOrderSummary(items) {
   if (!items || !Array.isArray(items)) {
     console.error("Invalid items array:", items);
-    items = []; // Ensure items is at least an empty array
+    items = []; 
     return;
   }
 
@@ -509,7 +457,7 @@ export function updateOrderSummary(items) {
   if (!orderSummaryContainer) {
     return;
   }
-  orderSummaryContainer.innerHTML = ""; // Clear previous summary
+  orderSummaryContainer.innerHTML = ""; 
 
   const receiptDate = new Date().toLocaleDateString("en-US", {
     month: "long",
@@ -579,8 +527,7 @@ export function updateOrderSummary(items) {
     completeOrderBtn.disabled = items.length === 0; 
 
     completeOrderBtn.addEventListener("click", handleCompleteOrderButtonClick);
-    orderSummaryContainer.appendChild(completeOrderBtn); // Append inside summary
-
+    orderSummaryContainer.appendChild(completeOrderBtn); 
 
   updateQuantityIndicators(items);
   toggleCompleteOrderButton(items.length > 0);

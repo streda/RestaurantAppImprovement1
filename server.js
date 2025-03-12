@@ -1,22 +1,19 @@
-// import open from "open";
+
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url"; 
 import { dirname } from "path"; 
 
 import cors from "cors";
-import Stripe from "stripe";
+// import Stripe from "stripe";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 
 import "express-async-errors";
 import mongoose from "mongoose";
-import MenuItem from "./models/menuItemModel.js";
+// import MenuItem from "./models/menuItemModel.js";
 import Order from "./models/order.js";
-// import User from "./models/userModel.js";
-
-// import authenticateToken from "./middleware/auth.js"; // Ensure correct path
 
 import cartRouter from "./routes/cart.js";
 import checkoutRouter from "./routes/checkout.js";
@@ -29,17 +26,14 @@ import registerRouter from "./routes/register.js";
 import removeRouter from "./routes/remove.js";
 import updateRouter from "./routes/update.js";
 
-import { calculateTotalPrice } from "./services/orderService.js";
-// import { error } from "console";
+// import { calculateTotalPrice } from "./services/orderService.js";
 
 import { createClient } from "redis";
 import session from "express-session";
 import { RedisStore } from "connect-redis"; // Use the named export
 
-// Initialize dotenv
 dotenv.config();
 
-console.log("SERVER_URL:", process.env.SERVER_URL);
 
 const app = express();
 app.use(express.json());
@@ -51,7 +45,7 @@ app.use("/api", checkoutRouter);
 app.use("/api", loginRouter);
 app.use("/api", logoutRouter);
 app.use("/api", menuRouter);
-app.use("/api", orderRouter); // Register order routes
+app.use("/api", orderRouter); 
 app.use("/api", paymentRouter);
 app.use("/api", registerRouter);
 app.use("/api", removeRouter);
@@ -59,7 +53,7 @@ app.use("/api", updateRouter);
 
 
 app.use(cookieParser());
-app.use(express.static("public")); // Serving static files normally without {index: false}
+app.use(express.static("public")); 
 
 
 app.use(cors({ origin: ["http://localhost:5005","http://localhost:3000", "http://127.0.0.1:5005", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
@@ -70,23 +64,20 @@ const allowedOrigins = [
   "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"
 ];
 
-// Create Redis client using ES module syntax:
 const redisClient = createClient({
-  url: process.env.REDIS_URL, // Ensure this is set in Heroku
+  url: process.env.REDIS_URL, 
   socket: { 
-    tls: true, // Ensure secure connection
-    rejectUnauthorized: false, // Only use this if needed
-    reconnectStrategy: (retries) => Math.min(retries * 500, 5000), // Retry logic
+    tls: true, 
+    rejectUnauthorized: false, 
+    reconnectStrategy: (retries) => Math.min(retries * 500, 5000), 
   } 
 });
 
-// 🔹 Proper error handling to prevent crashes
 redisClient.on("error", (err) => {
   console.error("Redis Client Error:", err);
 });
 
 redisClient.on("connect", () => {
-  console.log("✅ Connected to Redis");
 });
 
 redisClient.on("end", () => {
@@ -97,23 +88,19 @@ redisClient.on("end", () => {
 async function reconnectRedis() {
   try {
     await redisClient.connect();
-    console.log("🔄 Redis reconnected successfully");
   } catch (error) {
     console.error("Redis reconnection failed:", error);
-    setTimeout(reconnectRedis, 5000); // Try reconnecting every 5 sec
+    setTimeout(reconnectRedis, 5000); 
   }
 }
 
-// Connect Redis (ensures proper handling of async connection)
 redisClient.connect().catch((err) => {
   console.error("Initial Redis connection error:", err);
   reconnectRedis();
 });
 
-// 🔹 Create Redis store with proper handling
 const redisStore = new RedisStore({ client: redisClient, prefix: "session:" });
 
-// 🔹 Use session middleware with improved options
 app.use(
   session({
     store: redisStore,
@@ -121,25 +108,21 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: { 
-      secure: process.env.NODE_ENV === "production", // Secure only in production
-      sameSite: "none", // Allow cross-site cookies
-      httpOnly: true, // Prevent client-side access
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: "none", 
+      httpOnly: true, 
     }
   })
 );
 
-//* Send periodic keep-alive pings to prevent disconnection. Currently, the app crashes (disconnects) every 5 minutes whenever there is no active user. This happens because I am using Redis low tier plan. To avoid this, I need to dynamically ping the redis instance to mimic as an active user. This will trick the redis from disconnecting and reconnect every 5 minutes.
 setInterval(async () => {
   try {
     await redisClient.ping();
-    console.log("🔄 Redis keep-alive ping sent");
   } catch (err) {
     console.error("Redis ping failed:", err);
   }
-}, 240000); // Send a ping every 4 minutes (before the 5 min timeout)
+}, 240000); 
 
-
-// 🔹 Handle uncaught exceptions to prevent Heroku crashes
 process.on("uncaughtException", (err) => {
   console.error("🚨 Uncaught Exception:", err);
 });
@@ -149,11 +132,9 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-  app.set("trust proxy", 1); // Trust Heroku or other reverse proxies
+  app.set("trust proxy", 1); 
 }
 
-//  This middleware is checking if the hostname is "truefood.rest" and redirecting otherwise.
-// Wrap the redirection middleware so that it only runs in production.
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     if (req.hostname !== "truefood.rest") {
@@ -163,7 +144,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Block malicious requests targeting WordPress and admin-related paths
 app.use((req, res, next) => {
     if (req.path.startsWith('/wp-') || req.path.startsWith('/wordpress') || req.path.startsWith('/admin')) {
         return res.status(403).send('Access Denied');
@@ -171,8 +151,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
-// Converting import.meta.url to a file path and get the directory name
 
 const __filename = fileURLToPath(import.meta.url); 
 
@@ -195,11 +173,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "public", "index.html"));
-// });
 
-const PORT = process.env.PORT || 5005; // Heroku dynamically assigns a PORT
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 5005; 
 
 

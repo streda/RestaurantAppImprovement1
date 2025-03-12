@@ -18,8 +18,8 @@ mongoose.connect(mongoUri, {
 
 const populateDatabase = async () => {
     try {
-        await MenuItem.deleteMany(); // Clear existing data
-        await MenuItem.insertMany(menuArray); // Insert new data
+        await MenuItem.deleteMany();
+        await MenuItem.insertMany(menuArray); 
         mongoose.connection.close();
     } catch (error) {
         console.error("Failed to populate database", error);

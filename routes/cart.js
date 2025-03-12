@@ -1,35 +1,30 @@
 import express from "express";
-import Order from "../models/order.js"; // Import Order model
-import MenuItem from "../models/menuItemModel.js"; // Import MenuItem model
-import authenticateToken from "../middleware/auth.js"; // Middleware for authentication
+import Order from "../models/order.js"; 
+import MenuItem from "../models/menuItemModel.js"; 
+import authenticateToken from "../middleware/auth.js"; 
 
 const router = express.Router();
 
-// 📌 Add item to cart
 router.post("/add-to-cart", authenticateToken, async (req, res) => {
   const { menuItemId, quantity } = req.body;
 
   try {
-    // Verify the menu item exists
     const menuItem = await MenuItem.findById(menuItemId);
     if (!menuItem) {
       return res.status(404).json({ success: false, message: "Menu item not found" });
     }
 
-    // Delete any old pending orders with no items for this user
     await Order.deleteMany({
       userId: req.myUser.userId,
       status: "pending",
       items: { $size: 0 }
     });
 
-    // Find an existing pending order
     let order = await Order.findOne({
       userId: req.myUser.userId,
       status: "pending"
     });
 
-    // If no pending order exists, create one
     if (!order) {
       order = new Order({
         userId: req.myUser.userId,
@@ -38,7 +33,6 @@ router.post("/add-to-cart", authenticateToken, async (req, res) => {
       });
     }
 
-    // Check if the item is already in the order
     const existingItemIndex = order.items.findIndex(item =>
       item.menuItem.equals(menuItemId)
     );
@@ -48,7 +42,6 @@ router.post("/add-to-cart", authenticateToken, async (req, res) => {
       order.items.push({ menuItem: menuItemId, quantity });
     }
 
-    // Recalculate total price
     order.total = order.items.reduce((acc, item) => {
       return acc + item.quantity * menuItem.price;
     }, 0);
@@ -56,7 +49,6 @@ router.post("/add-to-cart", authenticateToken, async (req, res) => {
     await order.save();
     await order.populate("items.menuItem");
 
-    console.log("Order after saving:", JSON.stringify(order, null, 2));
 
     res.json({ message: "Item added to cart", order });
   } catch (error) {
@@ -65,10 +57,8 @@ router.post("/add-to-cart", authenticateToken, async (req, res) => {
   }
 });
 
-// 📌 Get User's Cart
 router.get("/cart", authenticateToken, async (req, res) => {
   try {
-    // Find the persistent pending order that actually has items
     let order = await Order.findOne({
       userId: req.myUser.userId,
       status: "pending",
@@ -80,8 +70,6 @@ router.get("/cart", authenticateToken, async (req, res) => {
       return res.json({ order: { items: [] } });
     }
 
-    // If no order found, return an empty cart
-    console.log("📦 Cart returned from backend:", order);
     res.json({ order: order || { items: [], total: 0 } });
   } catch (error) {
     console.error("Error fetching cart:", error);

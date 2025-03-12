@@ -24,14 +24,11 @@ document.getElementById("login-form").addEventListener("submit", async function 
     const data = await response.json();
 
     if (data.success) {
-      // Store token for future authenticated requests
       localStorage.setItem("token", data.token);
-      sessionStorage.setItem("token", data.token); // Optional for security
+      sessionStorage.setItem("token", data.token); 
 
-      // Fetch menu items after login
       await fetchMenuItems(true);
 
-      // Redirect the user to the correct environment
       window.location.href = API_BASE_URL;
     } else {
       throw new Error(data.message || "Login failed");

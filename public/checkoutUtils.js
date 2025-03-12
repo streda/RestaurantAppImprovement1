@@ -1,4 +1,4 @@
-import { orderArray } from "./index.js"; // Ensure this is imported properly
+import { orderArray } from "./index.js"; 
 
 export async function handleCheckout(orderArray) {
     const token = localStorage.getItem("token");
@@ -78,7 +78,7 @@ export function createCompleteOrderButton() {
 
     btn.addEventListener("click", handleCompleteOrderButtonClick);
 
-    const orderSummaryContainer = document.getElementById("section-summary"); // Fix: Append inside #section-summary
+    const orderSummaryContainer = document.getElementById("section-summary"); 
     if (orderSummaryContainer) {
         orderSummaryContainer.appendChild(btn);
     } else {

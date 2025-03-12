@@ -5,7 +5,6 @@ import authenticateToken from "../middleware/auth.js";
 
 const router = express.Router();
 
-// 📌 Remove an item from cart
 router.post("/remove-item", authenticateToken, async (req, res) => {
   const { id } = req.body;
 

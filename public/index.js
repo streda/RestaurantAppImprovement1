@@ -23,10 +23,10 @@ export let menuArray = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // Optionally check if paymentSuccess flag is present
+  
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("paymentSuccess") === "true") {
-    // Re-fetch cart data to update UI
+
     const cartData = await fetchCartData();
     updateOrderSummary(cartData);
   }
@@ -35,22 +35,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isAuthenticationPage = currentPagePath === '/login.html' || currentPagePath === '/signUp.html';
 
   if (isAuthenticationPage) {
-    return; // Exit early on authentication pages
+    return; 
   }
 
-  // Retrieve stored page from localStorage, default to 'home'
+  
   const savedPage = localStorage.getItem("currentPage") || "home";
 
-  // Fetch cart items on page load
+  
   const validItems = await fetchCartData();
   updateOrderSummary(validItems);
   updateQuantityIndicators(validItems);
 
-  // Ensure the "Complete Order" button persists on refresh
+  
   toggleCompleteOrderButton(validItems.length > 0);
   initializeCheckoutButton();
 
-  // Load the correct menu based on saved page
+  
   if (savedPage === "home") {
     renderLandingPage();
     toggleCompleteOrderButton(false);
@@ -67,16 +67,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Setup Navbar Click Handlers
   const navbarLinks = document.querySelector(".navbar-links");
   if (navbarLinks) {
     navbarLinks.addEventListener("click", async function (event) {
       const linkType = event.target.getAttribute("data-type");
       if (linkType) {
         event.preventDefault();
-        hideLoginForm(); // Hide login form when switching pages
+        hideLoginForm(); 
 
-        localStorage.setItem("currentPage", linkType); // Store the selected page
+        localStorage.setItem("currentPage", linkType); 
 
         if (linkType === "home") {
           renderLandingPage();
@@ -98,7 +97,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Attach event listeners for order modifications
   const sectionSummary = document.getElementById("section-summary");
   if (sectionSummary) {
     sectionSummary.addEventListener("click", async function (event) {
@@ -112,13 +110,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         await addSingleItem(itemId);
       }
 
-      // Ensure the "Complete Order" button stays visible when items exist
       const updatedItems = await fetchCartData();
       toggleCompleteOrderButton(updatedItems.length > 0);
     });
   }
 
-  // Handle navbar toggle for mobile view
   const toggleButton = document.querySelector(".toggle-button");
   const closeBtn = document.getElementById("close-btn");
 

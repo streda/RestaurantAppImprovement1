@@ -48,8 +48,6 @@ router.post("/create-checkout-session", authenticateToken, async (req, res) => {
 router.get("/checkout-success", async (req, res) => {
   const { userId } = req.query;
 
-  console.log("📢 Checkout Success route triggered!");
-  console.log(`🔹 Received userId: ${userId}`);
 
   if (!userId) {
     console.warn("⚠️ No userId provided in checkout-success.");
@@ -57,28 +55,23 @@ router.get("/checkout-success", async (req, res) => {
   }
 
   try {
-    console.log(`🔍 Searching for pending orders for userId: ${userId}`);
 
     // Convert userId to ObjectId (only if needed)
     const objectIdUserId = new mongoose.Types.ObjectId(userId);
 
     const pendingOrders = await Order.find({ userId: objectIdUserId, status: "pending" });
-    console.log(`📌 Found pending orders: ${pendingOrders.length}`);
 
     // Find and delete pending orders
     const deleteResult = await Order.deleteMany({ userId: objectIdUserId, status: "pending" });
 
-    console.log(`🗑️ Orders deleted: ${deleteResult.deletedCount}`);
 
     // ✅ Clear session cart if applicable
     if (req.session) {
-      console.log("🛒 Clearing session cart...");
       req.session.cart = null;
     } else {
       console.warn("⚠️ No session detected. Unable to clear session cart.");
     }
 
-    console.log("✅ Cart successfully cleared after checkout.");
 
     // ✅ Redirect user back to the homepage with a flag
     res.redirect("/?paymentSuccess=true");

@@ -6,7 +6,6 @@ import authenticateToken from "../middleware/auth.js";
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
 
-// 📌 Create Checkout Session
 router.post("/create-checkout-session", authenticateToken, async (req, res) => {
   try {
     let order = await Order.findOne({ userId: req.myUser.userId, status: "pending", items: { $exists: true, $ne: [] } })
