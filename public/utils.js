@@ -333,7 +333,7 @@ export async function addSingleItem(itemId) {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch(`/api/item/update`, {
+    const response = await fetch(`/api/update-item`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -360,7 +360,7 @@ export async function removeSingleItem(itemId) {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch(`/api/item/update`, {
+    const response = await fetch(`/api/update-item`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -388,7 +388,7 @@ export async function removeAllItem(itemId) {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch(`/api/item/remove`, {
+    const response = await fetch(`/api/remove-item`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
