@@ -179,23 +179,23 @@ export async function fetchCartData() {
   }
 
   // Decode and check if token is expired
-  try {
-    const payloadBase64 = token.split(".")[1]; 
-    const decodedPayload = JSON.parse(atob(payloadBase64));
+  // try {
+  //   const payloadBase64 = token.split(".")[1]; 
+  //   const decodedPayload = JSON.parse(atob(payloadBase64));
 
 
-    if (new Date(decodedPayload.exp * 1000) < new Date()) {
-      console.warn("Token expired, logging out user.");
-      localStorage.removeItem("token");
-      window.location.href = "/login.html";
-      return []; // Prevent further execution
-    }
-  } catch (error) {
-    console.error("Failed to decode JWT:", error);
-    localStorage.removeItem("token");
-    window.location.href = "/login.html";
-    return [];
-  }
+  //   if (new Date(decodedPayload.exp * 1000) < new Date()) {
+  //     console.warn("Token expired, logging out user.");
+  //     localStorage.removeItem("token");
+  //     window.location.href = "/login.html";
+  //     return []; // Prevent further execution
+  //   }
+  // } catch (error) {
+  //   console.error("Failed to decode JWT:", error);
+  //   localStorage.removeItem("token");
+  //   window.location.href = "/login.html";
+  //   return [];
+  // }
 
 
   try {
@@ -229,7 +229,7 @@ console.log("📦 Cart items received:", validCartItems);
       orderArray.length = 0;
     }
 
-    
+
         // Ensure Order Summary is updated
         updateOrderSummary(validCartItems);
         toggleCompleteOrderButton(validCartItems.length > 0);
