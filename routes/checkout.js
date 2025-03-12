@@ -33,7 +33,7 @@ router.post("/create-checkout-session", authenticateToken, async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.SERVER_URL}/checkout-success?userId=${req.myUser.userId}`,
+      success_url: `${process.env.SERVER_URL}/api/checkout-success?userId=${req.myUser.userId}`,
       cancel_url: `${process.env.SERVER_URL}/checkout-cancel`,
     });
 
@@ -48,22 +48,25 @@ router.post("/create-checkout-session", authenticateToken, async (req, res) => {
 router.get("/checkout-success", async (req, res) => {
   const { userId } = req.query;
 
+  console.log("📢 Checkout Success route triggered!");
+  console.log(`🔹 Received userId: ${userId}`);
+
   if (!userId) {
-    console.warn("No userId provided in checkout-success.");
+    console.warn("⚠️ No userId provided in checkout-success.");
     return res.redirect("/?paymentSuccess=true");
   }
 
   try {
     console.log(`🔍 Searching for pending orders for userId: ${userId}`);
 
-    // Convert userId string to ObjectId
+    // Convert userId to ObjectId (only if needed)
     const objectIdUserId = new mongoose.Types.ObjectId(userId);
 
+    const pendingOrders = await Order.find({ userId: objectIdUserId, status: "pending" });
+    console.log(`📌 Found pending orders: ${pendingOrders.length}`);
+
     // Find and delete pending orders
-    const deleteResult = await Order.deleteMany({ 
-      userId: objectIdUserId, 
-      status: "pending" 
-    });
+    const deleteResult = await Order.deleteMany({ userId: objectIdUserId, status: "pending" });
 
     console.log(`🗑️ Orders deleted: ${deleteResult.deletedCount}`);
 
@@ -85,4 +88,6 @@ router.get("/checkout-success", async (req, res) => {
     res.redirect("/?paymentFailed=true");
   }
 });
+
+
 export default router;
