@@ -90,6 +90,8 @@ async function restoreCartFromDatabase() {
     console.error("Error restoring cart from database:", error);
   }
 }
+
+
 export function renderLandingPage() {
   const menuContainer = document.getElementById("section-menu");
   if (menuContainer) {
@@ -103,6 +105,7 @@ export function renderLandingPage() {
   }
 }
 
+
 export function isLoggedIn() {
   // localStorage.getItem("token") returns a string value of the token or null if the token is not found in localStorage.
   const token = localStorage.getItem("token");
@@ -115,6 +118,7 @@ export function hideLoginForm() {
     loginForm.style.display = "none";
   }
 }
+
 
 //^ fetch the menu items from the server and store them in the menuArray
 export async function fetchMenuItems(redirect = false) {
@@ -151,9 +155,17 @@ export async function fetchMenuItems(redirect = false) {
     menuArray.push(...data);
 
 
+    // if (redirect) {
+    //   renderLandingPage();
+    //   hideLoginForm();
+    // }
     if (redirect) {
-      renderLandingPage();
-      hideLoginForm();
+      renderLandingPage(); // Render welcome message
+      hideLoginForm();     // Hide login form
+      renderMenu(menuArray, isLoggedIn()); // Render the menu items
+    } else {
+      // When no redirect is needed, refresh the menu items.
+      renderMenu(menuArray, isLoggedIn()); // render menu items
     }
   } catch (error) {
     console.error("Failed to load menu items:", error);
