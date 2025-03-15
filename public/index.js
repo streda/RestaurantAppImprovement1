@@ -55,8 +55,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (isLoggedIn()) {
     // User is logged in, load the correct menu based on saved page
     if (savedPage === "home") {
-      // If on the home page, the landing page content from index.html is already showing.
-      // Optionally, you could still fetch data to update other parts of the page.
+      //  renderLandingPage(); //Render Landing Page
+      toggleCompleteOrderButton(false);
+      toggleOrderSummaryDisplay(false);
     } else {
       await fetchMenuItems();
       renderMenuByType(savedPage, isLoggedIn()); // Fetch menu items if not home
@@ -100,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             localStorage.setItem("currentPage", linkType); // Store the selected page
 
             if (linkType === "home") {
-               renderLandingPage(); //Render Landing Page
+              //  renderLandingPage(); //Render Landing Page
               toggleCompleteOrderButton(false);
               toggleOrderSummaryDisplay(false);
             } else {
@@ -114,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   toggleCompleteOrderButton(validItems.length > 0);
                   toggleOrderSummaryDisplay(validItems.length > 0);
                 } else {
-                    alert("Please log in to view menu items.");
+                    alert("Please log in or sign up to view menu items.");
                     // Redirect to the login page (optional)
                   //  window.location.href = "/login.html";
                     return; // Stop further processing
