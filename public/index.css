@@ -50,7 +50,7 @@ body{
   
   .items-container {
     display: flex;
-     flex-direction: column;  
+    flex-direction: column;  
     justify-content: center; 
     /* display: grid; */
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
@@ -103,7 +103,7 @@ body{
     justify-content: center;
     padding:10px;
     border-radius: 10px;
-    background: #e9e5e5;
+    background: rgb(213, 205, 191);
     box-shadow: 0 1px 3px rgba(227, 4, 41, 0.1);
     height: auto; 
     width: auto;
