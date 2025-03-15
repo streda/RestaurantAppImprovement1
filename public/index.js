@@ -50,22 +50,44 @@ document.addEventListener("DOMContentLoaded", async () => {
   toggleCompleteOrderButton(validItems.length > 0);
   initializeCheckoutButton();
 
-  
-  if (savedPage === "home") {
-    renderLandingPage();
+  //******************************************** */
+    // Check login status and render content accordingly
+  if (isLoggedIn()) {
+    // User is logged in, load the correct menu based on saved page
+    if (savedPage === "home") {
+      // If on the home page, the landing page content from index.html is already showing.
+      // Optionally, you could still fetch data to update other parts of the page.
+    } else {
+      await fetchMenuItems();
+      renderMenuByType(savedPage, isLoggedIn()); // Fetch menu items if not home
+    }
+
+    updateOrderSummary(validItems);
+    updateQuantityIndicators(validItems);
+    toggleCompleteOrderButton(validItems.length > 0);
+    toggleOrderSummaryDisplay(validItems.length > 0);
+  } else {
+    // User is logged out: landing page is already in index.html
     toggleCompleteOrderButton(false);
     toggleOrderSummaryDisplay(false);
-  } else {
-    await fetchMenuItems();
-    renderMenuByType(savedPage, isLoggedIn());
-
-    if (isLoggedIn()) {
-      updateOrderSummary(validItems);
-      updateQuantityIndicators(validItems);
-      toggleCompleteOrderButton(validItems.length > 0);
-      toggleOrderSummaryDisplay(validItems.length > 0);
-    }
   }
+
+
+  // if (savedPage === "home") {
+  //   renderLandingPage();
+  //   toggleCompleteOrderButton(false);
+  //   toggleOrderSummaryDisplay(false);
+  // } else {
+  //   await fetchMenuItems();
+  //   renderMenuByType(savedPage, isLoggedIn());
+
+  //   if (isLoggedIn()) {
+  //     updateOrderSummary(validItems);
+  //     updateQuantityIndicators(validItems);
+  //     toggleCompleteOrderButton(validItems.length > 0);
+  //     toggleOrderSummaryDisplay(validItems.length > 0);
+  //   }
+  // }
 
   const navbarLinks = document.querySelector(".navbar-links");
   if (navbarLinks) {
