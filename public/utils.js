@@ -140,12 +140,26 @@ export async function fetchMenuItems(redirect = false) {
     }
 
     const data = await response.json();
+
+    // Reset the menuArray to 0 so that it is ready to store the latest version of the datas from the server/DataBase. This will prevent from displaying outdated data if changes was made to the DB.
     menuArray.length = 0;
+
+    // This line populates the menuArray with the menu items received from the API.
+    // The ...data spreads the data as individual item objects. Thus every object item is added individually inside the variable menuArray[]
     menuArray.push(...data);
 
-    if (redirect) {
-      renderLandingPage();
-      hideLoginForm();
+
+    // if (redirect) {
+    //   renderLandingPage();
+    //   hideLoginForm();
+    // }
+     if (redirect) {
+      renderLandingPage(); // Render welcome message
+      hideLoginForm();     // Hide login form
+      renderMenu(menuArray, isLoggedIn()); // Render the menu items
+    } else {
+      // When no redirect is needed, refresh the menu items.
+      renderMenu(menuArray, isLoggedIn()); // render menu items
     }
   } catch (error) {
     console.error("Failed to load menu items:", error);

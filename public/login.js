@@ -27,6 +27,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
       localStorage.setItem("token", data.token);
       sessionStorage.setItem("token", data.token); 
 
+      // This means that after the login process is successful and the token is stored,  Fetch the menu items from the API.
       await fetchMenuItems(true);
 
       // window.location.href = API_BASE_URL;
