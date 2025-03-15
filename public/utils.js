@@ -1,4 +1,4 @@
-import { menuArray, orderArray } from "./index.js";
+import { menuArray, orderArray, isLoggedIn} from "./index.js";
 
 import { 
   toggleCompleteOrderButton, 
@@ -115,6 +115,7 @@ export function hideLoginForm() {
   }
 }
 
+//^ fetch the menu items from the server and store them in the menuArray
 export async function fetchMenuItems(redirect = false) {
   const token = localStorage.getItem("token");
 
