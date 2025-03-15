@@ -90,18 +90,18 @@ async function restoreCartFromDatabase() {
     console.error("Error restoring cart from database:", error);
   }
 }
-export function renderLandingPage() {
-  const menuContainer = document.getElementById("section-menu");
-  if (menuContainer) {
-    menuContainer.innerHTML = `
-        <div class="landing-page-content">
-          <h2>Welcome to Our Food Ordering App!</h2>
-          <p>Explore our menu to find your favorite sandwiches, desserts, and drinks. Please navigate to our menu bar at the top right to get started.</p>
-          <p>🥪 🍪 🍺</p>
-        </div>
-      `;
-  }
-}
+// export function renderLandingPage() {
+//   const menuContainer = document.getElementById("section-menu");
+//   if (menuContainer) {
+//     menuContainer.innerHTML = `
+//         <div class="landing-page-content">
+//           <h2>Welcome to Our Food Ordering App!</h2>
+//           <p>Explore our menu to find your favorite sandwiches, desserts, and drinks. Please navigate to our menu bar at the top right to get started.</p>
+//           <p>🥪 🍪 🍺</p>
+//         </div>
+//       `;
+//   }
+// }
 
 export function isLoggedIn() {
   // localStorage.getItem("token") returns a string value of the token or null if the token is not found in localStorage.
@@ -152,7 +152,17 @@ export async function fetchMenuItems(redirect = false) {
 
 
     if (redirect) {
-      renderLandingPage();
+      // renderLandingPage();
+      const menuContainer = document.getElementById("section-menu");
+  if (menuContainer) {
+    menuContainer.innerHTML = `
+        <div class="landing-page-content">
+          <h2>Welcome to Our Food Ordering App!</h2>
+          <p>Explore our menu to find your favorite sandwiches, desserts, and drinks. Please navigate to our menu bar at the top right to get started.</p>
+          <p>🥪 🍪 🍺</p>
+        </div>
+      `;
+  }
       hideLoginForm();
     }
   } catch (error) {
