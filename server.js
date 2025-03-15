@@ -13,7 +13,7 @@ import cookieParser from "cookie-parser";
 import "express-async-errors";
 import mongoose from "mongoose";
 // import MenuItem from "./models/menuItemModel.js";
-import Order from "./models/order.js";
+// import Order from "./models/order.js";
 
 import cartRouter from "./routes/cart.js";
 import checkoutRouter from "./routes/checkout.js";
@@ -25,8 +25,6 @@ import paymentRouter from "./routes/payment.js";
 import registerRouter from "./routes/register.js";
 import removeRouter from "./routes/remove.js";
 import updateRouter from "./routes/update.js";
-
-// import { calculateTotalPrice } from "./services/orderService.js";
 
 import { createClient } from "redis";
 import session from "express-session";
@@ -151,12 +149,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
-const __filename = fileURLToPath(import.meta.url); 
-
-const __dirname = dirname(__filename); 
-
-
 mongoose
   .connect(process.env.MONGO_URI)
   .catch((err) => {
@@ -164,6 +156,8 @@ mongoose
     process.exit(1);
   });
 
+const __filename = fileURLToPath(import.meta.url); 
+const __dirname = dirname(__filename); 
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("*", (req, res) => {

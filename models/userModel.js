@@ -20,10 +20,11 @@ const userSchema = new mongoose.Schema({
 */
 userSchema.pre('save', async function (next) {
     if (!this.isModified("password")) {
-        // If the password has not been modified, skip the hashing process
+        // checks if the "password" has been modified since it was retrieved from the database If the password has not been modified, skip the hashing process
         return next();
     }
 
+    // if the "password" has been modified hash it and save it.
     try {
         const salt = await bcrypt.genSalt(10); // Generate a salt with 10 rounds
         this.password = await bcrypt.hash(this.password, salt); // Hash the password using the generated salt
