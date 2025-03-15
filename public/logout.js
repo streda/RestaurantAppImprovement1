@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if(logoutButton){
         logoutButton.addEventListener('click', function() {
             localStorage.removeItem('token');
-            window.location.href = './index.html';
+            // window.location.href = './index.html';
+            window.location.href = "https://truefood.rest/";
         });
     }
 });
