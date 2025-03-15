@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 } else {
                     alert("Please log in to view menu items.");
                     // Redirect to the login page (optional)
-                   window.location.href = "/login.html";
+                  //  window.location.href = "/login.html";
                     return; // Stop further processing
                 }
               }
