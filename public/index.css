@@ -50,14 +50,14 @@ body{
   
   .items-container {
     display: flex;
-     flex-direction: row;  
+     flex-direction: column;  
     justify-content: center; 
     /* display: grid; */
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
     overflow-y: auto; 
     overflow-x: hidden;
     max-height: 50vh; 
-    background-color: #f8f8f8;
+    background-color: #c4aeae;
     padding: 5px;
     border: 1px solid #755454;
 
