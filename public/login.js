@@ -29,7 +29,8 @@ document.getElementById("login-form").addEventListener("submit", async function 
 
       await fetchMenuItems(true);
 
-      window.location.href = API_BASE_URL;
+      // window.location.href = API_BASE_URL;
+      window.location.href = "https://truefood.rest/";
     } else {
       throw new Error(data.message || "Login failed");
     }
