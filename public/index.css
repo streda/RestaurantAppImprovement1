@@ -49,7 +49,7 @@ body{
 
   
   .items-container {
-    display: flex;
+    display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
     overflow-y: auto; 
     overflow-x: hidden;
@@ -100,7 +100,7 @@ body{
     justify-content: center;
     padding:10px;
     border-radius: 10px;
-    background: rgb(213, 205, 191);
+    background: #e9e5e5;
     box-shadow: 0 1px 3px rgba(227, 4, 41, 0.1);
     height: auto; 
     width: auto;
