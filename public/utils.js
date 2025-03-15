@@ -104,6 +104,7 @@ export function renderLandingPage() {
 }
 
 export function isLoggedIn() {
+  // localStorage.getItem("token") returns a string value of the token or null if the token is not found in localStorage.
   const token = localStorage.getItem("token");
   return !!token;
 }
@@ -150,11 +151,17 @@ export async function fetchMenuItems(redirect = false) {
     menuArray.push(...data);
 
 
-    // if (redirect) {
-    //   renderLandingPage();
-    //   hideLoginForm();
-    // }
-     if (redirect) {
+    if (redirect) {
+      renderLandingPage();
+      hideLoginForm();
+    }
+  } catch (error) {
+    console.error("Failed to load menu items:", error);
+  }
+}
+
+/* 
+if (redirect) {
       renderLandingPage(); // Render welcome message
       hideLoginForm();     // Hide login form
       renderMenu(menuArray, isLoggedIn()); // Render the menu items
@@ -162,11 +169,7 @@ export async function fetchMenuItems(redirect = false) {
       // When no redirect is needed, refresh the menu items.
       renderMenu(menuArray, isLoggedIn()); // render menu items
     }
-  } catch (error) {
-    console.error("Failed to load menu items:", error);
-  }
-}
-
+*/
 export async function fetchCartData() {
   const token = localStorage.getItem("token");
 
