@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             localStorage.setItem("currentPage", linkType); // Store the selected page
 
             if (linkType === "home") {
-              //  renderLandingPage(); //Render Landing Page
+               renderLandingPage(); //Render Landing Page
               toggleCompleteOrderButton(false);
               toggleOrderSummaryDisplay(false);
             } else {
