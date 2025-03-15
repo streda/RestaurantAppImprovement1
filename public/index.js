@@ -90,34 +90,69 @@ document.addEventListener("DOMContentLoaded", async () => {
   // }
 
   const navbarLinks = document.querySelector(".navbar-links");
-  if (navbarLinks) {
-    navbarLinks.addEventListener("click", async function (event) {
-      const linkType = event.target.getAttribute("data-type");
-      if (linkType) {
-        event.preventDefault();
-        hideLoginForm(); 
+      if (navbarLinks) {
+        navbarLinks.addEventListener("click", async function (event) {
+          const linkType = event.target.getAttribute("data-type");
+          if (linkType) {
+            event.preventDefault();
+            hideLoginForm(); // Hide login form when switching pages
 
-        localStorage.setItem("currentPage", linkType); 
+            localStorage.setItem("currentPage", linkType); // Store the selected page
 
-        if (linkType === "home") {
-          renderLandingPage();
-          toggleCompleteOrderButton(false);
-          toggleOrderSummaryDisplay(false);
-        } else {
-          await fetchMenuItems();
-          renderMenuByType(linkType, isLoggedIn());
+            if (linkType === "home") {
+               renderLandingPage(); //Render Landing Page
+              toggleCompleteOrderButton(false);
+              toggleOrderSummaryDisplay(false);
+            } else {
+                if (isLoggedIn()) {
+                  await fetchMenuItems();
+                  renderMenuByType(linkType, isLoggedIn());
 
-          if (isLoggedIn()) {
-            const validItems = await fetchCartData();
-            updateOrderSummary(validItems);
-            updateQuantityIndicators(validItems);
-            toggleCompleteOrderButton(validItems.length > 0);
-            toggleOrderSummaryDisplay(validItems.length > 0);
-          }
+                  const validItems = await fetchCartData();
+                  updateOrderSummary(validItems);
+                  updateQuantityIndicators(validItems);
+                  toggleCompleteOrderButton(validItems.length > 0);
+                  toggleOrderSummaryDisplay(validItems.length > 0);
+                } else {
+                    alert("Please log in to view menu items.");
+                    // Redirect to the login page (optional)
+                   window.location.href = "/login.html";
+                    return; // Stop further processing
+                }
+              }
+            }
+          });
         }
-      }
-    });
-  }
+
+  // const navbarLinks = document.querySelector(".navbar-links");
+  // if (navbarLinks) {
+  //   navbarLinks.addEventListener("click", async function (event) {
+  //     const linkType = event.target.getAttribute("data-type");
+  //     if (linkType) {
+  //       event.preventDefault();
+  //       hideLoginForm(); 
+
+  //       localStorage.setItem("currentPage", linkType); 
+
+  //       if (linkType === "home") {
+  //         renderLandingPage();
+  //         toggleCompleteOrderButton(false);
+  //         toggleOrderSummaryDisplay(false);
+  //       } else {
+  //         await fetchMenuItems();
+  //         renderMenuByType(linkType, isLoggedIn());
+
+  //         if (isLoggedIn()) {
+  //           const validItems = await fetchCartData();
+  //           updateOrderSummary(validItems);
+  //           updateQuantityIndicators(validItems);
+  //           toggleCompleteOrderButton(validItems.length > 0);
+  //           toggleOrderSummaryDisplay(validItems.length > 0);
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
 
   const sectionSummary = document.getElementById("section-summary");
   if (sectionSummary) {
