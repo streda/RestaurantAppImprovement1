@@ -1,4 +1,4 @@
-import { menuArray, orderArray, isLoggedIn} from "./index.js";
+import { menuArray, orderArray} from "./index.js";
 
 import { 
   toggleCompleteOrderButton, 
