@@ -1,6 +1,6 @@
-import { orderArray } from "./index.js"; 
+import { getOrderArray } from "./index.js"; 
 
-export async function handleCheckout(orderArray) {
+export async function handleCheckout() {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -9,7 +9,7 @@ export async function handleCheckout(orderArray) {
         return;
     }
 
-    const items = orderArray.map(({ menuItem, quantity }) => ({
+    const items = getOrderArray().map(({ menuItem, quantity }) => ({
         id: menuItem._id,
         name: menuItem.name,
         price: menuItem.price,
@@ -50,25 +50,26 @@ export function initializeCheckoutButton() {
 }
 
 export function toggleCompleteOrderButton(isRequired) {
-  let completeOrderButton = document.getElementById("complete-order-button");
+    let completeOrderButton = document.getElementById("complete-order-button");
 
-  if (!completeOrderButton) {
-    completeOrderButton = document.createElement("button");
-    completeOrderButton.id = "complete-order-button";
-    completeOrderButton.textContent = "Complete Order";
-    completeOrderButton.classList.add("complete-order-btn");
-    completeOrderButton.disabled = !isRequired;
-    completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
+    if (!completeOrderButton) {
+        completeOrderButton = document.createElement("button");
+        completeOrderButton.id = "complete-order-button";
+        completeOrderButton.textContent = "Complete Order";
+        completeOrderButton.classList.add("complete-order-btn");
+        completeOrderButton.disabled = !isRequired;
+        completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
 
-    // Attach inside the #section-summary div
-    const orderSummaryContainer = document.getElementById("section-summary");
-    if (orderSummaryContainer) {
-      orderSummaryContainer.appendChild(completeOrderButton);
+        // Attach inside the #section-summary div
+        const orderSummaryContainer = document.getElementById("section-summary");
+        if (orderSummaryContainer) {
+            orderSummaryContainer.appendChild(completeOrderButton);
+        }
     }
-  }
 
-  completeOrderButton.style.display = isRequired ? "block" : "none";
+    completeOrderButton.style.display = isRequired ? "block" : "none";
 }
+
 export function createCompleteOrderButton() {
     const btn = document.createElement("button");
     btn.id = "complete-order-button";
@@ -88,8 +89,8 @@ export function createCompleteOrderButton() {
 }
 
 export function handleCompleteOrderButtonClick() {
-    if (orderArray.length > 0) {
-        handleCheckout(orderArray).catch((error) =>
+    if (getOrderArray().length > 0) {
+        handleCheckout().catch((error) =>
             console.error("Checkout failed", error)
         );
     } else {
