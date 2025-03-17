@@ -425,12 +425,12 @@ export function toggleOrderSummaryDisplay(show) {
   }
 }
 
-export function updateQuantityIndicators(orderArray) {
+export function updateQuantityIndicators() {
   document.querySelectorAll(".quantity-indicator").forEach((indicator) => {
     indicator.textContent = "0 item";
   });
 
-  orderArray.forEach((order) => {
+  getOrderArray().forEach((order) => {
     const quantityCount = document.getElementById(
       `quantity-indicator-${order.menuItem._id}`
     );
@@ -440,6 +440,22 @@ export function updateQuantityIndicators(orderArray) {
     }
   });
 }
+
+// export function updateQuantityIndicators(orderArray) {
+//   document.querySelectorAll(".quantity-indicator").forEach((indicator) => {
+//     indicator.textContent = "0 item";
+//   });
+
+//   orderArray.forEach((order) => {
+//     const quantityCount = document.getElementById(
+//       `quantity-indicator-${order.menuItem._id}`
+//     );
+//     if (quantityCount) {
+//       const itemText = order.quantity > 1 ? "items" : "item";
+//       quantityCount.textContent = `${order.quantity} ${itemText}`;
+//     }
+//   });
+// }
 
 export function calculateTotalPrice(orders) {
   return orders.reduce((acc, order) => {
