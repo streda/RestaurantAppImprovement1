@@ -311,14 +311,15 @@ export async function addItem(itemId) {
 
     // const data = await response.json();
     const validCartItems = await fetchCartData();
-
     setOrderArray(validCartItems);
 
-    updateOrderSummary(getOrderArray());
-    updateQuantityIndicators(getOrderArray());
-
-    toggleOrderSummaryDisplay(getOrderArray().length > 0);
-    toggleCompleteOrderButton(getOrderArray().length > 0);
+   // Ensure UI updates reflect the latest state
+    setTimeout(() => {
+      updateOrderSummary(getOrderArray());
+      updateQuantityIndicators(getOrderArray());
+      toggleOrderSummaryDisplay(getOrderArray().length > 0);
+      toggleCompleteOrderButton(getOrderArray().length > 0);
+    }, 0); // Allows state update to settle before triggering UI updates
 
   } catch (error) {
     console.error("Failed to add item to cart:", error);
