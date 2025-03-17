@@ -184,14 +184,14 @@ export async function fetchCartData() {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/cart`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(`${API_BASE_URL}/api/cart?timestamp=${new Date().getTime()}`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    "Cache-Control": "no-cache",
+    Authorization: `Bearer ${token}`,
+  },
+});
 
     if (!response.ok) {
       if (response.status === 401) {
