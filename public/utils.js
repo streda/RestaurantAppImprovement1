@@ -210,12 +210,13 @@ export async function fetchCartData() {
     // Use the setter function to update orderArray
     setOrderArray(validCartItems);
 
-    requestAnimationFrame(() => {
-      updateOrderSummary(getOrderArray()); 
-      updateQuantityIndicators(getOrderArray());
-      toggleCompleteOrderButton(getOrderArray().length > 0);
-      toggleOrderSummaryDisplay(getOrderArray().length > 0);
-    });
+    setTimeout(() => {
+  setOrderArray(validCartItems);
+  updateOrderSummary(getOrderArray());
+  updateQuantityIndicators(getOrderArray());
+  toggleOrderSummaryDisplay(getOrderArray().length > 0);
+  toggleCompleteOrderButton(getOrderArray().length > 0);
+}, 150);
 
     return getOrderArray();
   } catch (error) {
@@ -317,12 +318,13 @@ export async function addItem(itemId) {
     setOrderArray(validCartItems);
 
    // Ensure UI updates reflect the latest state
-    requestAnimationFrame(() => {
-      updateOrderSummary(getOrderArray());
-      updateQuantityIndicators(getOrderArray());
-      toggleOrderSummaryDisplay(getOrderArray().length > 0);
-      toggleCompleteOrderButton(getOrderArray().length > 0);
-    }); // Allows state update to settle before triggering UI updates
+    setTimeout(() => {
+  setOrderArray(validCartItems);
+  updateOrderSummary(getOrderArray());
+  updateQuantityIndicators(getOrderArray());
+  toggleOrderSummaryDisplay(getOrderArray().length > 0);
+  toggleCompleteOrderButton(getOrderArray().length > 0);
+}, 150); // Allows state update to settle before triggering UI updates
 
   } catch (error) {
     console.error("Failed to add item to cart:", error);
