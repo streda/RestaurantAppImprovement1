@@ -18,9 +18,6 @@ import {
   toggleCompleteOrderButton
 } from "./checkoutUtils.js"; 
 
-// export let orderArray = [];
-// export let menuArray = [];
-
 let menuArray = [];
 let orderArray = [];
 

@@ -210,6 +210,7 @@ export async function fetchCartData() {
     setOrderArray(validCartItems);
 
     updateOrderSummary(getOrderArray()); 
+    updateQuantityIndicators(getOrderArray());
     toggleCompleteOrderButton(getOrderArray().length > 0);
     toggleOrderSummaryDisplay(getOrderArray().length > 0);
 
@@ -308,16 +309,16 @@ export async function addItem(itemId) {
       throw new Error(`Failed to add item to cart: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    // const data = await response.json();
     const validCartItems = await fetchCartData();
 
     setOrderArray(validCartItems);
 
-    updateOrderSummary(validCartItems);
-    updateQuantityIndicators(validCartItems);
+    updateOrderSummary(getOrderArray());
+    updateQuantityIndicators(getOrderArray());
 
-    toggleOrderSummaryDisplay(validCartItems.length > 0);
-    toggleCompleteOrderButton(validCartItems.length > 0);
+    toggleOrderSummaryDisplay(getOrderArray().length > 0);
+    toggleCompleteOrderButton(getOrderArray().length > 0);
 
   } catch (error) {
     console.error("Failed to add item to cart:", error);
@@ -347,7 +348,7 @@ export async function addSingleItem(itemId) {
       throw new Error("Failed to update item");
     }
 
-    const data = await response.json();
+    // const data = await response.json();
 
     const validCartItems = await fetchCartData();
     updateOrderSummary(validCartItems);
@@ -374,7 +375,7 @@ export async function removeSingleItem(itemId) {
       throw new Error("Failed to update item");
     }
 
-    const data = await response.json();
+    // const data = await response.json();
 
     const validCartItems = await fetchCartData();
 
