@@ -206,15 +206,15 @@ export async function fetchCartData() {
     const data = await response.json();
     const validCartItems = data?.order.items || [];
 
-    // ✅ Use the setter function to update orderArray
+    // Use the setter function to update orderArray
     setOrderArray(validCartItems);
 
-     setTimeout(() => {
+    requestAnimationFrame(() => {
       updateOrderSummary(getOrderArray()); 
       updateQuantityIndicators(getOrderArray());
       toggleCompleteOrderButton(getOrderArray().length > 0);
       toggleOrderSummaryDisplay(getOrderArray().length > 0);
-    }, 0);
+    });
 
     return getOrderArray();
   } catch (error) {
@@ -316,12 +316,12 @@ export async function addItem(itemId) {
     setOrderArray(validCartItems);
 
    // Ensure UI updates reflect the latest state
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       updateOrderSummary(getOrderArray());
       updateQuantityIndicators(getOrderArray());
       toggleOrderSummaryDisplay(getOrderArray().length > 0);
       toggleCompleteOrderButton(getOrderArray().length > 0);
-    }, 0); // Allows state update to settle before triggering UI updates
+    }); // Allows state update to settle before triggering UI updates
 
   } catch (error) {
     console.error("Failed to add item to cart:", error);
@@ -425,12 +425,12 @@ export function toggleOrderSummaryDisplay(show) {
   }
 }
 
-export function updateQuantityIndicators() {
+export function updateQuantityIndicators(orderArray) {
   document.querySelectorAll(".quantity-indicator").forEach((indicator) => {
     indicator.textContent = "0 item";
   });
 
-  getOrderArray().forEach((order) => {
+  orderArray.forEach((order) => {
     const quantityCount = document.getElementById(
       `quantity-indicator-${order.menuItem._id}`
     );
@@ -440,22 +440,6 @@ export function updateQuantityIndicators() {
     }
   });
 }
-
-// export function updateQuantityIndicators(orderArray) {
-//   document.querySelectorAll(".quantity-indicator").forEach((indicator) => {
-//     indicator.textContent = "0 item";
-//   });
-
-//   orderArray.forEach((order) => {
-//     const quantityCount = document.getElementById(
-//       `quantity-indicator-${order.menuItem._id}`
-//     );
-//     if (quantityCount) {
-//       const itemText = order.quantity > 1 ? "items" : "item";
-//       quantityCount.textContent = `${order.quantity} ${itemText}`;
-//     }
-//   });
-// }
 
 export function calculateTotalPrice(orders) {
   return orders.reduce((acc, order) => {
