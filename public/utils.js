@@ -209,10 +209,12 @@ export async function fetchCartData() {
     // ✅ Use the setter function to update orderArray
     setOrderArray(validCartItems);
 
-    updateOrderSummary(getOrderArray()); 
-    updateQuantityIndicators(getOrderArray());
-    toggleCompleteOrderButton(getOrderArray().length > 0);
-    toggleOrderSummaryDisplay(getOrderArray().length > 0);
+     setTimeout(() => {
+      updateOrderSummary(getOrderArray()); 
+      updateQuantityIndicators(getOrderArray());
+      toggleCompleteOrderButton(getOrderArray().length > 0);
+      toggleOrderSummaryDisplay(getOrderArray().length > 0);
+    }, 0);
 
     return getOrderArray();
   } catch (error) {
