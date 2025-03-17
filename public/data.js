@@ -1,13 +1,5 @@
 export const menuArray = [
     {
-        name: "Pizza",
-        ingredients: ["pepperoni", "mushrom", "mozarella"],
-        id: 0,
-        price: 2.5,
-        type: "pizza",
-        emoji: "./image/pizza.png"
-    },
-    {
         name: "Hamburger",
         ingredients: ["beef", "cheese", "lettuce"],
         price: 5.99,
@@ -102,11 +94,6 @@ export const menuArray = [
         type: "desserts",
         id: 12
     },
-    {
-        type: "login"
-    },
-
-
 
     {
         name: "lemon-pie",
