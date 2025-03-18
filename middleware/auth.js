@@ -23,6 +23,8 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ message: "Invalid token" });
     }
 
+     // myUser is a custom property that is added the the request to specify the current user
+    console.log("Decoded JWT:", decoded); // ✅ Check what decoded contains
     req.myUser = decoded;
     next();
   });

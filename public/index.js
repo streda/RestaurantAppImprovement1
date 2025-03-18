@@ -22,23 +22,29 @@ export let orderArray = [];
 export let menuArray = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // To improve performance and avoid any unnecessary UI rendering, if the page is the login or signup page exit early, and any further code will not be executed.
+   const isAuthenticationPage = window.location.pathname === '/login.html' || 
+                               window.location.pathname === '/signUp.html';
+
+  // Stops further execution before loading cart, menu, or UI updates
+  if (isAuthenticationPage) {
+    return;  
+  }
+
+  /* 
+    Creates a helper object to work with URL parameters. Checks the url for the "paymentSuccess" word. If true, it updates the UI. 
+  */
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("paymentSuccess") === "true") {
     const cartData = await fetchCartData();
     updateOrderSummary(cartData);
   }
 
-  const currentPagePath = window.location.pathname;
-  const isAuthenticationPage = currentPagePath === '/login.html' || currentPagePath === '/signUp.html';
-
-  if (isAuthenticationPage) {
-    return; 
-  }
-  
-  const validItems = await fetchCartData();
-  updateOrderSummary(validItems);
-  updateQuantityIndicators(validItems);
-  toggleCompleteOrderButton(validItems.length > 0);
+  // On page load update the UI
+  const cartItems = await fetchCartData();
+  updateOrderSummary(cartItems);
+  updateQuantityIndicators(cartItems);
+  toggleCompleteOrderButton(cartItems.length > 0);
   initializeCheckoutButton();
   
   const savedPage = localStorage.getItem("currentPage") || "home";
@@ -54,32 +60,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderMenuByType(savedPage, isLoggedIn()); // Fetch menu items if not home
     }
 
-    updateOrderSummary(validItems);
-    updateQuantityIndicators(validItems);
-    toggleCompleteOrderButton(validItems.length > 0);
-    toggleOrderSummaryDisplay(validItems.length > 0);
+    updateOrderSummary(cartItems);
+    updateQuantityIndicators(cartItems);
+    toggleCompleteOrderButton(cartItems.length > 0);
+    toggleOrderSummaryDisplay(cartItems.length > 0);
   } else {
     // User is logged out: landing page is already in index.html
     toggleCompleteOrderButton(false);
     toggleOrderSummaryDisplay(false);
   }
-
-
-  // if (savedPage === "home") {
-  //   renderLandingPage();
-  //   toggleCompleteOrderButton(false);
-  //   toggleOrderSummaryDisplay(false);
-  // } else {
-  //   await fetchMenuItems();
-  //   renderMenuByType(savedPage, isLoggedIn());
-
-  //   if (isLoggedIn()) {
-  //     updateOrderSummary(validItems);
-  //     updateQuantityIndicators(validItems);
-  //     toggleCompleteOrderButton(validItems.length > 0);
-  //     toggleOrderSummaryDisplay(validItems.length > 0);
-  //   }
-  // }
 
   const navbarLinks = document.querySelector(".navbar-links");
       if (navbarLinks) {
@@ -100,11 +89,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                   await fetchMenuItems();
                   renderMenuByType(linkType, isLoggedIn());
 
-                  const validItems = await fetchCartData();
-                  updateOrderSummary(validItems);
-                  updateQuantityIndicators(validItems);
-                  toggleCompleteOrderButton(validItems.length > 0);
-                  toggleOrderSummaryDisplay(validItems.length > 0);
+                  const cartItems = await fetchCartData();
+                  updateOrderSummary(cartItems);
+                  updateQuantityIndicators(cartItems);
+                  toggleCompleteOrderButton(cartItems.length > 0);
+                  toggleOrderSummaryDisplay(cartItems.length > 0);
                 } else {
                     alert("Please log in or sign up to view menu items.");
                     // Redirect to the login page (optional)
@@ -115,36 +104,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
           });
         }
-
-  // const navbarLinks = document.querySelector(".navbar-links");
-  // if (navbarLinks) {
-  //   navbarLinks.addEventListener("click", async function (event) {
-  //     const linkType = event.target.getAttribute("data-type");
-  //     if (linkType) {
-  //       event.preventDefault();
-  //       hideLoginForm(); 
-
-  //       localStorage.setItem("currentPage", linkType); 
-
-  //       if (linkType === "home") {
-  //         renderLandingPage();
-  //         toggleCompleteOrderButton(false);
-  //         toggleOrderSummaryDisplay(false);
-  //       } else {
-  //         await fetchMenuItems();
-  //         renderMenuByType(linkType, isLoggedIn());
-
-  //         if (isLoggedIn()) {
-  //           const validItems = await fetchCartData();
-  //           updateOrderSummary(validItems);
-  //           updateQuantityIndicators(validItems);
-  //           toggleCompleteOrderButton(validItems.length > 0);
-  //           toggleOrderSummaryDisplay(validItems.length > 0);
-  //         }
-  //       }
-  //     }
-  //   });
-  // }
 
   const sectionSummary = document.getElementById("section-summary");
   if (sectionSummary) {
@@ -250,10 +209,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 //     return; 
 //   }
 
-//   const validItems = await fetchCartData();
-//   updateOrderSummary(validItems);
-//   updateQuantityIndicators(validItems);
-//   toggleCompleteOrderButton(validItems.length > 0);
+//   const cartItems = await fetchCartData();
+//   updateOrderSummary(cartItems);
+//   updateQuantityIndicators(cartItems);
+//   toggleCompleteOrderButton(cartItems.length > 0);
 //   initializeCheckoutButton();
   
 //   //******************************************** */
@@ -270,10 +229,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 //       renderMenuByType(savedPage, isLoggedIn()); // Fetch menu items if not home
 //     }
 
-//     updateOrderSummary(validItems);
-//     updateQuantityIndicators(validItems);
-//     toggleCompleteOrderButton(validItems.length > 0);
-//     toggleOrderSummaryDisplay(validItems.length > 0);
+//     updateOrderSummary(cartItems);
+//     updateQuantityIndicators(cartItems);
+//     toggleCompleteOrderButton(cartItems.length > 0);
+//     toggleOrderSummaryDisplay(cartItems.length > 0);
 //   } else {
 //     // User is logged out: landing page is already in index.html
 //     toggleCompleteOrderButton(false);
@@ -299,11 +258,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 //                   await fetchMenuItems();
 //                   renderMenuByType(linkType, isLoggedIn());
 
-//                   const validItems = await fetchCartData();
-//                   updateOrderSummary(validItems);
-//                   updateQuantityIndicators(validItems);
-//                   toggleCompleteOrderButton(validItems.length > 0);
-//                   toggleOrderSummaryDisplay(validItems.length > 0);
+//                   const cartItems = await fetchCartData();
+//                   updateOrderSummary(cartItems);
+//                   updateQuantityIndicators(cartItems);
+//                   toggleCompleteOrderButton(cartItems.length > 0);
+//                   toggleOrderSummaryDisplay(cartItems.length > 0);
 //                 } else {
 //                     alert("Please log in or sign up to view menu items.");
 //                     // Redirect to the login page (optional)

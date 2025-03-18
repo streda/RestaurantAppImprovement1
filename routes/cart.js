@@ -57,19 +57,21 @@ router.post("/add-to-cart", authenticateToken, async (req, res) => {
   }
 });
 
+// 📌 Get User's Cart
 router.get("/cart", authenticateToken, async (req, res) => {
   try {
     let order = await Order.findOne({
       userId: req.myUser.userId,
       status: "pending",
-      items: { $exists: true, $ne: [] }
-    }).populate("items.menuItem");
+      items: { $exists: true, $ne: [] } 
+    }).populate("items.menuItem"); 
 
      if (!order) {
       console.warn("⚠️ No pending order found. Returning an empty cart.");
       return res.json({ order: { items: [] } });
     }
 
+    console.log("Returning fully populated Cart order as JSON Cart from backend:", order);
     res.json({ order: order || { items: [], total: 0 } });
   } catch (error) {
     console.error("Error fetching cart:", error);

@@ -70,12 +70,12 @@ async function restoreCartFromDatabase() {
 
     const data = await response.json();
 
-    const validCartItems = data.order?.items || [];
+    const cartItems = data.order?.items || [];
 
-    if (validCartItems.length > 0) {
+    if (cartItems.length > 0) {
 
       orderArray.length = 0;
-      orderArray.push(...validCartItems.map(item => ({
+      orderArray.push(...cartItems.map(item => ({
         menuItem: item.menuItem,
         quantity: item.quantity
       })));
@@ -191,25 +191,6 @@ export async function fetchCartData() {
   }
 
   try {
-    const payloadBase64 = token.split(".")[1]; 
-    const decodedPayload = JSON.parse(atob(payloadBase64));
-
-
-    if (new Date(decodedPayload.exp * 1000) < new Date()) {
-      console.warn("Token expired, logging out user.");
-      localStorage.removeItem("token");
-      window.location.href = "/login.html";
-      return []; 
-    }
-  } catch (error) {
-    console.error("Failed to decode JWT:", error);
-    localStorage.removeItem("token");
-    window.location.href = "/login.html";
-    return [];
-  }
-
-
-  try {
     const response = await fetch(`${API_BASE_URL}/api/cart`, {
       method: "GET",
       headers: {
@@ -231,17 +212,17 @@ export async function fetchCartData() {
     }
 
     const data = await response.json();
-    const validCartItems = data?.order.items || [];
+    const cartItems = data?.order.items || [];
 
 
- if (validCartItems.length === 0) {
+ if (cartItems.length === 0) {
       orderArray.length = 0;
     }
-        updateOrderSummary(validCartItems);
-        toggleCompleteOrderButton(validCartItems.length > 0);
-         toggleOrderSummaryDisplay(validCartItems.length > 0); 
+        updateOrderSummary(cartItems);
+        toggleCompleteOrderButton(cartItems.length > 0);
+        toggleOrderSummaryDisplay(cartItems.length > 0); 
 
-        return validCartItems;
+        return cartItems;
   } catch (error) {
     console.error("Failed to fetch cart data:", error);
     return [];
@@ -335,16 +316,15 @@ export async function addItem(itemId) {
     }
 
     const data = await response.json();
-    const validCartItems = await fetchCartData();
+    const cartItems = await fetchCartData();
 
     orderArray.length = 0; 
-    orderArray.push(...validCartItems);
+    orderArray.push(...cartItems);
 
-    updateOrderSummary(validCartItems);
-    updateQuantityIndicators(validCartItems);
-
-    toggleOrderSummaryDisplay(validCartItems.length > 0);
-    toggleCompleteOrderButton(validCartItems.length > 0);
+    updateOrderSummary(cartItems);
+    updateQuantityIndicators(cartItems);
+    toggleOrderSummaryDisplay(cartItems.length > 0);
+    toggleCompleteOrderButton(cartItems.length > 0);
 
   } catch (error) {
     console.error("Failed to add item to cart:", error);
@@ -376,9 +356,9 @@ export async function addSingleItem(itemId) {
 
     const data = await response.json();
 
-    const validCartItems = await fetchCartData();
-    updateOrderSummary(validCartItems);
-    updateQuantityIndicators(validCartItems);
+    const cartItems = await fetchCartData();
+    updateOrderSummary(cartItems);
+    updateQuantityIndicators(cartItems);
   } catch (error) {
     console.error("Error updating item:", error);
   }
@@ -403,10 +383,10 @@ export async function removeSingleItem(itemId) {
 
     const data = await response.json();
 
-    const validCartItems = await fetchCartData();
+    const cartItems = await fetchCartData();
 
-    updateOrderSummary(validCartItems);
-    updateQuantityIndicators(validCartItems);
+    updateOrderSummary(cartItems);
+    updateQuantityIndicators(cartItems);
   } catch (error) {
     console.error("Error updating item:", error);
   }
@@ -429,12 +409,12 @@ export async function removeAllItem(itemId) {
       throw new Error("Failed to remove item");
     }
 
-    const validCartItems = await fetchCartData();
-    updateOrderSummary(validCartItems);
-    updateQuantityIndicators(validCartItems);
+    const cartItems = await fetchCartData();
+    updateOrderSummary(cartItems);
+    updateQuantityIndicators(cartItems);
 
-    toggleOrderSummaryDisplay(validCartItems.length > 0);
-    toggleCompleteOrderButton(validCartItems.length > 0);
+    toggleOrderSummaryDisplay(cartItems.length > 0);
+    toggleCompleteOrderButton(cartItems.length > 0);
   } catch (error) {
     console.error("Error removing item:", error);
   }
@@ -633,10 +613,10 @@ export function updateOrderSummary(items) {
 //     }
 
 //     const data = await response.json();
-//     const validCartItems = data.order?.items || [];
+//     const cartItems = data.order?.items || [];
 
-//     if (validCartItems.length > 0) {
-//       setOrderArray(validCartItems.map(item => ({
+//     if (cartItems.length > 0) {
+//       setOrderArray(cartItems.map(item => ({
 //         menuItem: item.menuItem,
 //         quantity: item.quantity
 //       }))); // ✅ Set order array with restored cart data
@@ -770,13 +750,13 @@ export function updateOrderSummary(items) {
 //     }
 
 //     const data = await response.json();
-//     const validCartItems = data?.order.items || [];
+//     const cartItems = data?.order.items || [];
 
 //     // Use the setter function to update orderArray
-//     setOrderArray(validCartItems);
+//     setOrderArray(cartItems);
 
 //     setTimeout(() => {
-//   setOrderArray(validCartItems);
+//   setOrderArray(cartItems);
 //   updateOrderSummary(getOrderArray());
 //   updateQuantityIndicators(getOrderArray());
 //   toggleOrderSummaryDisplay(getOrderArray().length > 0);
@@ -879,12 +859,12 @@ export function updateOrderSummary(items) {
 //     }
 
 //     // const data = await response.json();
-//     const validCartItems = await fetchCartData();
-//     setOrderArray(validCartItems);
+//     const cartItems = await fetchCartData();
+//     setOrderArray(cartItems);
 
 //    // Ensure UI updates reflect the latest state
 //     setTimeout(() => {
-//   setOrderArray(validCartItems);
+//   setOrderArray(cartItems);
 //   updateOrderSummary(getOrderArray());
 //   updateQuantityIndicators(getOrderArray());
 //   toggleOrderSummaryDisplay(getOrderArray().length > 0);
@@ -921,9 +901,9 @@ export function updateOrderSummary(items) {
 
 //     // const data = await response.json();
 
-//     const validCartItems = await fetchCartData();
-//     updateOrderSummary(validCartItems);
-//     updateQuantityIndicators(validCartItems);
+//     const cartItems = await fetchCartData();
+//     updateOrderSummary(cartItems);
+//     updateQuantityIndicators(cartItems);
 //   } catch (error) {
 //     console.error("Error updating item:", error);
 //   }
@@ -948,10 +928,10 @@ export function updateOrderSummary(items) {
 
 //     // const data = await response.json();
 
-//     const validCartItems = await fetchCartData();
+//     const cartItems = await fetchCartData();
 
-//     updateOrderSummary(validCartItems);
-//     updateQuantityIndicators(validCartItems);
+//     updateOrderSummary(cartItems);
+//     updateQuantityIndicators(cartItems);
 //   } catch (error) {
 //     console.error("Error updating item:", error);
 //   }
@@ -974,12 +954,12 @@ export function updateOrderSummary(items) {
 //       throw new Error("Failed to remove item");
 //     }
 
-//     const validCartItems = await fetchCartData();
-//     updateOrderSummary(validCartItems);
-//     updateQuantityIndicators(validCartItems);
+//     const cartItems = await fetchCartData();
+//     updateOrderSummary(cartItems);
+//     updateQuantityIndicators(cartItems);
 
-//     toggleOrderSummaryDisplay(validCartItems.length > 0);
-//     toggleCompleteOrderButton(validCartItems.length > 0);
+//     toggleOrderSummaryDisplay(cartItems.length > 0);
+//     toggleCompleteOrderButton(cartItems.length > 0);
 //   } catch (error) {
 //     console.error("Error removing item:", error);
 //   }
