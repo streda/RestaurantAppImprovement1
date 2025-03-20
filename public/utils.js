@@ -421,7 +421,7 @@ export async function removeAllItem(itemId) {
 }
 
 export function toggleOrderSummaryDisplay(show) {
-  const orderSummaryContainer = document.getElementById("section-summary");
+  const orderSummaryContainer = document.getElementById("order-summary-container");
   
   if (orderSummaryContainer) {
     orderSummaryContainer.style.display = show ? "block" : "none";
@@ -462,7 +462,7 @@ export function updateOrderSummary(items) {
   }
 
 
-  const orderSummaryContainer = document.getElementById("section-summary");
+  const orderSummaryContainer = document.getElementById("order-summary-container");
 
   if (!orderSummaryContainer) {
     return;
@@ -966,7 +966,7 @@ export function updateOrderSummary(items) {
 // }
 
 // export function toggleOrderSummaryDisplay(show) {
-//   const orderSummaryContainer = document.getElementById("section-summary");
+//   const orderSummaryContainer = document.getElementById("order-summary-container");
   
 //   if (orderSummaryContainer) {
 //     orderSummaryContainer.style.display = show ? "block" : "none";
@@ -1007,7 +1007,7 @@ export function updateOrderSummary(items) {
 //   }
 
 
-//   const orderSummaryContainer = document.getElementById("section-summary");
+//   const orderSummaryContainer = document.getElementById("order-summary-container");
 
 //   if (!orderSummaryContainer) {
 //     return;

@@ -60,8 +60,8 @@ export function toggleCompleteOrderButton(isRequired) {
     completeOrderButton.disabled = !isRequired;
     completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
 
-    // Attach inside the #section-summary div
-    const orderSummaryContainer = document.getElementById("section-summary");
+    // Attach inside the #order-summary-container div
+    const orderSummaryContainer = document.getElementById("order-summary-container");
     if (orderSummaryContainer) {
       orderSummaryContainer.appendChild(completeOrderButton);
     }
@@ -78,11 +78,11 @@ export function createCompleteOrderButton() {
 
     btn.addEventListener("click", handleCompleteOrderButtonClick);
 
-    const orderSummaryContainer = document.getElementById("section-summary"); // Fix: Append inside #section-summary
+    const orderSummaryContainer = document.getElementById("order-summary-container"); // Fix: Append inside #order-summary-container
     if (orderSummaryContainer) {
         orderSummaryContainer.appendChild(btn);
     } else {
-        console.error("#section-summary is MISSING in the DOM!");
+        console.error("#order-summary-container is MISSING in the DOM!");
     }
     return btn;
 }
@@ -159,8 +159,8 @@ export function handleCompleteOrderButtonClick() {
 //         completeOrderButton.disabled = !isRequired;
 //         completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
 
-//         // Attach inside the #section-summary div
-//         const orderSummaryContainer = document.getElementById("section-summary");
+//         // Attach inside the #order-summary-container div
+//         const orderSummaryContainer = document.getElementById("order-summary-container");
 //         if (orderSummaryContainer) {
 //             orderSummaryContainer.appendChild(completeOrderButton);
 //         }
@@ -178,11 +178,11 @@ export function handleCompleteOrderButtonClick() {
 
 //     btn.addEventListener("click", handleCompleteOrderButtonClick);
 
-//     const orderSummaryContainer = document.getElementById("section-summary"); 
+//     const orderSummaryContainer = document.getElementById("order-summary-container"); 
 //     if (orderSummaryContainer) {
 //         orderSummaryContainer.appendChild(btn);
 //     } else {
-//         console.error("#section-summary is MISSING in the DOM!");
+//         console.error("#order-summary-container is MISSING in the DOM!");
 //     }
 //     return btn;
 // }

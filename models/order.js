@@ -17,6 +17,7 @@ const {Schema, model} = mongoose;
 
 //! A schema for number of menu items and their quantity
 const itemSchema = new Schema({
+    // When you define a schema with a type: Schema.Types.ObjectId and ref: 'MenuItem', you're telling Mongoose that this field represents a reference to another document, in this case the "menuItemSchema" defined in the "menuItemModel.js". To get the actual data for the referenced document, you need to use the populate() method on the query, which is done in the car.js 's /api/cart endpoint.
     menuItem: { //  A reference to a MenuItem data doc in the database
         type: Schema.Types.ObjectId,
         ref: "MenuItem", // tells Mongoose which model to use for population.

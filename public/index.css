@@ -297,7 +297,7 @@ body{
 
 }
 
-.section-summary{
+.order-summary-container{
     display: flex;
     flex-direction: column;
     justify-content: space-between;

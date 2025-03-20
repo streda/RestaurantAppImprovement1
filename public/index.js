@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         }
 
-  const sectionSummary = document.getElementById("section-summary");
+  const sectionSummary = document.getElementById("order-summary-container");
   if (sectionSummary) {
     sectionSummary.addEventListener("click", async function (event) {
       const itemId = event.target.getAttribute("data-item-id");
@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 //           });
 //         }
 
-//   const sectionSummary = document.getElementById("section-summary");
+//   const sectionSummary = document.getElementById("order-summary-container");
 //   if (sectionSummary) {
 //     sectionSummary.addEventListener("click", async function (event) {
 //       const itemId = event.target.getAttribute("data-item-id");
