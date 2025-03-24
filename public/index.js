@@ -18,6 +18,9 @@ import {
   toggleCompleteOrderButton
 } from "./checkoutUtils.js"; 
 
+
+//! This exports "orderArray" and "menuArray" to be manipulated and updated
+//! We declare the here because index.js is the entry point of the app
 export let orderArray = [];
 export let menuArray = [];
 

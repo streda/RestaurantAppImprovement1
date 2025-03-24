@@ -61,9 +61,11 @@ router.post("/add-to-cart", authenticateToken, async (req, res) => {
 router.get("/cart", authenticateToken, async (req, res) => {
   try {
     let order = await Order.findOne({
+      // The "myUser" is coming from the authenticateToken() function
       userId: req.myUser.userId,
       status: "pending",
-      items: { $exists: true, $ne: [] } 
+      // This is an object filter in MongoDB query language (MQL) that checks for specific conditions on the items field. If an order document is missing the items field entirely, it will be excluded from the results. The second parameter Ensures that items is not an empty array ([]). Overall, Because MongoDB operates at the database level, i.e is very fast, filtering results before they reach the backend.
+      items: { $exists: true, $ne: [] } // ✅ Only returns orders with at least one item
     }).populate("items.menuItem"); 
 
      if (!order) {

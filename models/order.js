@@ -58,5 +58,20 @@ const orderSchema = new Schema({
 
 //! This creates an Order model from the orderSchema
 const Order = model("Order", orderSchema);
-
 export default Order;
+
+//* Alternative way of writing the Order Schema by nesting the menuItems array inside of it 
+/* 
+const orderSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  items: [
+    {
+      menuItem: { type: Schema.Types.ObjectId, ref: "MenuItem", required: true },
+      quantity: { type: Number, required: true, min: 1 }
+    }
+  ],
+  total: { type: Number, required: true },
+  status: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' },
+  created_at: { type: Date, default: Date.now }
+});
+*/
