@@ -1,9 +1,5 @@
 import { menuArray, orderArray} from "./index.js";
-
-import { 
-  toggleCompleteOrderButton, 
-  handleCompleteOrderButtonClick 
-} from "./checkoutUtils.js";
+import { handleCompleteOrderButtonClick } from "./checkoutUtils.js";
 
 const API_BASE_URL = "https://truefood.rest";
 
@@ -442,6 +438,40 @@ export function calculateTotalPrice(orders) {
   }, 0);
 }
 
+
+export function createCompleteOrderButton(isEnabled = false) {
+  const btn = document.createElement("button");
+  btn.id = "complete-order-button";
+  btn.textContent = "Complete Order";
+  btn.classList.add("complete-order-btn");
+  btn.disabled = !isEnabled;
+
+  btn.addEventListener("click", handleCompleteOrderButtonClick);
+  return btn;
+}
+
+export function toggleCompleteOrderButton(isRequired) {
+  const completeOrderButton = document.getElementById("complete-order-button");
+  if (!completeOrderButton) return; // safety check
+  completeOrderButton.style.display = isRequired ? "block" : "none";
+}
+
+
+export async function handleCompleteOrderButtonClick() {
+    if (orderArray.length > 0) {
+        try {
+            await handleCheckout(orderArray); // Wait for the promise to resolve or reject
+            // Optional: Handle successful checkout if needed
+            console.log("Checkout successful!");
+        } catch (error) {
+            console.error("Checkout failed", error);
+        }
+    } else {
+        alert("Please add items to your order before proceeding to payment.");
+    }
+}
+
+
 export function updateOrderSummary(items) {
   if (!items || !Array.isArray(items)) {
     console.error("Invalid items array:", items);
@@ -515,17 +545,9 @@ export function updateOrderSummary(items) {
         </div>
       `;
 
-  orderSummaryContainer.innerHTML = summaryHtml;
+    orderSummaryContainer.innerHTML = summaryHtml;
 
-  //! Ensure button is inside order summary
-    const completeOrderBtn = document.createElement("button");
-    completeOrderBtn.id = "complete-order-button";
-    completeOrderBtn.textContent = "Complete Order";
-    completeOrderBtn.classList.add("complete-order-btn");
-    completeOrderBtn.disabled = items.length === 0; 
-
-    completeOrderBtn.addEventListener("click", handleCompleteOrderButtonClick);
-    orderSummaryContainer.appendChild(completeOrderBtn); 
+    orderSummaryContainer.appendChild(createCompleteOrderButton(items.length > 0));
 
   updateQuantityIndicators(items);
   toggleCompleteOrderButton(items.length > 0);

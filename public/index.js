@@ -11,12 +11,12 @@ import {
   removeAllItem,
   removeSingleItem,
   addSingleItem,
+  toggleCompleteOrderButton,
 } from "./utils.js";
 
-import { 
-  initializeCheckoutButton,
-  toggleCompleteOrderButton
-} from "./checkoutUtils.js"; 
+// import { 
+//   initializeCheckoutButton,
+// } from "./checkoutUtils.js"; 
 
 
 //! This exports "orderArray" and "menuArray" to be manipulated and updated
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateOrderSummary(cartItems);
   updateQuantityIndicators(cartItems);
   toggleCompleteOrderButton(cartItems.length > 0);
-  initializeCheckoutButton();
+  // initializeCheckoutButton();
   
   const savedPage = localStorage.getItem("currentPage") || "home";
     // Check login status and render content accordingly

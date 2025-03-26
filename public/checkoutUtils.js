@@ -39,59 +39,6 @@ export async function handleCheckout(orderArray) {
     }
 }
 
-export function initializeCheckoutButton() {
-    const checkoutButton = document.getElementById("complete-order-button");
-
-    if (checkoutButton) {
-        checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
-    } else {
-        console.error("Checkout button not found");
-    }
-}
-
-export function toggleCompleteOrderButton(isRequired) {
-  const completeOrderButton = document.getElementById("complete-order-button");
-  if (!completeOrderButton) return; // safety check
-  completeOrderButton.style.display = isRequired ? "block" : "none";
-}
-
-// export function toggleCompleteOrderButton(isRequired) {
-//   let completeOrderButton = document.getElementById("complete-order-button");
-
-//   if (!completeOrderButton) {
-//     completeOrderButton = document.createElement("button");
-//     completeOrderButton.id = "complete-order-button";
-//     completeOrderButton.textContent = "Complete Order";
-//     completeOrderButton.classList.add("complete-order-btn");
-//     completeOrderButton.disabled = !isRequired;
-//     completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
-
-//     // Attach inside the #order-summary-container div
-//     const orderSummaryContainer = document.getElementById("order-summary-container");
-//     if (orderSummaryContainer) {
-//       orderSummaryContainer.appendChild(completeOrderButton);
-//     }
-//   }
-
-//   completeOrderButton.style.display = isRequired ? "block" : "none";
-// }
-export function createCompleteOrderButton() {
-    const btn = document.createElement("button");
-    btn.id = "complete-order-button";
-    btn.textContent = "Complete Order";
-    btn.classList.add("complete-order-btn");
-    btn.disabled = true; // Initially disabled
-
-    btn.addEventListener("click", handleCompleteOrderButtonClick);
-
-    const orderSummaryContainer = document.getElementById("order-summary-container"); // Fix: Append inside #order-summary-container
-    if (orderSummaryContainer) {
-        orderSummaryContainer.appendChild(btn);
-    } else {
-        console.error("#order-summary-container is MISSING in the DOM!");
-    }
-    return btn;
-}
 
 export function handleCompleteOrderButtonClick() {
     if (orderArray.length > 0) {
@@ -102,6 +49,26 @@ export function handleCompleteOrderButtonClick() {
         alert("Please add items to your order before proceeding to payment.");
     }
 }
+
+
+
+// export function initializeCheckoutButton() {
+//     const checkoutButton = document.getElementById("complete-order-button");
+
+//     if (checkoutButton) {
+//         checkoutButton.addEventListener("click", handleCompleteOrderButtonClick);
+//     } else {
+//         console.error("Checkout button not found");
+//     }
+// }
+
+// export function toggleCompleteOrderButton(isRequired) {
+//   const completeOrderButton = document.getElementById("complete-order-button");
+//   if (!completeOrderButton) return; // safety check
+//   completeOrderButton.style.display = isRequired ? "block" : "none";
+// }
+
+
 
 // import { getOrderArray } from "./index.js"; 
 
@@ -201,4 +168,17 @@ export function handleCompleteOrderButtonClick() {
 //     } else {
 //         alert("Please add items to your order before proceeding to payment.");
 //     }
+// }
+
+
+
+// export function createCompleteOrderButton() {
+//     const btn = document.createElement("button");
+//     btn.id = "complete-order-button";
+//     btn.textContent = "Complete Order";
+//     btn.classList.add("complete-order-btn");
+//     btn.disabled = true; // Initially disabled
+
+//     btn.addEventListener("click", handleCompleteOrderButtonClick);
+//     return btn;
 // }
