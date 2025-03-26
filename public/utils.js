@@ -36,8 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     orderArray.push(...cartData); 
 
     updateOrderSummary(orderArray);
-    toggleCompleteOrderButton(orderArray.length > 0);
     toggleOrderSummaryDisplay(orderArray.length > 0);
+    toggleCompleteOrderButton(orderArray.length > 0);
 
   } catch (error) {
     console.error("Failed to load cart on page load:", error);
@@ -81,8 +81,8 @@ async function restoreCartFromDatabase() {
       })));
 
       updateOrderSummary(orderArray);
-      toggleCompleteOrderButton(true);
       toggleOrderSummaryDisplay(true);
+      toggleCompleteOrderButton(true);
     } else {
       console.warn("Cart was empty upon restoration.");
     }
@@ -204,8 +204,8 @@ export async function fetchCartData() {
       orderArray.length = 0;
     }
         updateOrderSummary(cartItems);
-        toggleCompleteOrderButton(cartItems.length > 0);
         toggleOrderSummaryDisplay(cartItems.length > 0); 
+        toggleCompleteOrderButton(cartItems.length > 0);
 
         return cartItems;
   } catch (error) {
@@ -304,6 +304,7 @@ export async function addItem(itemId) {
     }
 
     const data = await response.json();
+    // const cartItems = data.order;
     const cartItems = await fetchCartData();
 
     orderArray.length = 0; 
@@ -400,7 +401,6 @@ export async function removeAllItem(itemId) {
     const cartItems = await fetchCartData();
     updateOrderSummary(cartItems);
     updateQuantityIndicators(cartItems);
-
     toggleOrderSummaryDisplay(cartItems.length > 0);
     toggleCompleteOrderButton(cartItems.length > 0);
   } catch (error) {

@@ -26,6 +26,17 @@ const authenticateToken = (req, res, next) => {
      // myUser is a custom property that is added the the request to specify the current user
     console.log("Decoded JWT:", decoded); // ✅ Check what decoded contains
     req.myUser = decoded;
+
+    //! Or extract the a specific data information
+
+    /* 
+        // Attach the extracted user information to the req object:
+        req.myUser = {
+          userId: userId,
+          username: username,
+          email: email  // Add any other claims you need
+        };
+    */
     next();
   });
 };

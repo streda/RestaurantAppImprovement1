@@ -50,25 +50,31 @@ export function initializeCheckoutButton() {
 }
 
 export function toggleCompleteOrderButton(isRequired) {
-  let completeOrderButton = document.getElementById("complete-order-button");
-
-  if (!completeOrderButton) {
-    completeOrderButton = document.createElement("button");
-    completeOrderButton.id = "complete-order-button";
-    completeOrderButton.textContent = "Complete Order";
-    completeOrderButton.classList.add("complete-order-btn");
-    completeOrderButton.disabled = !isRequired;
-    completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
-
-    // Attach inside the #order-summary-container div
-    const orderSummaryContainer = document.getElementById("order-summary-container");
-    if (orderSummaryContainer) {
-      orderSummaryContainer.appendChild(completeOrderButton);
-    }
-  }
-
+  const completeOrderButton = document.getElementById("complete-order-button");
+  if (!completeOrderButton) return; // safety check
   completeOrderButton.style.display = isRequired ? "block" : "none";
 }
+
+// export function toggleCompleteOrderButton(isRequired) {
+//   let completeOrderButton = document.getElementById("complete-order-button");
+
+//   if (!completeOrderButton) {
+//     completeOrderButton = document.createElement("button");
+//     completeOrderButton.id = "complete-order-button";
+//     completeOrderButton.textContent = "Complete Order";
+//     completeOrderButton.classList.add("complete-order-btn");
+//     completeOrderButton.disabled = !isRequired;
+//     completeOrderButton.addEventListener("click", handleCompleteOrderButtonClick);
+
+//     // Attach inside the #order-summary-container div
+//     const orderSummaryContainer = document.getElementById("order-summary-container");
+//     if (orderSummaryContainer) {
+//       orderSummaryContainer.appendChild(completeOrderButton);
+//     }
+//   }
+
+//   completeOrderButton.style.display = isRequired ? "block" : "none";
+// }
 export function createCompleteOrderButton() {
     const btn = document.createElement("button");
     btn.id = "complete-order-button";

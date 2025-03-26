@@ -30,7 +30,13 @@ router.post("/update-item", authenticateToken, async (req, res) => {
     await order.save();
     await order.populate("items.menuItem");
 
-    res.json({ message: "Order updated successfully", order });
+    // res.json({ message: "Order updated successfully", order });
+    res.status(200).json({
+      message: "Order updated successfully",
+      success: true,
+      order: order, // already populated
+    });
+
   } catch (error) {
     console.error("Error updating order:", error);
     res.status(500).json({ error: "Failed to update order" });

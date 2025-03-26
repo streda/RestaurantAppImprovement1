@@ -22,7 +22,13 @@ router.post("/remove-item", authenticateToken, async (req, res) => {
     await order.save();
     await order.populate("items.menuItem");
 
-    res.json({ message: "Item removed from order", order });
+    // res.json({ message: "Item removed from order", order });
+    res.status(200).json({
+      message: "Item removed from order",
+      success: true,
+      order: order, // already populated
+    });
+
   } catch (error) {
     console.error("Error removing item:", error);
     res.status(500).json({ error: "Failed to remove item" });

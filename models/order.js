@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
 
-const {Schema, model} = mongoose;
 
 // This "itemSchema" defines the structure for each item within an order.
 /* 
