@@ -40,11 +40,15 @@ export async function handleCheckout(orderArray) {
 }
 
 
-export function handleCompleteOrderButtonClick() {
+export async function handleCompleteOrderButtonClick() {
     if (orderArray.length > 0) {
-        handleCheckout(orderArray).catch((error) =>
-            console.error("Checkout failed", error)
-        );
+        try {
+            await handleCheckout(orderArray); // Wait for the promise to resolve or reject
+            // Optional: Handle successful checkout if needed
+            console.log("Checkout successful!");
+        } catch (error) {
+            console.error("Checkout failed", error);
+        }
     } else {
         alert("Please add items to your order before proceeding to payment.");
     }

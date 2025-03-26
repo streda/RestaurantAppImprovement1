@@ -456,22 +456,6 @@ export function toggleCompleteOrderButton(isRequired) {
   completeOrderButton.style.display = isRequired ? "block" : "none";
 }
 
-
-export async function handleCompleteOrderButtonClick() {
-    if (orderArray.length > 0) {
-        try {
-            await handleCheckout(orderArray); // Wait for the promise to resolve or reject
-            // Optional: Handle successful checkout if needed
-            console.log("Checkout successful!");
-        } catch (error) {
-            console.error("Checkout failed", error);
-        }
-    } else {
-        alert("Please add items to your order before proceeding to payment.");
-    }
-}
-
-
 export function updateOrderSummary(items) {
   if (!items || !Array.isArray(items)) {
     console.error("Invalid items array:", items);
