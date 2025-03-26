@@ -9,7 +9,6 @@ export const menuArray = [
         "price": 5.99,
         "emoji": "./image/Hamburger.png",
         "type": "sandwich",
-        "id": 1
     },
     {
         "name": "Beer",
@@ -19,7 +18,6 @@ export const menuArray = [
         "price": 6.99,
         "emoji": "./image/beer.png",
         "type": "drinks",
-        "id": 2
     },
     {
         "name": "Chicken-Sandwich",
@@ -28,7 +26,6 @@ export const menuArray = [
             "mushrom",
             "mozarella"
         ],
-        "id": 3,
         "price": 8.99,
         "type": "sandwich",
         "emoji": "./image/soup-sandwich.webp"
@@ -43,7 +40,6 @@ export const menuArray = [
         "price": 10.99,
         "emoji": "./image/bacon-sandwich.webp",
         "type": "sandwich",
-        "id": 4
     },
     {
         "name": "ice-tea",
@@ -53,7 +49,6 @@ export const menuArray = [
         "price": 4.99,
         "emoji": "./image/ice-tea.webp",
         "type": "drinks",
-        "id": 5
     },
     {
         "name": "tonic-tea",
@@ -63,7 +58,6 @@ export const menuArray = [
         "price": 3.99,
         "emoji": "./image/tonic-tea.webp",
         "type": "drinks",
-        "id": 6
     },
     {
         "name": "acai-bowl",
@@ -73,7 +67,6 @@ export const menuArray = [
         "price": 6.99,
         "emoji": "./image/acai-bowl.webp",
         "type": "desserts",
-        "id": 7
     },
     {
         "name": "cinnamon-tea",
@@ -83,7 +76,6 @@ export const menuArray = [
         "price": 4.5,
         "emoji": "./image/cinnamon-tea.webp",
         "type": "drinks",
-        "id": 8
     },
     {
         "name": "lemon-pie",
@@ -93,7 +85,6 @@ export const menuArray = [
         "price": 4.99,
         "emoji": "./image/lemon-pie.webp",
         "type": "desserts",
-        "id": 9
     },
     {
         "name": "macarons-dessert",
@@ -103,7 +94,6 @@ export const menuArray = [
         "price": 6.99,
         "emoji": "./image/macarons-dessert.webp",
         "type": "desserts",
-        "id": 10
     },
     {
         "name": "fruit-tart",
@@ -113,7 +103,6 @@ export const menuArray = [
         "price": 5.99,
         "emoji": "./image/fruit-tart.webp",
         "type": "desserts",
-        "id": 11
     },
     {
         "name": "chocolate-cake",
@@ -123,6 +112,5 @@ export const menuArray = [
         "price": 4.99,
         "emoji": "./image/chocoalte-cake.webp",
         "type": "desserts",
-        "id": 12
     }
 ];
