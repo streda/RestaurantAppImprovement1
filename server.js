@@ -134,8 +134,8 @@ if (process.env.NODE_ENV === 'production') {
 
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
-    if (req.hostname === "truefood.world") {
-      return res.redirect(301, `https://www.truefood.world${req.originalUrl}`);
+    if (req.hostname !== "truefood.world") {
+      return res.redirect(301, `https://truefood.world${req.originalUrl}`);
     }
     next();
   });

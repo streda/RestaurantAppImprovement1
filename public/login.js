@@ -3,13 +3,10 @@ import { fetchMenuItems } from "./utils.js";
 document.getElementById("login-form").addEventListener("submit", async function (event) {
   event.preventDefault();
 
-  // const API_BASE_URL = window.location.origin.includes("localhost")
-  //   ? "http://localhost:5005"  
-  //   : "https://truefood.world";
-
   const API_BASE_URL = window.location.origin.includes("localhost")
-  ? "http://localhost:5005"
-  : window.location.origin;
+    ? "http://localhost:5005"  
+    : "https://truefood.world";
+
 
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
