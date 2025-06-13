@@ -5,7 +5,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
 
   const API_BASE_URL = window.location.origin.includes("localhost")
     ? "http://localhost:5005"  
-    : "https://truefood.rest";
+    : "https://truefood.world";
 
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
@@ -31,7 +31,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
       await fetchMenuItems(true);
 
       // window.location.href = API_BASE_URL;
-      window.location.href = "https://truefood.rest/";
+      window.location.href = "https://truefood.world/";
     } else {
       throw new Error(data.message || "Login failed");
     }
