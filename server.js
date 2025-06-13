@@ -54,11 +54,13 @@ app.use(cookieParser());
 app.use(express.static("public")); 
 
 
-app.use(cors({ origin: ["http://localhost:5005","http://localhost:3000", "http://127.0.0.1:5005", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
+// app.use(cors({ origin: ["http://localhost:5005","http://localhost:3000", "http://127.0.0.1:5005", "https://truefood.rest", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
+
+app.use(cors({ origin: ["http://localhost:5005","http://localhost:3000", "http://127.0.0.1:5005", "https://truefood.world", "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"], credentials: true, allowedHeaders: ["Content-Type", "Authorization"] }));
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://truefood.rest",
+  "https://truefood.world",
   "https://truefood-restaurant-app-dced7b5ba521.herokuapp.com"
 ];
 
@@ -135,8 +137,8 @@ if (process.env.NODE_ENV === 'production') {
 
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
-    if (req.hostname !== "truefood.rest") {
-      return res.redirect(301, `https://truefood.rest${req.originalUrl}`);
+    if (req.hostname === "truefood.world") {
+      return res.redirect(301, `https://www.truefood.world${req.originalUrl}`);
     }
     next();
   });
