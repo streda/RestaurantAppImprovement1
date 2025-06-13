@@ -1,7 +1,7 @@
 import { menuArray, orderArray} from "./index.js";
 import { handleCompleteOrderButtonClick } from "./checkoutUtils.js";
 
-const API_BASE_URL = "https://truefood.rest";
+const API_BASE_URL = "https://truefood.world";
 
 //! handle payment cancellation restoration and call fetchCartData() on page load.
 document.addEventListener("DOMContentLoaded", async () => {

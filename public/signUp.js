@@ -3,7 +3,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
 
     const API_BASE_URL = window.location.origin.includes("localhost")
   ? "http://localhost:5005"
-  : "https://truefood.rest";
+  : "https://truefood.world";
 
 
     const username = document.getElementById('username').value;
@@ -22,7 +22,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
 
         const data = await response.json();
         alert('Registration successful');
-        window.location.href = 'https://truefood.rest';
+        window.location.href = 'https://truefood.world';
     } catch (error) {
         console.error('Registration error:', error);
         alert('Registration failed: ' + error.message);
